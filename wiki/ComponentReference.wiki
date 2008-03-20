@@ -1,4 +1,5 @@
 #summary IWElite Component Reference
+#labels Featured
 
 = Introduction =
 
