@@ -8,7 +8,30 @@ This is the Component Reference for the IW Elite Suite.  Please contribute where
 = Details =
 
 ==Visual Components==
-  * *Dialogs *
+  ===Grids===
+
+  [TArcIWStringGrid]
+
+  [TArcIWFileGrid]
+
+  [TArcIWRegionGrid]
+
+  [TArcIWRGButton]
+
+  [TArcIWRGImageFile]
+
+  [TArcIWRGImage]
+
+  [TArcIWRGLink]
+
+  ===Charts===
+
+  [TArcIWBarGraph]
+  
+  [TArcIWFusionChart]
+
+  ===Dialogs===
+
   [TArcIWDlgMessageBox]
 
   [TArcIWDlgLogin]
@@ -29,8 +52,9 @@ This is the Component Reference for the IW Elite Suite.  Please contribute where
 
   [TArcIWDlgPopupRegion]
 
+  [TArcIWToolWindow] 
   
-  * *Enhanced Controls *
+  ===Enhanced Controls===
 
   [TArcIWEnhEdit]
  
@@ -113,15 +137,83 @@ This is the Component Reference for the IW Elite Suite.  Please contribute where
   [TArcIWEnhDBText]
 
 
-  * *Dialogs *
+  ===Other===
 
-  * *Grids *
+  [TArcIWCheckListBox]
 
-  * *Other *
+  [TArcIWPageFileUpload]
+
+  [TArcIWPageFileUploadButton]
+
+  [TArcIWTabRegion]
+
+  [TArcIWDateLabel]
+  
+  [TArcIWEmbeddedHTML]
+
+  [TArcIWFilledBox]
+
+  [TArcIWImageURL]
+
+  [TArcIWImageFileURL]
+
+  [TArcIWPayPalDonation]
+
+  [TArcIWPayPalSubscription]
+
+  [TArcIWPayPalSubscriptionCancel]
+
+  [TArcIWPayPalAddToCart] 
+
+  [TArcIWPayPalViewCart]
+
+  [TArcIWPayPalItemPurchase]
 
 ==Non-Visual Components==
-  * *Interop *
+  ===Grids===
   
-  * *Control *
+  [TArcIWStringGridDatasetContent]
 
-  * *Other *
+  [TArcIWStringGridINIContent]
+
+  [TArcIWStringGridTreeContent]
+
+  [TArcIWStringGridCalendarContent]
+
+  ===Interop===
+
+  [TArcIWInteropController]
+
+  [TArcIWInteropRenderer]
+
+  [TArcIWInteropReceiver] 
+
+  [TArcIWWebModuleBridge]
+  
+  ===Control===
+
+  [TArcIWServerManager]
+
+  [TArcRuntimeConfig]
+
+  [TArcIWLoginManager]
+
+  [TArcIWServerConfig] 
+
+  [TArcIWTemplateProcessor]
+
+  [TArcIWServerTimer]
+
+  [TArcIWPageIcon]
+
+  [TArcStyleManager]
+
+  ===Other===
+
+  [TArcIWScreenInfo]
+
+  [TArcIWPageController]
+
+  [TArcIWTranslator]
+
+  [TArcIWStringContainer]
