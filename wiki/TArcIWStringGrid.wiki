@@ -17,152 +17,152 @@ TArcIWStringGrid is a flexible grid component which can be used as a simple stri
     
    [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.AutoColumnWidth AutoColumnWidth]
 
-   [TArcIWCustomGrid.AutoRowHeight AutoRowHeight]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.AutoRowHeight AutoRowHeight]
 
-   [TArcIWCustomGrid.StyleHeader StyleHeader]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.StyleHeader StyleHeader]
 
-   [TArcIWCustomGrid.StyleDetail StyleDetail]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.StyleDetail StyleDetail]
 
-   [TArcIWCustomGrid.StyleDetailAlt StyleDetailAlt]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.StyleDetailAlt StyleDetailAlt]
 
-   [TArcIWCustomGrid.StyleTable StyleTable]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.StyleTable StyleTable]
 
-   [TArcIWCustomGrid.UseAltStyles UseAltStyles]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.UseAltStyles UseAltStyles]
 
-   [TArcIWCustomGrid.RowCount RowCount]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.RowCount RowCount]
 
-   [TArcIWCustomGrid.ShowHeaderRow ShowHeaderRow]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.ShowHeaderRow ShowHeaderRow]
 
-   [TArcIWStringGrid.StyleButtonBar StyleButtonBar]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.StyleButtonBar StyleButtonBar]
 
-   [TArcIWStringGrid.StyleControlBar StyleControlBar]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.StyleControlBar StyleControlBar]
 
-   [TArcIWStringGrid.StyleSelected StyleSelected]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.StyleSelected StyleSelected]
 
-   [TArcIWStringGrid.ScrollToSelectedCell ScrollToSelectedCell]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ScrollToSelectedCell ScrollToSelectedCell]
 
-   [TArcIWStringGrid.ScrollToSelectedRow ScrollToSelectedRow]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ScrollToSelectedRow ScrollToSelectedRow]
 
-   [TArcIWStringGrid.ShowButtonBar ShowButtonBar]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ShowButtonBar ShowButtonBar]
 
-   [TArcIWStringGrid.ShowControlBar ShowControlBar]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ShowControlBar ShowControlBar]
 
-   [TArcIWStringGrid.AllowEmptyCells AllowEmptyCells]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.AllowEmptyCells AllowEmptyCells]
 
-   [TArcIWStringGrid.Scrollbars Scrollbars]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Scrollbars Scrollbars]
 
-   [TArcIWStringGrid.AutoHeight AutoHeight]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.AutoHeight AutoHeight]
 
-   [TArcIWStringGrid.Columns Columns]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Columns Columns]
 
-   [TArcIWStringGrid.DetailVisible DetailVisible]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.DetailVisible DetailVisible]
 
-   [TArcIWStringGrid.RowHeight RowHeight]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.RowHeight RowHeight]
 
-   [TArcIWStringGrid.ColumnsWidthsType ColumnsWidthsType]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ColumnsWidthsType ColumnsWidthsType]
 
-   [TArcIWStringGrid.SuppressSelRowClick SuppressSelRowClick]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SuppressSelRowClick SuppressSelRowClick]
 
-   [TArcIWStringGrid.Content Content]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Content Content]
 
-   [TArcIWStringGrid.Caption Caption]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Caption Caption]
 
-   [TArcIWStringGrid.CaptionButtons CaptionButtons]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.CaptionButtons CaptionButtons]
 
-   [TArcIWStringGrid.ButtonBarHeight ButtonBarHeight]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ButtonBarHeight ButtonBarHeight]
 
-   [TArcIWStringGrid.ControlBarAboveHeader ControlBarAboveHeader]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ControlBarAboveHeader ControlBarAboveHeader]
 
-   [TArcIWStringGrid.RowHeaderHeight RowHeaderHeight]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.RowHeaderHeight RowHeaderHeight]
 
-   [TArcIWStringGrid.UseAsyncEvents UseAsyncEvents]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.UseAsyncEvents UseAsyncEvents]
 
-   [TArcIWStringGrid.Cells]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Cells]
 
-   [TArcIWStringGrid.Objects]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Objects]
 
-   [TArcIWStringGrid.Selected]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Selected]
 
-   [TArcIWStringGrid.SelectedRow]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectedRow]
 
-   [TArcIWStringGrid.SelectedCol]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectedCol]
 
   * *Methods*
 
-   [TArcIWStringGrid.LoadFromDelimitedFile procedure LoadFromDelimitedFile(AFilename: string; ADelimiter: char = ',';
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDelimitedFile procedure LoadFromDelimitedFile(AFilename: string; ADelimiter: char = ',';
       AQuote: char = '"'; AAutoFields: boolean = true; AReadHeaders: boolean = true;
       AValuesAreLinks: boolean = false; SkipRows: integer = 0); virtual;]
 
-   [TArcIWStringGrid.LoadFromStringList procedure LoadFromStringList(Strings: TStrings; {$IFNDEF VER130}ADelimiter: char = ',';
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromStringList procedure LoadFromStringList(Strings: TStrings; {$IFNDEF VER130}ADelimiter: char = ',';
       AQuote: char = '"'; {$ENDIF}AAutoFields: boolean = true; AReadHeaders: boolean = true;]
       AValuesAreLinks: boolean = false; SkipRows: integer = 0); virtual;
 
-   [TArcIWStringGrid.LoadFromDataset procedure LoadFromDataset(ADataset: TDataset); overload;]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset procedure LoadFromDataset(ADataset: TDataset); overload;]
 
-   [TArcIWStringGrid.LoadFromDataset procedure LoadFromDataset(ADataset: TDataset; const AFieldNames: array of string;
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset procedure LoadFromDataset(ADataset: TDataset; const AFieldNames: array of string;
       AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1); overload;]
 
-   [TArcIWStringGrid.LoadFromDataset procedure LoadFromDataset(ADataset: TDataset; const AFieldNames: TStringDynArray;
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset procedure LoadFromDataset(ADataset: TDataset; const AFieldNames: TStringDynArray;
       AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1); overload;]
 
-   [TArcIWStringGrid.SelectAll procedure SelectAll; virtual;]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectAll procedure SelectAll; virtual;]
 
-   [TArcIWStringGrid.DeselectAll procedure DeselectAll; virtual;]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.DeselectAll procedure DeselectAll; virtual;]
 
-   [TArcIWStringGrid.AddRow procedure AddRow; virtual;]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.AddRow procedure AddRow; virtual;]
 
-   [TArcIWStringGrid.DeleteRow procedure DeleteRow(idx: integer; FreeObjects: boolean = False); virtual;]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.DeleteRow procedure DeleteRow(idx: integer; FreeObjects: boolean = False); virtual;]
 
-   [TArcIWStringGrid.InsertRow procedure InsertRow(idx: integer); virtual;]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.InsertRow procedure InsertRow(idx: integer); virtual;]
 
-   [TArcIWStringGrid.FirstSelectedRow property FirstSelectedRow: integer read GetFirstSelectedRow;]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FirstSelectedRow property FirstSelectedRow: integer read GetFirstSelectedRow;]
 
-   [TArcIWStringGrid.FindValue function FindValue(const Value: string; var Col, Row: integer): boolean;]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FindValue function FindValue(const Value: string; var Col, Row: integer): boolean;]
 
-   [TArcIWStringGrid.FindValueInCol function FindValueInCol(const Value: string; Col: integer): integer;]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FindValueInCol function FindValueInCol(const Value: string; Col: integer): integer;]
 
-   [TArcIWStringGrid.FindValueInRow function FindValueInRow(const Value: string; Row: integer): integer;]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FindValueInRow function FindValueInRow(const Value: string; Row: integer): integer;]
 
-   [TArcIWStringGrid.SelectRowWithValue procedure SelectRowWithValue(const Value: string; Col: integer; DeselectOthers: boolean = True; SelectAll: boolean = False);]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectRowWithValue procedure SelectRowWithValue(const Value: string; Col: integer; DeselectOthers: boolean = True; SelectAll: boolean = False);]
 
-   [TArcIWStringGrid.DeselectRowWithValue procedure DeselectRowWithValue(const Value: string; Col: integer; SelectOthers: boolean = False; DeselectAll: boolean = False);]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.DeselectRowWithValue procedure DeselectRowWithValue(const Value: string; Col: integer; SelectOthers: boolean = False; DeselectAll: boolean = False);]
 
-   [TArcIWStringGrid.ExportGridStyle procedure ExportGridStyle(const Filename: string);]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ExportGridStyle procedure ExportGridStyle(const Filename: string);]
 
-   [TArcIWStringGrid.ImportGridStyle procedure ImportGridStyle(const Filename: string);]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ImportGridStyle procedure ImportGridStyle(const Filename: string);]
 
-   [TArcIWStringGrid.Focus procedure Focus(Row: integer);]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Focus procedure Focus(Row: integer);]
 
   * *Events*
 
-   [TArcIWStringGrid.OnCellHint OnCellHint]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.OnCellHint OnCellHint]
 
-   [TArcIWCustomGrid.OnAsyncEnter OnAsyncEnter]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.OnAsyncEnter OnAsyncEnter]
 
-   [TArcIWCustomGrid.OnAsyncExit OnAsyncExit]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.OnAsyncExit OnAsyncExit]
 
-   [TArcIWCustomGrid.OnAsyncMouseDown OnAsyncMouseDown]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.OnAsyncMouseDown OnAsyncMouseDown]
 
-   [TArcIWCustomGrid.OnAsyncMouseMove OnAsyncMouseMove]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.OnAsyncMouseMove OnAsyncMouseMove]
 
-   [TArcIWCustomGrid.OnAsyncMouseOver OnAsyncMouseOver]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.OnAsyncMouseOver OnAsyncMouseOver]
 
-   [TArcIWCustomGrid.OnAsyncMouseOut OnAsyncMouseOut]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.OnAsyncMouseOut OnAsyncMouseOut]
 
-   [TArcIWCustomGrid.OnAsyncMouseUp OnAsyncMouseUp]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.OnAsyncMouseUp OnAsyncMouseUp]
 
-   [TArcIWStringGrid.OnPopulateRow OnPopulateRow]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.OnPopulateRow OnPopulateRow]
 
-   [TArcIWStringGrid.OnCellData OnCellData]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.OnCellData OnCellData]
 
-   [TArcIWStringGrid.OnRowClick OnRowClick]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.OnRowClick OnRowClick]
 
-   [TArcIWStringGrid.OnCaptionButtonClick OnCaptionButtonClick]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.OnCaptionButtonClick OnCaptionButtonClick]
 
-   [TArcIWStringGrid.OnOverrideCellStyle OnOverrideCellStyle]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.OnOverrideCellStyle OnOverrideCellStyle]
 
-   [TArcIWStringGrid.OnOverrideCellShowIcon OnOverrideCellShowIcon]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.OnOverrideCellShowIcon OnOverrideCellShowIcon]
 
-   [TArcIWStringGrid.OnOverrideCellShowControl OnOverrideCellShowControl]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.OnOverrideCellShowControl OnOverrideCellShowControl]
 
-   [TArcIWStringGrid.OnRender OnRender]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.OnRender OnRender]
