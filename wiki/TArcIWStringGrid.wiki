@@ -82,35 +82,30 @@
 
    [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectedCol]
 
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FirstSelectedRow FirstSelectedRow]
+
   * *Methods*
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDelimitedFile procedure LoadFromDelimitedFile(AFilename: string; ADelimiter: char = ',';
-      AQuote: char = '"'; AAutoFields: boolean = true; AReadHeaders: boolean = true;
-      AValuesAreLinks: boolean = false; SkipRows: integer = 0); virtual;]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDelimitedFile LoadFromDelimitedFile](AFilename: string; ADelimiter: char = ','; AQuote: char = '"'; AAutoFields: boolean = true; AReadHeaders: boolean = true; AValuesAreLinks: boolean = false; SkipRows: integer = 0);
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromStringList procedure LoadFromStringList(Strings: TStrings; {$IFNDEF VER130}ADelimiter: char = ',';
-      AQuote: char = '"'; {$ENDIF}AAutoFields: boolean = true; AReadHeaders: boolean = true;]
-      AValuesAreLinks: boolean = false; SkipRows: integer = 0); virtual;
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromStringList LoadFromStringList](Strings: TStrings; {$IFNDEF VER130}ADelimiter: char = ','; AQuote: char = '"'; {$ENDIF}AAutoFields: boolean = true; AReadHeaders: boolean = true; AValuesAreLinks: boolean = false; SkipRows: integer = 0);
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset procedure LoadFromDataset(ADataset: TDataset); overload;]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset LoadFromDataset](ADataset: TDataset); 
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset procedure LoadFromDataset(ADataset: TDataset; const AFieldNames: array of string;
-      AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1); overload;]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset LoadFromDataset](ADataset: TDataset; const AFieldNames: array of string;
+      AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1);
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset procedure LoadFromDataset(ADataset: TDataset; const AFieldNames: TStringDynArray;
-      AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1); overload;]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset LoadFromDataset](ADataset: TDataset; const AFieldNames: TStringDynArray; AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1);
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectAll procedure SelectAll; virtual;]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectAll SelectAll]; 
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.DeselectAll procedure DeselectAll; virtual;]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.DeselectAll DeselectAll];
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.AddRow procedure AddRow; virtual;]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.AddRow AddRow];
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.DeleteRow procedure DeleteRow(idx: integer; FreeObjects: boolean = False); virtual;]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.DeleteRow DeleteRow](idx: integer; FreeObjects: boolean = False); 
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.InsertRow procedure InsertRow(idx: integer); virtual;]
-
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FirstSelectedRow property FirstSelectedRow: integer read GetFirstSelectedRow;]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.InsertRow InsertRow](idx: integer);
 
    [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FindValue function FindValue(const Value: string; var Col, Row: integer): boolean;]
 
