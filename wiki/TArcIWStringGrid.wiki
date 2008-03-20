@@ -15,77 +15,77 @@ TArcIWStringGrid is a flexible grid component which can be used as a simple stri
 
   * *Properties*
     
-   [TArcIWCustomGrid-AutoColumnWidth AutoColumnWidth]
+   [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.AutoColumnWidth AutoColumnWidth]
 
-   [TArcIWCustomGrid-AutoRowHeight AutoRowHeight]
+   [TArcIWCustomGrid.AutoRowHeight AutoRowHeight]
 
-   [TArcIWCustomGrid-StyleHeader StyleHeader]
+   [TArcIWCustomGrid.StyleHeader StyleHeader]
 
-   [TArcIWCustomGrid-StyleDetail StyleDetail]
+   [TArcIWCustomGrid.StyleDetail StyleDetail]
 
-   [TArcIWCustomGrid-StyleDetailAlt StyleDetailAlt]
+   [TArcIWCustomGrid.StyleDetailAlt StyleDetailAlt]
 
-   [TArcIWCustomGrid-StyleTable StyleTable]
+   [TArcIWCustomGrid.StyleTable StyleTable]
 
-   [TArcIWCustomGrid-UseAltStyles UseAltStyles]
+   [TArcIWCustomGrid.UseAltStyles UseAltStyles]
 
-   [TArcIWCustomGrid-RowCount RowCount]
+   [TArcIWCustomGrid.RowCount RowCount]
 
-   [TArcIWCustomGrid-ShowHeaderRow ShowHeaderRow]
+   [TArcIWCustomGrid.ShowHeaderRow ShowHeaderRow]
 
-   [TArcIWStringGrid-StyleButtonBar StyleButtonBar]
+   [TArcIWStringGrid.StyleButtonBar StyleButtonBar]
 
-   [TArcIWStringGrid-StyleControlBar StyleControlBar]
+   [TArcIWStringGrid.StyleControlBar StyleControlBar]
 
-   [TArcIWStringGrid-StyleSelected StyleSelected]
+   [TArcIWStringGrid.StyleSelected StyleSelected]
 
-   [TArcIWStringGrid-ScrollToSelectedCell ScrollToSelectedCell]
+   [TArcIWStringGrid.ScrollToSelectedCell ScrollToSelectedCell]
 
-   [TArcIWStringGrid-ScrollToSelectedRow ScrollToSelectedRow]
+   [TArcIWStringGrid.ScrollToSelectedRow ScrollToSelectedRow]
 
-   [TArcIWStringGrid-ShowButtonBar ShowButtonBar]
+   [TArcIWStringGrid.ShowButtonBar ShowButtonBar]
 
-   [TArcIWStringGrid-ShowControlBar ShowControlBar]
+   [TArcIWStringGrid.ShowControlBar ShowControlBar]
 
-   [TArcIWStringGrid-AllowEmptyCells AllowEmptyCells]
+   [TArcIWStringGrid.AllowEmptyCells AllowEmptyCells]
 
-   [TArcIWStringGrid-Scrollbars Scrollbars]
+   [TArcIWStringGrid.Scrollbars Scrollbars]
 
-   [TArcIWStringGrid-AutoHeight AutoHeight]
+   [TArcIWStringGrid.AutoHeight AutoHeight]
 
-   [TArcIWStringGrid-Columns Columns]
+   [TArcIWStringGrid.Columns Columns]
 
-   [TArcIWStringGrid-DetailVisible DetailVisible]
+   [TArcIWStringGrid.DetailVisible DetailVisible]
 
-   [TArcIWStringGrid-RowHeight RowHeight]
+   [TArcIWStringGrid.RowHeight RowHeight]
 
-   [TArcIWStringGrid-ColumnsWidthsType ColumnsWidthsType]
+   [TArcIWStringGrid.ColumnsWidthsType ColumnsWidthsType]
 
-   [TArcIWStringGrid-SuppressSelRowClick SuppressSelRowClick]
+   [TArcIWStringGrid.SuppressSelRowClick SuppressSelRowClick]
 
-   [TArcIWStringGrid-Content Content]
+   [TArcIWStringGrid.Content Content]
 
-   [TArcIWStringGrid-Caption Caption]
+   [TArcIWStringGrid.Caption Caption]
 
-   [TArcIWStringGrid-CaptionButtons CaptionButtons]
+   [TArcIWStringGrid.CaptionButtons CaptionButtons]
 
-   [TArcIWStringGrid-ButtonBarHeight ButtonBarHeight]
+   [TArcIWStringGrid.ButtonBarHeight ButtonBarHeight]
 
-   [TArcIWStringGrid-ControlBarAboveHeader ControlBarAboveHeader]
+   [TArcIWStringGrid.ControlBarAboveHeader ControlBarAboveHeader]
 
-   [TArcIWStringGrid-RowHeaderHeight RowHeaderHeight]
+   [TArcIWStringGrid.RowHeaderHeight RowHeaderHeight]
 
-   [TArcIWStringGrid-UseAsyncEvents UseAsyncEvents]
+   [TArcIWStringGrid.UseAsyncEvents UseAsyncEvents]
 
-   [TArcIWStringGrid-Cells]
+   [TArcIWStringGrid.Cells]
 
-   [TArcIWStringGrid-Objects]
+   [TArcIWStringGrid.Objects]
 
-   [TArcIWStringGrid-Selected]
+   [TArcIWStringGrid.Selected]
 
-   [TArcIWStringGrid-SelectedRow]
+   [TArcIWStringGrid.SelectedRow]
 
-   [TArcIWStringGrid-SelectedCol]
+   [TArcIWStringGrid.SelectedCol]
 
   * *Methods*
 
