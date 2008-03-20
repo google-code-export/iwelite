@@ -1,14 +1,14 @@
-#summary TArcIWStringGrid is a flexible grid component which can be used as a simple string grid or be controlled by one of several content providers to build complex editable grid-style interfaces.
+#summary A flexible grid component which can be used as a simple string grid or be controlled by one of several content providers to build complex editable grid-style interfaces.
 
-= Component Reference =
+= TArcIWStringGrid Component Reference =
 
-===TArcIWStringGrid===
-  * *Descends From*
+===Descends From===
+
   [TArcIWCustomGrid]
 
   TIWControl
 
-  * *Properties*
+===Properties===
     
    [http://code.google.com/p/iwelite/wiki/TArcIWCustomGrid.AutoColumnWidth AutoColumnWidth]
 
@@ -84,7 +84,7 @@
 
    [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FirstSelectedRow FirstSelectedRow]
 
-  * *Methods*
+===Methods===
 
    procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDelimitedFile LoadFromDelimitedFile](AFilename: string; ADelimiter: char = ','; AQuote: char = '"'; AAutoFields: boolean = true; AReadHeaders: boolean = true; AValuesAreLinks: boolean = false; SkipRows: integer = 0);
 
@@ -122,7 +122,7 @@
 
    procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Focus Focus](Row: integer);]
 
-  * *Events*
+===Events===
 
    [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.OnCellHint OnCellHint]
 
