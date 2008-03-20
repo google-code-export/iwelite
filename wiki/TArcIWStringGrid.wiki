@@ -72,15 +72,15 @@
 
    [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.UseAsyncEvents UseAsyncEvents]
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Cells]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Cells Cells]
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Objects]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Objects Objects]
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Selected]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Selected Selected]
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectedRow]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectedRow SelectedRow]
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectedCol]
+   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectedCol SelectedCol]
 
    [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FirstSelectedRow FirstSelectedRow]
 
@@ -92,8 +92,7 @@
 
    procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset LoadFromDataset](ADataset: TDataset); 
 
-   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset LoadFromDataset](ADataset: TDataset; const AFieldNames: array of string;
-      AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1);
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset LoadFromDataset](ADataset: TDataset; const AFieldNames: array of string; AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1);
 
    procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.LoadFromDataset LoadFromDataset](ADataset: TDataset; const AFieldNames: TStringDynArray; AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1);
 
@@ -107,21 +106,21 @@
 
    procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.InsertRow InsertRow](idx: integer);
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FindValue function FindValue(const Value: string; var Col, Row: integer): boolean;]
+   function [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FindValue FindValue](const Value: string; var Col, Row: integer): boolean;
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FindValueInCol function FindValueInCol(const Value: string; Col: integer): integer;]
+   function [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FindValueInCol FindValueInCol](const Value: string; Col: integer): integer;
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FindValueInRow function FindValueInRow(const Value: string; Row: integer): integer;]
+   function [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.FindValueInRow FindValueInRow](const Value: string; Row: integer): integer;
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectRowWithValue procedure SelectRowWithValue(const Value: string; Col: integer; DeselectOthers: boolean = True; SelectAll: boolean = False);]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.SelectRowWithValue SelectRowWithValue](const Value: string; Col: integer; DeselectOthers: boolean = True; SelectAll: boolean = False);
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.DeselectRowWithValue procedure DeselectRowWithValue(const Value: string; Col: integer; SelectOthers: boolean = False; DeselectAll: boolean = False);]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.DeselectRowWithValue DeselectRowWithValue](const Value: string; Col: integer; SelectOthers: boolean = False; DeselectAll: boolean = False);
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ExportGridStyle procedure ExportGridStyle(const Filename: string);]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ExportGridStyle ExportGridStyle](const Filename: string);
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ImportGridStyle procedure ImportGridStyle(const Filename: string);]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.ImportGridStyle ImportGridStyle](const Filename: string);
 
-   [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Focus procedure Focus(Row: integer);]
+   procedure [http://code.google.com/p/iwelite/wiki/TArcIWStringGrid.Focus Focus](Row: integer);]
 
   * *Events*
 
