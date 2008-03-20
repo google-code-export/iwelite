@@ -1,0 +1,169 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+TArcIWStringGrid is a flexible grid component which can be used as a simple string grid or be controlled by one of several content providers to build complex editable grid-style interfaces.
+
+
+= Details =
+
+===TArcIWStringGrid===
+  * *Descends From*
+  [TArcIWCustomGrid]
+
+  TIWControl
+
+  * *Properties*
+    
+   [TArcIWCustomGrid.AutoColumnWidth AutoColumnWidth]
+
+   [TArcIWCustomGrid.AutoRowHeight AutoRowHeight]
+
+   [TArcIWCustomGrid.StyleHeader StyleHeader]
+
+   [TArcIWCustomGrid.StyleDetail StyleDetail]
+
+   [TArcIWCustomGrid.StyleDetailAlt StyleDetailAlt]
+
+   [TArcIWCustomGrid.StyleTable StyleTable]
+
+   [TArcIWCustomGrid.UseAltStyles UseAltStyles]
+
+   [TArcIWCustomGrid.RowCount RowCount]
+
+   [TArcIWCustomGrid.ShowHeaderRow ShowHeaderRow]
+
+   [TArcIWStringGrid.StyleButtonBar StyleButtonBar]
+
+   [TArcIWStringGrid.StyleControlBar StyleControlBar]
+
+   [TArcIWStringGrid.StyleSelected StyleSelected]
+
+   [TArcIWStringGrid.ScrollToSelectedCell ScrollToSelectedCell]
+
+   [TArcIWStringGrid.ScrollToSelectedRow ScrollToSelectedRow]
+
+   [TArcIWStringGrid.ShowButtonBar ShowButtonBar]
+
+   [TArcIWStringGrid.ShowControlBar ShowControlBar]
+
+   [TArcIWStringGrid.AllowEmptyCells AllowEmptyCells]
+
+   [TArcIWStringGrid.Scrollbars Scrollbars]
+
+   [TArcIWStringGrid.AutoHeight AutoHeight]
+
+   [TArcIWStringGrid.Columns Columns]
+
+   [TArcIWStringGrid.DetailVisible DetailVisible]
+
+   [TArcIWStringGrid.RowHeight RowHeight]
+
+   [TArcIWStringGrid.ColumnsWidthsType ColumnsWidthsType]
+
+   [TArcIWStringGrid.SuppressSelRowClick SuppressSelRowClick]
+
+   [TArcIWStringGrid.Content Content]
+
+   [TArcIWStringGrid.Caption Caption]
+
+   [TArcIWStringGrid.CaptionButtons CaptionButtons]
+
+   [TArcIWStringGrid.ButtonBarHeight ButtonBarHeight]
+
+   [TArcIWStringGrid.ControlBarAboveHeader ControlBarAboveHeader]
+
+   [TArcIWStringGrid.RowHeaderHeight RowHeaderHeight]
+
+   [TArcIWStringGrid.UseAsyncEvents UseAsyncEvents]
+
+   [TArcIWStringGrid.Cells]
+
+   [TArcIWStringGrid.Objects]
+
+   [TArcIWStringGrid.Selected]
+
+   [TArcIWStringGrid.SelectedRow]
+
+   [TArcIWStringGrid.SelectedCol]
+
+  * *Methods*
+
+   [TArcIWStringGrid.LoadFromDelimitedFile procedure LoadFromDelimitedFile(AFilename: string; ADelimiter: char = ',';
+      AQuote: char = '"'; AAutoFields: boolean = true; AReadHeaders: boolean = true;
+      AValuesAreLinks: boolean = false; SkipRows: integer = 0); virtual;]
+
+   [TArcIWStringGrid.LoadFromStringList procedure LoadFromStringList(Strings: TStrings; {$IFNDEF VER130}ADelimiter: char = ',';
+      AQuote: char = '"'; {$ENDIF}AAutoFields: boolean = true; AReadHeaders: boolean = true;]
+      AValuesAreLinks: boolean = false; SkipRows: integer = 0); virtual;
+
+   [TArcIWStringGrid.LoadFromDataset procedure LoadFromDataset(ADataset: TDataset); overload;]
+
+   [TArcIWStringGrid.LoadFromDataset procedure LoadFromDataset(ADataset: TDataset; const AFieldNames: array of string;
+      AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1); overload;]
+
+   [TArcIWStringGrid.LoadFromDataset procedure LoadFromDataset(ADataset: TDataset; const AFieldNames: TStringDynArray;
+      AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1); overload;]
+
+   [TArcIWStringGrid.SelectAll procedure SelectAll; virtual;]
+
+   [TArcIWStringGrid.DeselectAll procedure DeselectAll; virtual;]
+
+   [TArcIWStringGrid.AddRow procedure AddRow; virtual;]
+
+   [TArcIWStringGrid.DeleteRow procedure DeleteRow(idx: integer; FreeObjects: boolean = False); virtual;]
+
+   [TArcIWStringGrid.InsertRow procedure InsertRow(idx: integer); virtual;]
+
+   [TArcIWStringGrid.FirstSelectedRow property FirstSelectedRow: integer read GetFirstSelectedRow;]
+
+   [TArcIWStringGrid.FindValue function FindValue(const Value: string; var Col, Row: integer): boolean;]
+
+   [TArcIWStringGrid.FindValueInCol function FindValueInCol(const Value: string; Col: integer): integer;]
+
+   [TArcIWStringGrid.FindValueInRow function FindValueInRow(const Value: string; Row: integer): integer;]
+
+   [TArcIWStringGrid.SelectRowWithValue procedure SelectRowWithValue(const Value: string; Col: integer; DeselectOthers: boolean = True; SelectAll: boolean = False);]
+
+   [TArcIWStringGrid.DeselectRowWithValue procedure DeselectRowWithValue(const Value: string; Col: integer; SelectOthers: boolean = False; DeselectAll: boolean = False);]
+
+   [TArcIWStringGrid.ExportGridStyle procedure ExportGridStyle(const Filename: string);]
+
+   [TArcIWStringGrid.ImportGridStyle procedure ImportGridStyle(const Filename: string);]
+
+   [TArcIWStringGrid.Focus procedure Focus(Row: integer);]
+
+  * *Events*
+
+   [TArcIWStringGrid.OnCellHint OnCellHint]
+
+   [TArcIWCustomGrid.OnAsyncEnter OnAsyncEnter]
+
+   [TArcIWCustomGrid.OnAsyncExit OnAsyncExit]
+
+   [TArcIWCustomGrid.OnAsyncMouseDown OnAsyncMouseDown]
+
+   [TArcIWCustomGrid.OnAsyncMouseMove OnAsyncMouseMove]
+
+   [TArcIWCustomGrid.OnAsyncMouseOver OnAsyncMouseOver]
+
+   [TArcIWCustomGrid.OnAsyncMouseOut OnAsyncMouseOut]
+
+   [TArcIWCustomGrid.OnAsyncMouseUp OnAsyncMouseUp]
+
+   [TArcIWStringGrid.OnPopulateRow OnPopulateRow]
+
+   [TArcIWStringGrid.OnCellData OnCellData]
+
+   [TArcIWStringGrid.OnRowClick OnRowClick]
+
+   [TArcIWStringGrid.OnCaptionButtonClick OnCaptionButtonClick]
+
+   [TArcIWStringGrid.OnOverrideCellStyle OnOverrideCellStyle]
+
+   [TArcIWStringGrid.OnOverrideCellShowIcon OnOverrideCellShowIcon]
+
+   [TArcIWStringGrid.OnOverrideCellShowControl OnOverrideCellShowControl]
+
+   [TArcIWStringGrid.OnRender OnRender]
+
