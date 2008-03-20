@@ -1,11 +1,6 @@
-#summary One-sentence summary of this page.
+#summary TArcIWStringGrid is a flexible grid component which can be used as a simple string grid or be controlled by one of several content providers to build complex editable grid-style interfaces.
 
-= Introduction =
-
-TArcIWStringGrid is a flexible grid component which can be used as a simple string grid or be controlled by one of several content providers to build complex editable grid-style interfaces.
-
-
-= Details =
+= Component Reference =
 
 ===TArcIWStringGrid===
   * *Descends From*
