@@ -10,18 +10,108 @@ This is the Component Reference for the IW Elite Suite.  Please contribute where
 ==Visual Components==
   * *Dialogs *
   [TArcIWDlgMessageBox]
+
   [TArcIWDlgLogin]
+
   [TArcIWDlgEmailUserLogin]
+
   [TArcIWDlgProgress]
+
   [TArcIWDlgSearchReplace]
+
   [TArcIWDlgTimeout]
+
   [TArcIWDlgPrint]
+
   [TArcIWDlgConfirmPopup]
+
   [TArcIWDlgScrollableMessageBox]
+
   [TArcIWDlgPopupRegion]
 
   
   * *Enhanced Controls *
+
+  [TArcIWEnhEdit]
+ 
+  [TArcIWEnhCalendar]
+ 
+  [TArcIWEnhEdit]
+ 
+  [TArcIWEnhCalendar]
+ 
+  [TArcIWEnhActiveX]
+ 
+  [TArcIWEnhButton]
+ 
+  [TArcIWEnhCheckBox]
+ 
+  [TArcIWEnhFlash]
+ 
+  [TArcIWEnhLabel]
+ 
+  [TArcIWEnhListbox]
+ 
+  [TArcIWEnhComboBox]
+ 
+  [TArcIWEnhMemo]
+ 
+  [TArcIWEnhMPEG]
+ 
+  [TArcIWEnhProgressBar]
+ 
+  [TArcIWEnhQuicktime]
+ 
+  [TArcIWEnhText]
+ 
+  [TArcIWEnhRadioGroup]
+ 
+  [TArcIWEnhImage]
+ 
+  [TArcIWEnhImageFile]
+ 
+  [TArcIWEnhHRule]
+ 
+  [TArcIWEnhLink]
+ 
+  [TArcIWEnhURL]
+ 
+  [TArcIWEnhURLWindow]
+ 
+  [TArcIWEnhApplet]
+ 
+  [TArcIWEnhList]
+ 
+  [TArcIWEnhTimeEdit]
+ 
+  [TArcIWEnhOrderedListBox]
+ 
+  [TArcIWEnhDBImage]
+ 
+  [TArcIWEnhDBRadioGroup]
+ 
+  [TArcIWEnhDBCheckBox]
+ 
+  [TArcIWEnhDBComboBox]
+ 
+  [TArcIWEnhDBEdit]
+ 
+  [TArcIWEnhDBFile]
+ 
+  [TArcIWEnhDBLabel]
+ 
+  [TArcIWEnhDBListbox]
+ 
+  [TArcIWEnhDBLookupComboBox]
+ 
+  [TArcIWEnhDBLookupListBox]
+ 
+  [TArcIWEnhDBMemo]
+ 
+  [TArcIWEnhDBNavigator]
+ 
+  [TArcIWEnhDBText]
+
 
   * *Dialogs *
 
