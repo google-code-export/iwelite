@@ -26,9 +26,9 @@
 
 package IWEliteSuite_90_Delphi2007w32_dsn;
 
-{$R *.RES}
+{$R *.res}
 {$R 'EliteSuiteDsn.dcr'}
-{$ALIGN ON}
+{$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
 {$DEBUGINFO ON}
@@ -54,12 +54,14 @@ package IWEliteSuite_90_Delphi2007w32_dsn;
 {$IMPLICITBUILD OFF}
 
 requires
-  rtl,Intraweb_90_100,
+  rtl,
+  Intraweb_90_100,
   IWEliteSuite_90_Delphi2007w32,
-  dclIntraweb_90_100;
+  dclIntraweb_90_100,
+  designide;
 
 contains
-    ArcIWDlgReg in 'ArcIWDlgReg.pas',
+  ArcIWDlgReg in 'ArcIWDlgReg.pas',
   ArcIWEnhancedReg in 'ArcIWEnhancedReg.pas',
   ArcIWExtrasReg in 'ArcIWExtrasReg.pas',
   ArcIWGraphsReg in 'ArcIWGraphsReg.pas',
