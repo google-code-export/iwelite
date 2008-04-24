@@ -28,7 +28,7 @@ unit ArcIWGraphsReg;
 
 interface
 
-uses DesignIntf, SysUtils, Classes, ArcIWGraphsBar, ArcIWFusionChart, IWColor, IWDsnColor;
+uses {$IFDEF D7Plus}DesignIntf, {$ELSE} DsgnIntf, {$ENDIF}SysUtils, Classes, ArcIWGraphsBar, ArcIWFusionChart, IWColor, IWDsnColor;
 
 procedure Register;
 

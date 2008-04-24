@@ -43,7 +43,7 @@ uses
   {$ENDIF}
   {$IFDEF Linux}QGraphics, {$ELSE}Graphics, {$ENDIF}
   IWTypes, IWHTMLTag, IWControl, IWScriptEvents, IWRenderContext, IWBaseInterfaces,
-  IWColor, IWFileReference, IWGLobal, IWCompListbox, IWFont, IWForm;
+  IWColor, IWFileReference, IWGLobal, IWCompListbox, IWFont, IWForm, ArcD5Fix;
 
 type
   TInvalidSelectionBehavior = (isSelectNone, isSelectAll);

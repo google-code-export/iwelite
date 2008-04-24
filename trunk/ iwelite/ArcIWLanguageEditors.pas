@@ -31,7 +31,7 @@ interface
 {$I IntraWebVersion.inc}
 
 uses Windows, Controls, Classes, SysUtils, ShellApi, Dialogs, ComCtrls, IWControl,
-  IWForm, {$IFDEF VER130}Forms, DsgnIntf,{$ELSE}DesignIntf, DesignEditors,{$ENDIF} Menus
+  IWForm, {$IFDEF VER130}DsgnIntf,{$ELSE}DesignIntf, DesignEditors,{$ENDIF} Menus
   {$IFDEF INTRAWEB60}, IWBaseControlInterface {$ENDIF}
   {$IFDEF INTRAWEB70}, IWBaseInterfaces {$ENDIF}
   , ArcIWStringContainer;
@@ -117,7 +117,7 @@ begin
     {$IFNDEF VER130}
     frm.FDesignerForm := TIWForm(Dsn.Root);
     {$ELSE}
-    frm.FDesignerForm := TIWForm(Designer.GetRoot);
+    frm.FDesignerForm := TIWForm(Dsn.GetRoot);
     {$ENDIF}
     frm.FEditComponent := EditComponent;
     frm.Translations.Assign(frm.FEditComponent.Translations);
