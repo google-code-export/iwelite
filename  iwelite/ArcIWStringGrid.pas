@@ -36,7 +36,7 @@ uses
   {$IFNDEF VER130}Types,{$ENDIF}
   {$IFDEF INTRAWEB72}IWVCLBaseControl, IWBaseControl, IWBaseHTMLControl, IWRenderContext, IWContainer,
   IWBaseRenderContext, IWBaseHTMLInterfaces, IWHTML40Interfaces, IWFileReference, IWBaseInterfaces,
-  IWVCLComponent, IWContainerLayout, IWLayoutMgrForm, IWXMLTag,{$ENDIF}
+  IWVCLComponent, IWContainerLayout, IWLayoutMgrForm, IWXMLTag,{$ENDIF} IWMarkupLanguageTag, IWScriptEvents,
   IWTemplateProcessorHTML, DB, IWApplication, ArcIWGridCommon, ArcIWCustomGrid, IWServer, IWForm;
 
 type
@@ -328,6 +328,7 @@ type
 
     //comment by peter 2005/05/18
     FOnCellHint: TOnCellHintEvent;
+    FUseAsyncEvents: boolean;
     function CWT: string;
   protected
     procedure InitControl; override;
@@ -372,8 +373,11 @@ type
     procedure ContentRetrieveCBObject(x: integer; var ctrl: TControl); virtual;
     procedure ContentAfterRenderHTML; virtual;
     procedure ContentAssignSession(ASession : TIWApplication);
+    procedure DoAsyncSubmit(AParams: TStringList);
 
     procedure SetRowHeaderHeight(const Value: integer);
+    procedure RenderInnerHTML(AContext: TIWBaseHTMLComponentContext; Result : TIWHTMLTag); virtual;
+    procedure AssignAsyncEvents(APageContext: TIWPageContext40; AScriptEvents: TIWScriptEvents); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -390,6 +394,7 @@ type
       AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1); overload;
     procedure Invalidate; override;
     function SupportsSubmit: Boolean;
+    function RenderAsync(AContext: TIWBaseHTMLComponentContext): TIWXMLTag; override;
     function RenderAsyncComponent(AContext: TIWBaseComponentContext): TIWXMLTag; override;
     property Cells[x, y: integer]: string read GetCell write SetCell;
     property Objects[x, y: integer]: TObject read GetObject write SetObject;
@@ -499,8 +504,17 @@ type
     property RowHeaderHeight: integer read FRowHeaderHeight write SetRowHeaderHeight;
     //
 
+    property UseAsyncEvents : boolean read FUseAsyncEvents write FUseAsyncEvents;
+
     //comment by peter 2005/05/18
     property OnCellHint: TOnCellHintEvent read FOnCellHint write FOnCellHint;
+    property OnAsyncEnter;
+    property OnAsyncExit;
+    property OnAsyncMouseDown;
+    property OnAsyncMouseMove;
+    property OnAsyncMouseOver;
+    property OnAsyncMouseOut;
+    property OnAsyncMouseUp;
   end;
 
   TStyleExportFile = class(TComponent)
@@ -1218,6 +1232,11 @@ begin
   FContainerImplementation.Free;
 end;
 
+procedure TArcIWStringGrid.DoAsyncSubmit(AParams: TStringList);
+begin
+  Submit(AParams.Values['Data']);
+end;
+
 procedure TArcIWStringGrid.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
@@ -1262,6 +1281,13 @@ begin
     ms.Free;
     fs.Free;
   end;
+end;
+
+procedure TArcIWStringGrid.AssignAsyncEvents(APageContext: TIWPageContext40;
+  AScriptEvents: TIWScriptEvents);
+begin
+  inherited;
+  APageContext.WebApplication.RegisterCallBack(HTMLName+'.Submit', DoAsyncSubmit);
 end;
 
 function TArcIWStringGrid.ContainerClassname: String;
@@ -1571,13 +1597,20 @@ end;
 procedure TArcIWStringGrid.SetCell(x, y: integer; Value: string);
 begin
   EnsureXYValues(x, y);
-  FColumns[x].Values[y] := Value;
-  Invalidate;
+  if FColumns[x].Values[y] <> Value then
+  begin
+    FColumns[x].Values[y] := Value;
+    Invalidate;
+  end;
 end;
 
 procedure TArcIWStringGrid.SetRowHeaderHeight(const Value: integer);
 begin
-  FRowHeaderHeight := Value;
+  if FRowHeaderHeight <> Value then
+  begin
+    FRowHeaderHeight := Value;
+    Invalidate;
+  end;
 end;
 
 function TArcIWStringGrid.GetObject(x, y: integer): TObject;
@@ -1589,8 +1622,11 @@ end;
 procedure TArcIWStringGrid.SetObject(x, y: integer; Value: TObject);
 begin
   EnsureXYValues(x, y);
-  FColumns[x].Values.Objects[y] := Value;
-  Invalidate;
+  if FColumns[x].Values.Objects[y] <> Value then
+  begin
+    FColumns[x].Values.Objects[y] := Value;
+    Invalidate;
+  end;
 end;
 
 procedure TArcIWStringGrid.Submit(const AValue: string);
@@ -1832,6 +1868,7 @@ begin
       break;
     ADataSet.Next;
   end;
+  Invalidate;
 end;
 
 
@@ -1935,6 +1972,7 @@ var
 begin
   for i := 0 to FColumns.Count - 1 do
     SelectedCol[i] := False;
+  Invalidate;
 end;
 
 {$IFDEF INTRAWEB72}
@@ -2169,8 +2207,12 @@ end;
 procedure TArcIWStringGrid.SetSelected(x, y: integer; Value: boolean);
 begin
   EnsureXYValues(x, y);
-  ContentSelect(x, y, Value);
-  FColumns[x].Selected[y] := Value;
+  if FColumns[x].Selected[y] <> Value then
+  begin
+    ContentSelect(x, y, Value);
+    FColumns[x].Selected[y] := Value;
+    invalidate;
+  end;
 end;
 
 function TArcIWStringGrid.GetSelectedRow(y: integer): boolean;
@@ -2208,6 +2250,7 @@ begin
     FColumns[x].Selected[y] := Value;
   end;
   ContentSelectRow(y, Value);
+  Invalidate;
 end;
 
 function TArcIWStringGrid.GetSelectedCol(x: integer): boolean;
@@ -2246,6 +2289,7 @@ begin
   begin
     FColumns[x].Selected[y] := Value;
   end;
+  Invalidate;
 end;
 
 function TArcIWStringGrid.GetFirstSelectedRow: integer;
@@ -2276,19 +2320,71 @@ begin
   end;
 end;
 
+function TArcIWStringGrid.RenderAsync(AContext: TIWBaseHTMLComponentContext): TIWXMLTag;
+var
+  tag : TIWMarkupLanguageTag;
+begin
+  Result := TIWXMLTag.CreateTag('control');
+  try
+    Result.AddStringParam('id', HTMLName);
+    Result.AddStringParam('type', 'ARCIWSTRINGGRID');
+    tag := Result.Contents.AddTag('innerHTML');
+    RenderInnerHTML(TIWBaseHTMLComponentContext(AContext), TIWHTMLTag(tag));
+    RenderAsyncCommonProperties(TIWBaseHTMLComponentContext(AContext), Result, [acpEnabled..acpAlignment]);
+  except
+    FreeAndNil(Result);
+  end;
+  if (AContext.Browser in [brIE, brIE4]) then
+     AContext.WebApplication.CallBackResponse.AddJavaScriptToExecute('Body_OnResize();');
+
+end;
+
 function TArcIWStringGrid.RenderAsyncComponent(
   AContext: TIWBaseComponentContext): TIWXMLTag;
 begin
-  // Todo?
+  Result := inherited RenderAsyncComponent(AContext);
 end;
 
 procedure TArcIWStringGrid.RenderAsyncComponents(AContext: TIWContainerContext;
   APageContext: TIWBasePageContext);
+Var
+  i: integer;
+  LContainerContext: IWBaseRenderContext.TIWContainerContext;
+  LIWContainer: IIWBaseContainer;
 begin
-  // Todo?
+  //Todo: Render initially invisible controls
+  //Initially invisible controls are  currently not rendered when set to visible true.
+  //For that readson they do not have a ContainerContext at all
+  if visible and assigned(ContainerContext) then begin
+    with ContainerContext do begin
+      for i := 0 to ComponentsCount - 1 do begin
+        if SupportsInterface(ComponentsList[i], IIWBaseContainer) then begin
+          LIWContainer := BaseContainerInterface(ComponentsList[i]);
+          LContainerContext := LIWContainer.InitContainerContext(APageContext.WebApplication);
+          if Assigned(LContainerContext) then begin
+            LContainerContext.UpdateTree := {CheckUpdateTree(LComponent) or }AContext.UpdateTree;
+            LIWContainer.RenderComponents(LContainerContext, APageContext);
+          end;
+        end;
+        // Because HTML Tags are already embeded into table tag we should clear the HTML pointer inside container context.
+        TIWBaseHTMLComponentContext(ComponentContext[BaseHTMLComponentInterface(ComponentsList[i]).HTMLName]).HTMLTag := nil;
+      end;
+    end;
+  end;
 end;
 
 function TArcIWStringGrid.RenderHTML{$IFNDEF INTRAWEB72}: TIWHTMLTag; {$ELSE}(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; {$ENDIF}
+begin
+  Result := TIWHTMLTag.CreateTag('span');
+  try
+    RenderInnerHTML(AContext, Result);
+  except
+    FreeAndNil(Result);
+    raise;
+  end;
+end;
+
+procedure TArcIWStringGrid.RenderInnerHTML(AContext: TIWBaseHTMLComponentContext; Result: TIWHTMLTag);
   function IsNotTemplate(str : string; alt : string='') : string;
   begin
     {$IFDEF INTRAWEB72}
@@ -2319,12 +2415,19 @@ function TArcIWStringGrid.RenderHTML{$IFNDEF INTRAWEB72}: TIWHTMLTag; {$ELSE}(AC
     result := Assigned(FOnOverrideCellStyle) or (Assigned(FContent) and FContent.DoNeedStyleOverride(Self));
   end;
   function ShouldRenderLink(idx, Row : integer): boolean;
+  var
+    b : boolean;
   begin
     result := TArcGridStringColumn(FColumns.Items[idx]).ClickEventAsLinks and
       Assigned(TArcGridStringColumn(FColumns.Items[idx]).OnClick);
 
     if Result and Assigned(TArcGridStringColumn(FColumns.Items[idx]).FOnCellClickable) then
+    begin
+      b := Result;
       TArcGridStringColumn(FColumns.Items[idx]).FOnCellClickable(Self, FColumns[idx], Row, Result);
+      if b <> Result then
+        Invalidate;
+    end;
   end;
 {$IFDEF INTRAWEB72}
   procedure RenderControl(Tag: TIWHTMLTag; ctrl: TControl; FullWidth, FullHeight : boolean);
@@ -2398,7 +2501,7 @@ function TArcIWStringGrid.RenderHTML{$IFNDEF INTRAWEB72}: TIWHTMLTag; {$ELSE}(AC
 		
 		    //ctrl.Parent := TWinControl(Self);
 		    //ctrli.ParentChanging(ctrl.Parent, Self);
-		
+
 		    ctrl.Visible := true;
 		    ctrlContext := TIWComponent40Context.Create(ctrl, cntrContext, AContext.PageContext);
 		
@@ -2441,7 +2544,7 @@ function TArcIWStringGrid.RenderHTML{$IFNDEF INTRAWEB72}: TIWHTMLTag; {$ELSE}(AC
 		      begin
 		        Result.AddStringParam('NAME', BaseHTMLControlInterface(ctrl).HTMLName);
 		      end;
-		
+
 		      Result.AddStringParam('STYLE', s);
 		
 		      if SupportsInterface(ctrl, IIWHTML40Component) then begin
@@ -2449,7 +2552,7 @@ function TArcIWStringGrid.RenderHTML{$IFNDEF INTRAWEB72}: TIWHTMLTag; {$ELSE}(AC
 		      end;
 		    end;
 		    cntrContext.AddComponent(ctrlContext);
-		
+
 		    DoRefreshControl := DoRefreshControl or HTML40ComponentInterface(ctrl).DoRefreshControl;
 		    if DoRefreshControl then
 		    begin
@@ -2747,6 +2850,14 @@ var
     end;
   end;
   procedure DoRenderDetail;
+    function RenderScrollScript(HTMLName, _selected : string; i,y : integer) : string; inline;
+    begin
+      result := 'var o = IWTop().document.getElementById("' + HTMLName + _selected + '_' + IntToStr(i) + '_' + IntToStr(y) + '"); if(o) {o.scrollIntoView(false)};';
+    end;
+    function RenderScrollRowScript(HTMLName, _selected : string; y : integer) : string; inline;
+    begin
+      result := 'var o = IWTop().document.getElementById("' + HTMLName + _selected + '_' + IntToStr(y) + '"); if(o) {o.scrollIntoView(false)};';
+    end;
   var
     bShow : boolean;
     y, i: integer;
@@ -2938,9 +3049,9 @@ var
                 begin
                   tagCol.AddStringParam('id', HTMLName + _selected + '_' + IntToStr(i) + '_' + IntToStr(y));
                   if AContext.PageContext.WebApplication.IsPartialUpdate then
-                    TIWPageContext40(AContext.PageContext).AddToUpdateInitProc('IWTop().document.getElementById("' + HTMLName + _selected + '_' + IntToStr(i) + '_' + IntToStr(y) + '").scrollIntoView(false)')
+                    TIWPageContext40(AContext.PageContext).AddToUpdateInitProc(RenderScrollScript(HTMLName, _selected, i, y))
                   else
-                    TIWPageContext40(AContext.PageContext).AddToInitProc('IWTop().document.getElementById("' + HTMLName + _selected + '_' + IntToStr(i) + '_' + IntToStr(y) + '").scrollIntoView(false)');
+                    TIWPageContext40(AContext.PageContext).AddToInitProc(RenderScrollScript(HTMLName, _selected, i, y));
                 end;
               end else
                 if FUseAltStyles then
@@ -3056,9 +3167,9 @@ var
             begin
               tagRow.AddStringParam('id', HTMLName + _SelectedRow + '_' + IntToStr(y));
               if AContext.PageContext.WebApplication.IsPartialUpdate then
-                TIWPageContext40(AContext.PageContext).AddToUpdateInitProc('IWTop().document.getElementById("' + HTMLName + _SelectedRow + '_' + IntToStr(y) + '").scrollIntoView(false)')
+                TIWPageContext40(AContext.PageContext).AddToUpdateInitProc(RenderScrollRowScript(HTMLName, _SelectedRow, y))
               else
-                TIWPageContext40(AContext.PageContext).AddToInitProc('IWTop().document.getElementById("' + HTMLName + _SelectedRow + '_' + IntToStr(y) + '").scrollIntoView(false)');
+                TIWPageContext40(AContext.PageContext).AddToInitProc(RenderScrollRowScript(HTMLName, _SelectedRow, y))
             end;
           end;
         end;
@@ -3075,8 +3186,6 @@ var
 begin
   ContentBeforeRenderHTML(AContext);
   ContainerContext := IWBaseRenderContext.TIWContainerContext.Create(AContext.WebApplication);
-
-  Result := TIWHTMLTag.CreateTag('span');
 
   s := 'width:' + IntToStr(Width) + 'px;';
   if not FAutoHeight then
@@ -3131,28 +3240,79 @@ begin
   tagScript := AContext.PageContext.BodyTag.Contents.AddTag('script');
   //tagScript := Result.Contents.AddTag('script');
 
-  sScript := DebugEOL + 'var ' + HTMLName + _ReturnStyle + ' = "' + HTMLName + _col + '";' + DebugEOL +
-    'function ' + HTMLName + _SubmitOnEnterKey + '(e, Param1, Param2, Param3, Param4) {' + DebugEOL +
-    '  var c;' + DebugEOL +
-    '  c=e.keyCode;' + DebugEOL +
-    '  if (c==13) { SubmitClickConfirm(Param1, Param2, Param3, Param4); return false;} else { return true; }' + DebugEOL +
-    '}' + DebugEOL +
-    'function ' + HTMLName + _DoCaptionClick + '(col) {' + DebugEOL +
-    //'  alert("hx"+col);'+DebugEOL+
-  '  SubmitClickConfirm("' + HTMLName + '","hx"+col,false,"");' + DebugEOL +
-    '}' + DebugEOL +
-    'function ' + HTMLName + _DoColumnClick + '(row,col) {' + DebugEOL +
-    //'  alert("cy"+row+"x"+col);'+DebugEOL+
-  '  SubmitClickConfirm("' + HTMLName + '","cy"+row+"x"+col,false,"");' + DebugEOL +
-    '}' + DebugEOL;
-  if FShowButtonBar then
-    sScript := sScript +
-      'function ' + HTMLName + _DoCaptionButtonClick + '(ButtonType,ConfirmString) {' + DebugEOL +
-      '  if (ConfirmString != "") {' + DebugEOL +
-      '    if (!confirm(ConfirmString)) { return false; }' + DebugEOL +
-      '  }' + DebugEOL +
-      '  SubmitClickConfirm("' + HTMLName + '","b"+ButtonType,false,"");' + DebugEOL +
+  sScript := '';
+  // ajax support code
+  if FUseAsyncEvents then
+  begin
+    sScript := DebugEOL+
+      (*'function '+HTMLName+'_SubmitEvent() {'+DebugEOL+
+      '  this.type = "'+HTMLName+'_Submit";'+DebugEOL+
+      '  this.data = "";'+DebugEOL+
+      '}'+DebugEOL+
+      'eventList += '''+HTMLName+'_Submit'';'+DebugEOL+
+      'eventGenerators += function(lEvent) { alert("here: "+lEvent.data); return "&data="+lEvent.data;}'+DebugEOL+
+      *)'var ' + HTMLName + _ReturnStyle + ' = "' + HTMLName + _col + '";' + DebugEOL +
+      'function '+HTMLName+'_Submit(Param) {'+DebugEOL+
+      //'  var e = new '+HTMLName+'_SubmitEvent();'+DebugEOL+
+      //'  e.type = "'+HTMLName+'_Submit";'+DebugEOL+
+      //'  e.data = Param;'+DebugEOL+
+      //'  processAjaxEvent(e, '+HTMLName+'IWCL, '''+HTMLName+'.'+HTMLName+'_Submit'', false, null, false);'+ DebugEOL+
+      '  executeAjaxEvent("&data="+Param, '+HTMLName+'IWCL, '''+HTMLName+'.Submit'', false, null, false);'+DebugEOL+
+      '}'+DebugEOL+
+      'function ' + HTMLName + _SubmitOnEnterKey + '(e, Param1, Param2, Param3, Param4) {' + DebugEOL +
+      '  var c;' + DebugEOL +
+      '  c=e.keyCode;' + DebugEOL +
+      '  if (c==13) { SubmitClickConfirm(Param1, Param2, Param3, Param4); return false;} else { return true; }' + DebugEOL +
+      '}' + DebugEOL +
+      'function ' + HTMLName + _DoCaptionClick + '(col) {' + DebugEOL +
+      '  '+HTMLName+'_Submit("hx"+col);' + DebugEOL +
+      '}' + DebugEOL +
+      'function ' + HTMLName + _DoColumnClick + '(row,col) {' + DebugEOL +
+      '  '+HTMLName+'_Submit("cy"+row+"x"+col);' + DebugEOL +
       '}' + DebugEOL;
+  end else
+  begin
+    sScript := sScript+DebugEOL + 'var ' + HTMLName + _ReturnStyle + ' = "' + HTMLName + _col + '";' + DebugEOL +
+      'function ' + HTMLName + _SubmitOnEnterKey + '(e, Param1, Param2, Param3, Param4) {' + DebugEOL +
+      '  var c;' + DebugEOL +
+      '  c=e.keyCode;' + DebugEOL +
+      '  if (c==13) { SubmitClickConfirm(Param1, Param2, Param3, Param4); return false;} else { return true; }' + DebugEOL +
+      '}' + DebugEOL +
+      'function ' + HTMLName + _DoCaptionClick + '(col) {' + DebugEOL +
+      //'  alert("hx"+col);'+DebugEOL+
+    '  SubmitClickConfirm("' + HTMLName + '","hx"+col,false,"");' + DebugEOL +
+      '}' + DebugEOL +
+      'function ' + HTMLName + _DoColumnClick + '(row,col) {' + DebugEOL +
+      //'  alert("cy"+row+"x"+col);'+DebugEOL+
+    '  SubmitClickConfirm("' + HTMLName + '","cy"+row+"x"+col,false,"");' + DebugEOL +
+      '}' + DebugEOL;
+  end;
+  
+  sScript := sScript+
+    'function ' + HTMLName +'_ShowLoading() {' + DebugEOL+
+    '  IWTop().FindElem('''+HTMLName+''').innerHTML=''<img style="position:relative;top:50%;left:50%;" src="'+AContext.WebApplication.AppURLBase+'/gfx/loading.gif">'';'+
+    '}'+DebugEOL;
+
+  if FShowButtonBar then
+    if not FUseAsyncEvents then
+    begin
+      sScript := sScript +
+        'function ' + HTMLName + _DoCaptionButtonClick + '(ButtonType,ConfirmString) {' + DebugEOL +
+        '  if (ConfirmString != "") {' + DebugEOL +
+        '    if (!confirm(ConfirmString)) { return false; }' + DebugEOL +
+        '  }' + DebugEOL +
+        '  SubmitClickConfirm("' + HTMLName + '","b"+ButtonType,false,"");' + DebugEOL +
+        '}' + DebugEOL;
+    end else
+    begin
+      sScript := sScript +
+        'function ' + HTMLName + _DoCaptionButtonClick + '(ButtonType,ConfirmString) {' + DebugEOL +
+        '  if (ConfirmString != "") {' + DebugEOL +
+        '    if (!confirm(ConfirmString)) { return false; }' + DebugEOL +
+        '  }' + DebugEOL +
+        '  '+HTMLName+'_Submit("' + HTMLName + '","b"+ButtonType);' + DebugEOL +
+        '}' + DebugEOL;
+    end;
 
   (*if FRollover <> rtNone then
   begin
@@ -3287,7 +3447,7 @@ begin
   
   if FAutoHeight and bShow then
   begin
-    s := 'document.getElementById('''+HTMLName+''').style.height=IWTop().FindElem('''+HTMLName+_tbl+''').clientHeight';
+    s := 'document.getElementById('''+HTMLName+''').style.height=IWTop().FindElem('''+HTMLName+_tbl+''').clientHeight;';
 
     if FShowButtonBar then
       s := s+'+IWTop().FindElem('''+HTMLName+_btnbar+''').clientHeight;';

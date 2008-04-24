@@ -30,7 +30,7 @@ interface
 
 {$I IntrawebVersion.inc}
 
-uses ArcIWEliteResources, ArcIWDlgBase, ArcFastStrings,
+uses ArcIWEliteResources, ArcIWDlgBase,
   {$IFDEF VSNET}
     System.ComponentModel,
     System.ComponentModel.Design,
@@ -58,7 +58,7 @@ uses ArcIWEliteResources, ArcIWDlgBase, ArcFastStrings,
   {$IFDEF Linux}Qt, Types,{$ELSE}Windows, Messages,{$ENDIF}
   {$ENDIF}
   Classes,
-  IWContainer, IWControl, IWHTMLTag, IWBaseContainerLayout, IWForm,
+  IWContainer, IWHTML40Container, IWControl, IWHTMLTag, IWBaseContainerLayout, IWForm,
   IWColor, IWBaseInterfaces, IWRenderContext, IWContainerLayout, IWBaseHTMLInterfaces,
   IWBaseHTMLControl, IWGridCommon, IWHTML40Interfaces, IWScriptEvents, IWTypes,
   IWContainerBorderOptions, IWApplication, IWFont, IWBaseControl, IWAppForm, IWBaseComponent,
@@ -83,7 +83,7 @@ type
     DesignerCategory('Component')
   ]
   {$ENDIF}*)
-  TArcIWDlgPopupRegion = class( TIWHTMLContainer, IIWHTML40Container, IIWBaseComponent,
+  TArcIWDlgPopupRegion = class( TIWHTML40Container, IIWHTML40Container, IIWBaseComponent,
                                 IIWBaseHTMLComponent, IIWBaseControl, IIWBaseHTMLControl,
                                 IIWHTML40Control, IIWHTML40Component, IIWTabOrder, IIWSubmitControl,
                                 IIWSubmitInvisible)
@@ -112,7 +112,7 @@ type
     FBorderOptions: TIWContainerBorderOptions;
     FIWControlImplementation: TIWHTMLControlImplementation;
     FIWBaseControlImplementation: TIWBaseControlImplementation;
-    FContainerImplementation: TIWContainerImplementation;
+    FContainerImplementation: TIWHTML40ContainerImplementation;
     FDoRefreshControl: Boolean;
     FUseFrame: Boolean;
     FRegionDIV: TIWHTMLTag;
@@ -242,20 +242,19 @@ type
     function get_HTMLHeight: Integer;
 
     {$IFDEF INTRAWEB90}
+    function RenderAsync(AContext: TIWBaseHTMLComponentContext): TIWXMLTag; override;
     function RenderAsyncComponent(AContext: TIWBaseComponentContext): TIWXMLTag;
+
     procedure AddAsyncStyle(ATag: TIWXMLTag; AStyle: string);
-    function get_StyleRenderOptions: TIWStyleRenderOptions; 
+    function get_StyleRenderOptions: TIWStyleRenderOptions;
     procedure set_StyleRenderOptions(AValue: TIWStyleRenderOptions);
+
     {$ENDIF}
     function get_Css: string;
     function get_SkinId: string;
     procedure set_SkinId(AValue: string);
     function RequiresRefresh: Boolean;
     procedure set_Css(AValue: string);
-    {$IFDEF INTRAWEB90}
-    procedure RenderAsyncComponents(AContext: TIWContainerContext;
-      APageContext: TIWBasePageContext);
-    {$ENDIF}
 
     property DoRefreshControl : Boolean read get_DoRefreshControl write set_DoRefreshControl;
     property HTMLName: string read get_HTMLName;
@@ -348,6 +347,7 @@ begin
   FExtraTabNames := TStringList.Create;
   FAutoHideVisibleList := TList.Create;
   FAutoHideOptions := [ahComboBoxes, ahListBoxes, ahApplets, ahObjects, ahIFrame];
+  self.FRenderInvisibleControls := True;
 end;
 
 procedure FreeAllChildren(const AComponent:TComponent);
@@ -506,7 +506,7 @@ begin
 
   FBorderOptions.OnChange := OnBorderChange;
 
-  FContainerImplementation := TIWContainerImplementation.Create(Self);
+  FContainerImplementation := TIWHTML40ContainerImplementation.Create(Self);
 
   {$IFNDEF VSNET}
   ControlStyle := [csAcceptsControls, csCaptureMouse, csClickEvents, csSetCaption, csDoubleClicks];
@@ -973,7 +973,9 @@ begin
     begin
       if (ParentForm is TIWAppForm) then
         if (ParentForm <> nil) and (TIWAppForm(ParentForm).UpdateMode = umPartial) then
+        begin
           ParentForm.AddToInitProc('IWTop().document.all["'+HTMLName+'_locker"].style.visibility = "visible";');
+        end;
       if FCentered then
       begin
         Left := (Parent.Width div 2) - (Width div 2);
@@ -986,6 +988,7 @@ begin
         if FDefaultControl <> nil then
           FDefaultControl.SetFocus;
       end;
+      Invalidate;
     end;
     if (not Value) and (Value <> get_Visible) and (not (csDesigning in ComponentState)) then
     begin
@@ -996,6 +999,7 @@ begin
       end;
       if ParentForm <> nil then
         ParentForm.ActiveControl := FOldActiveControl;
+      Invalidate;
     end;
 
     FIWControlImplementation.SetVisible(Value);
@@ -1043,6 +1047,13 @@ end;
 {$IFDEF INTRAWEB90}
 function TArcIWDlgPopupRegion.RenderAsyncComponent(AContext: TIWBaseComponentContext): TIWXMLTag;
 begin
+  result := RenderAsync(TIWBaseHTMLComponentContext(AContext));
+end;
+
+function TArcIWDlgPopupRegion.RenderAsync(AContext: TIWBaseHTMLComponentContext): TIWXMLTag;
+begin
+  Result := nil;
+  {
   Result := TIWXMLTag.CreateTag('control');
   try
     Result.AddStringParam('id', HTMLName);
@@ -1050,22 +1061,29 @@ begin
 
     AddAsyncStyle(Result, 'background-color:' + ColorToRGBString(Color) + ';');
     AddAsyncStyle(Result, 'color:' + ColorToRGBString(BorderOptions.Color) + ';');
-    if Visible then
-      AddAsyncStyle(Result, 'visibility: visible;')
-    else
-      AddAsyncStyle(Result, 'visibility: hidden;');
+    AddAsyncStyle(Result, 'height:' + IntToStr(Height - BorderOptions.NumericWidth * 2));
+    AddAsyncStyle(Result, 'width:' + IntToStr(Width - BorderOptions.NumericWidth * 2));
 
-    FIWControlImplementation.RenderAsyncCommonProperties(TIWBaseHTMLComponentContext(AContext), Result, [acpEnabled..acpAlignment]);
+    if Visible then
+    begin
+      AddAsyncStyle(Result, 'visibility: visible;');
+      AContext.WebApplication.CallBackResponse.AddJavaScriptToExecute(
+            'IWTop().document.all["'+HTMLName+'_locker"].style.visibility = "visible";');
+    end else
+    begin
+      AddAsyncStyle(Result, 'visibility: hidden;');
+      AContext.WebApplication.CallBackResponse.AddJavaScriptToExecute(
+            'IWTop().document.all["'+HTMLName+'_locker"].style.visibility = "hidden";');
+    end;
+
+    //don't rerender width and height
+    FIWControlImplementation.RenderAsyncCommonProperties(AContext, Result, [acpEnabled..acpAlignment] - [acpWidth, acpHeight]);
+
   except
     FreeAndNil(Result);
-  end;
+  end;}
 end;
 
-procedure TArcIWDlgPopupRegion.RenderAsyncComponents(
-  AContext: TIWContainerContext; APageContext: TIWBasePageContext);
-begin
-// todo?
-end;
 {$ENDIF}
 
 procedure TArcIWDlgPopupRegion.RenderComponents(AContainerContext: TIWContainerContext; APageContext: TIWBasePageContext);
@@ -1380,20 +1398,8 @@ end;
 
 function TArcIWDlgPopupRegion.RenderStyle(
   AComponentContext: TIWBaseHTMLComponentContext): string;
-var
-  intf: IIWHTML40Container;
 begin
   result := FIWControlImplementation.RenderStyle(AComponentContext);
-  if (Parent <> nil) then
-  begin
-    intf := HTML40ContainerInterface(Parent);
-    if (intf <> nil) and (intf.get_LayoutMgr <> nil) and (intf.get_LayoutMgr.Enabled) then
-    begin
-      // Then the popupregion is in an active template and must override the relative positioning
-      Result := FastReplace(Result,'relative','absolute;left:50%;top:50%;margin-left:-'+IntToStr(Width div 2)+'px;margin-top:-'+IntToStr(Height div 2)+'px;');
-    end;
-  end;
-  
 end;
 
 function TArcIWDlgPopupRegion.RequiresRefresh: Boolean;
@@ -1448,6 +1454,12 @@ procedure TArcIWDlgPopupRegion.AddAsyncStyle(ATag: TIWXMLTag; AStyle: string);
 begin
   FIWControlImplementation.AddAsyncStyle(ATag, AStyle);
 end;
+{$ENDIF}
+
+function TArcIWDlgPopupRegion.get_Css: string;
+begin
+  Result := FIWControlImplementation.getCss;
+end;
 
 function TArcIWDlgPopupRegion.get_StyleRenderOptions: TIWStyleRenderOptions;
 begin
@@ -1457,13 +1469,6 @@ end;
 procedure TArcIWDlgPopupRegion.set_StyleRenderOptions(AValue: TIWStyleRenderOptions);
 begin
   FIWControlImplementation.GetStyleRenderOptions.Assign(AValue);
-end;
-
-{$ENDIF}
-
-function TArcIWDlgPopupRegion.get_Css: string;
-begin
-  Result := FIWControlImplementation.getCss;
 end;
 
 procedure TArcIWDlgPopupRegion.AddFreeNotifier(AObject: TObject);
