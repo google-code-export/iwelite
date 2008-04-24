@@ -28,6 +28,9 @@ unit ArcIWPageFileUpload;
 
 interface
 
+{$I IntrawebVersion.inc}
+
+{$IFDEF D7Plus}
 uses
   {$IFDEF VSNET}System.ComponentModel, System.Drawing, {$ENDIF}
   {$IFDEF VSNET}
@@ -41,7 +44,7 @@ uses
   {$ENDIF}
   {$IFDEF Linux}QControls, {$ELSE}Controls, {$ENDIF}
   {$ENDIF}
-  {$IFDEF Linux}QGraphics, {$ELSE}Graphics, {$ENDIF} ArcIWEliteResources,
+  {$IFDEF Linux}QGraphics, {$ELSE}Graphics, {$ENDIF} ArcIWEliteResources, ArcD5Fix,
   IWTypes, IWHTMLTag, IWControl, IWScriptEvents, IWRenderContext, IWBaseInterfaces, SyncObjs, IWServer,
   IWColor, IWCompButton, IWFileReference, IWGLobal, IWFont, IWForm, IWServerControllerBase, HTTPApp;
 
@@ -124,12 +127,14 @@ type
   published
     property PageFileUpload : TArcIWPageFileUpload read FPageFileUpload write SetPageFileUpload;
   end;
-
+{$ENDIF}
 implementation
+{$IFDEF D7Plus}
 
 
-
-uses DateUtils, IWBaseHTMLControl;
+uses
+  DateUtils,
+  IWBaseHTMLControl;
 
 var
   _CatcherRefCount : integer;
@@ -635,5 +640,6 @@ finalization
   _RIDCS.Free;
   _RIDListCS.Free;
   _RIDList.Free
+{$ENDIF}
 
 end.

@@ -37,7 +37,7 @@ interface
 uses
   Classes,
   Windows, IWContainerLayout, IWRenderContext, IWTypes,
-  IWStreams, IWUtils,
+  IWStreams, IWUtils, ArcD5Fix,
   IWBaseInterfaces, IWBaseRenderContext, IWBaseHTMLInterfaces, IWMarkupLanguageTag,
   IWHTML40Interfaces, IWTemplateProcessorHTML, ArcIWControlBase,
   IWHTMLTag, Graphics, IWControl, IWScriptEvents, ArcIWControlCommon,
