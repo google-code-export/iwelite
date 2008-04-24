@@ -99,15 +99,18 @@ end;
 
 procedure SetLogApplication(AppName : string);
 begin
-  with TRegistry.Create do
   try
-    RootKey := HKEY_LOCAL_MACHINE;
-    OpenKey('\System\CurrentControlSet\Services\EventLog\Application\'+AppName,True);
-    WriteString('EventMessageFile',DLLFileName);
-  finally
-    free;
+    with TRegistry.Create do
+    try
+      RootKey := HKEY_LOCAL_MACHINE;
+      OpenKey('\System\CurrentControlSet\Services\EventLog\Application\'+AppName,True);
+      WriteString('EventMessageFile',DLLFileName);
+    finally
+      free;
+    end;
+    LogApplicationName := AppName;
+  except
   end;
-  LogApplicationName := AppName;
 end;
 
 procedure LogEvent(LogName : TLogName; MsgType : TMsgType; Text : string; Category : integer=0; EventID : integer=0);

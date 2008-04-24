@@ -539,6 +539,9 @@ function TArcIWStringGridTreeContent.FindItemInRow(Row: integer): TArcIWTreeItem
   function FindItemIn(List : TArcIWTreeItems; Row : integer) : TArcIWTreeItem;
   var
     i : integer;
+begin
+  Result := nil;
+  for i := 0 to ItemList.Count-1 do
   begin
     Result := nil;
     for i := 0 to List.Count-1 do
