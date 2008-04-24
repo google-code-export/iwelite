@@ -26,8 +26,8 @@
 
 package IWEliteSuite_90_Delphi2007w32;
 
-{$R *.RES}
-{$ALIGN ON}
+{$R *.res}
+{$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
 {$DEBUGINFO ON}
@@ -53,8 +53,14 @@ package IWEliteSuite_90_Delphi2007w32;
 {$IMPLICITBUILD OFF}
 
 requires
-  rtl,Intraweb_90_100,
-  IntrawebDB_90_100;
+  rtl,
+  Intraweb_90_100,
+  IntrawebDB_90_100,
+  vcl,
+  vcljpg,
+  vclimg,
+  vclx,
+  inet;
 
 contains
   ArcD5Fix in 'ArcD5Fix.pas',
@@ -140,7 +146,9 @@ contains
   uAppDlgSearchReplaceForm in 'uAppDlgSearchReplaceForm.pas',
   uLoginManager in 'uLoginManager.pas',
   uSMCommon in 'uSMCommon.pas',
-  uStatisticFile in 'uStatisticFile.pas';
+  uStatisticFile in 'uStatisticFile.pas',
+  ArcIWDateLabel in 'ArcIWDateLabel.pas',
+  ArcIWTabRegion in 'ArcIWTabRegion.pas';
 
 end.
 
