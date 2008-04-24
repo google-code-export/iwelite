@@ -28,6 +28,8 @@ unit ArcIWGraphsReg;
 
 interface
 
+{$I IntrawebVersion.inc}
+
 uses {$IFDEF D7Plus}DesignIntf, {$ELSE} DsgnIntf, {$ENDIF}SysUtils, Classes, ArcIWGraphsBar, ArcIWFusionChart, IWColor, IWDsnColor;
 
 procedure Register;
