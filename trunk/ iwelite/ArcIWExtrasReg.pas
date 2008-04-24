@@ -37,7 +37,7 @@ implementation
 
 procedure Register;
 begin
-  RegisterComponents('IWES Visual',[TArcIWCheckListBox, TArcIWPageFileUpload, TArcIWPageFileUploadButton]);
+  RegisterComponents('IWES Visual',[TArcIWCheckListBox {$IFDEF D7Plus}, TArcIWPageFileUpload, TArcIWPageFileUploadButton {$ENDIF}]);
   IWRegisterPaintHandler('TArcIWCheckListBox', TIWPaintHandlerListBox);
   IWRegisterPaintHandler('TArcIWPageFileUploadButton', TIWPaintHandlerButton);
   //IWRegisterPaintHandler('TArcIWPageFileUpload', TIWPaintHandlerEdit);
