@@ -1,29 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-// 
-// The MIT License
-// 
-// Copyright (c) 2008 by Arcana Technologies Incorporated
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// 
-////////////////////////////////////////////////////////////////////////////////
-
 unit ArcIWTemplateProcessor7;
 
 interface
@@ -33,6 +7,20 @@ interface
 {$IFNDEF INTRAWEB72}
   ERROR: This unit is designed to work only with IW 7.2 and above.
 {$ENDIF}
+{History
+
+02-July-2008 Russell Weetch
+Added 
+- Published property OnGetTemplateDir: TArcIWGetTemplateDir read FOnGetTemplateDir write FOnGetTemplateDir;
+  enables developer to override the default template directory - usesful for multi lingual sets of templates
+- Public property PassNumber: integer 
+  returns the pass number (1 or 2) only meaningful if UseTwoPassRender is True
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+}
+
+
 
 uses
   Classes,
@@ -115,9 +103,15 @@ type
   TArcIWBeforeRenderTagEvent = procedure(Sender : TObject; TagName : string; Params : TStringList; var DoRender : boolean) of object;
   TArcIWAfterRenderTagEvent = procedure(Sender : TObject; TagName : string; Params : TStringList) of object;
   TArcIWOnFullUnknownTagEvent = procedure(const AName: string; Params: TStrings; var VValue: string) of object;
+  //added by Russell Weetch 02-July-2008
+  TArcIWGetTemplateDir = procedure(Sender: TObject; const IsMaster: boolean; var TemplateDir: string) of object;
   TArcIWTemplateProcessor = class(TIWTemplateProcessorHTML)
+
   private
     FOnNewControl: TArcIWNewControlEvent;
+    //added by Russell Weetch 02-July-2008
+    FPassNumber: integer;
+    //end added by Russell Weetch 02-July-2008
   protected
     FUseTwoPassRender: boolean;
     FCacheTemplate: boolean;
@@ -127,7 +121,7 @@ type
     FSSIOptions: TSSIOptions;
     FOnAfterRenderTag: TArcIWAfterRenderTagEvent;
     FOnBeforeRenderTag: TArcIWBeforeRenderTagEvent;
-    AlreadyProcessedTemplate : boolean;  
+    AlreadyProcessedTemplate : boolean;
     //
     FUseMasterTemplate: boolean;
     FMasterTemplate: string;
@@ -135,6 +129,12 @@ type
     FCacheUpdated: TDateTime;
     FOnFullUnknownTag: TArcIWOnFullUnknownTagEvent;
     FCachedTemplate: TMemoryStream;
+
+    //added by Russell Weetch 02-July-2008
+    FOnGetTemplateDir: TArcIWGetTemplateDir;
+    function ArcTemplatePathName: string;
+    //end added by Russell Weetch 02-July-2008
+
     function GetMasterTemplate: string;
     function DoFullUnknownTag(const AName: string; Params: TStrings): string; virtual;
     //
@@ -153,6 +153,9 @@ type
       APageContext: TIWBaseHTMLPageContext; AControl: IIWBaseHTMLComponent); override;
     procedure Process( AStream : TIWRenderStream;
       AContainerContext: TIWContainerContext; APageContext: TIWBasePageContext); override;
+    //added by Russell Weetch 02-July-2008
+    property PassNumber: integer read FPassNumber;
+    //end Added by Russell Weetch 02-July-2008      
   published
     property SSIOptions : TSSIOptions read FSSIOptions write SetSSIOptions;
     property OnBeforeRenderTag : TArcIWBeforeRenderTagEvent read FOnBeforeRenderTag write FOnBeforeRenderTag;
@@ -165,6 +168,9 @@ type
     property UseMasterTemplate: boolean read FUseMasterTemplate write FUseMasterTemplate;
     property OnFullUnknownTag: TArcIWOnFullUnknownTagEvent read FOnFullUnknownTag write FOnFullUnknownTag;
     property CacheLimit: Integer read FCacheLimit write FCacheLimit;
+    //added by Russell Weetch 02-July-2008
+    property OnGetTemplateDir: TArcIWGetTemplateDir read FOnGetTemplateDir write FOnGetTemplateDir;
+    //end added by Russell Weetch 02-July-2008
   end;
 
 implementation
@@ -284,6 +290,25 @@ begin
 end;
 
 { TArcIWTemplateProcessor }
+//added by Russell Weetch 02-July-2008
+function TArcIWTemplateProcessor.ArcTemplatePathName: string;
+var
+ aTemplateDir: string;
+begin
+  result := TemplatePathname;
+  aTemplateDir := GServerController.TemplateDir;
+  if assigned(FOnGetTemplateDir) then
+  begin
+     FOnGetTemplateDir(self, False, aTemplateDir);
+     if (aTemplateDir <> GServerController.TemplateDir) then
+     begin
+        result := copy(result, length(GServerController.TemplateDir) + 1, length(result));
+        result := IncludeTrailingBackslash(aTemplateDir) + result;
+     end;
+  end;
+
+end;
+//end added by Russell Weetch 02-July-2008
 
 constructor TArcIWTemplateProcessor.Create(AOwner: TComponent);
 begin
@@ -330,6 +355,10 @@ begin
 end;
 
 function TArcIWTemplateProcessor.GetMasterTemplate: string;
+var
+  //added by Russell Weetch 02-July-2008
+  aTemplateDir: string;
+  //end added by Russell Weetch 02-July-2008
 begin
   result := '';
   if HTML40FormInterface(Container.InterfaceInstance)<>nil then begin
@@ -337,7 +366,16 @@ begin
         exit;
      result := FMasterTemplate;
      if (result <> '') then begin
-       result := GServerController.TemplateDir + result;
+
+       //added by Russell Weetch 02-July-2008
+       aTemplateDir := GServerController.TemplateDir;
+       if assigned(FOnGetTemplateDir) then
+          FOnGetTemplateDir(self, True, aTemplateDir);
+       result := IncludeTrailingBackslash(aTemplateDir) + result;
+       //end added by Russell Weetch 02-July-2008
+       //removed by Russell Weetch 02-July-2008
+         //result := GServerController.TemplateDir + result;
+	   //end removed by Russell Weetch 02-July-2008
        if not FileExists(result) then
           result := '';
      end;
@@ -345,9 +383,17 @@ begin
      if result = '' then begin
         result := GGetWebApplicationThreadVar.ActiveMasterTemplate;
         if result <> '' then begin
-           result := GServerController.TemplateDir + result;
-        if not FileExists(result) then
-           result := '';
+          //added by Russell Weetch 02-July-2008
+          aTemplateDir := GServerController.TemplateDir;
+          if assigned(FOnGetTemplateDir) then
+             FOnGetTemplateDir(self, True, aTemplateDir);
+          result := IncludeTrailingBackslash(aTemplateDir) + result;
+          //end added by Russell Weetch 02-July-2008
+		  //removed by Russell Weetch 02-July-2008
+            //result := GServerController.TemplateDir + result;
+		  //end removed by Russell Weetch 02-July-2008
+          if not FileExists(result) then
+             result := '';
         end;
      end;
   end;
@@ -512,10 +558,10 @@ var
       rs := TIWRenderStream.Create;
       try
         APageContext.BodyTag.Render(rs);
-        APageContext.FormTag.ClosingTag := cbTrue;
-        rs.WriteString('{/FORM\}');
         if MasterFormTag then
         begin
+          APageContext.FormTag.ClosingTag := cbTrue;
+          rs.WriteString('{/FORM\}');
           tagTmp := TIWHTMLTag.CreateHTMLTag('form',cbFalse);
           try
             tagTmp.AddStringParam('onSubmit','return FormDefaultSubmit();');
@@ -524,7 +570,9 @@ var
           finally
             tagTmp.Free;
           end;
-        end;
+        end
+        else
+          APageContext.FormTag.ClosingTag := cbFalse;
         if not bHeadWritten then
         begin
           Tag := '<HEAD></HEAD>';
@@ -642,6 +690,10 @@ var
 begin
   if (not UseTwoPassRender) and (Pass = 2) then
     exit;
+ //added by Russell Weetch 02-July-2008
+   FPassNumber := Pass;
+ //end added by Russell Weetch 02-July-2008
+
   if (Pass = 2) and Assigned(aPageContext.WebApplication.ActiveForm) then
   begin
     TIWFormHack(aPageContext.WebApplication.ActiveForm).ClearRealTabOrders;
@@ -696,6 +748,9 @@ var
   fsTemplate : TStream;
   LMasterSrc: TStream;
   masterFileName: TFileName;
+  //added by Russell Weetch 02-July-2008
+  templateFileName: TFileName;
+  //end added by Russell Weetch 02-July-2008
 begin
   if FCacheTemplate and (FCachedTemplate.Size > 0) and
      ((FCacheLimit = 0) or
@@ -715,14 +770,26 @@ begin
     masterFileName := GetMasterTemplate; //needs a $body tag
                                          //page templates need to be std html <html>...</html>
 
-    if FileExists(TemplatePathname) then
+    //added by Russell Weetch 02-July-2008
+    templateFileName := ArcTemplatePathName;
+    if FileExists(templateFileName) then
     begin
       fsTemplate := TMemoryStream.Create;
-      TMemoryStream(fsTemplate).LoadFromFile(TemplatePathname);
+      TMemoryStream(fsTemplate).LoadFromFile(TemplateFileName);
       try
         if Assigned(FOnBeforeProcess) then begin
           OnBeforeProcess(fsTemplate);
         end;
+    //end added by Russell Weetch 02-July-2008
+
+//    if FileExists(TemplatePathname) then
+//    begin
+//      fsTemplate := TMemoryStream.Create;
+//      TMemoryStream(fsTemplate).LoadFromFile(TemplatePathname);
+//      try
+//        if Assigned(FOnBeforeProcess) then begin
+//          OnBeforeProcess(fsTemplate);
+//        end;
 
         if masterFileName <> '' then
         begin
