@@ -249,7 +249,6 @@ type
     procedure SetSelectedDataRow(const Value: Integer); override;
     procedure MaskTagStyle(ASender: TObject; ATag: TIWHTMLTag);
     function RecNo(ds: TDataset): integer; virtual;
-    procedure Loaded; override;
   public
     destructor Destroy; override;
     constructor Create(AOwner: TComponent); override;
@@ -396,6 +395,7 @@ begin
   FDataFields := TDataFieldsCollection.Create(Self);
   FDataFields.Content := Self;
   FDatasetState := dsBrowse;
+  FOkToRefresh := True;
 end;
 
 destructor TArcIWStringGridDatasetContent.Destroy;
@@ -592,7 +592,6 @@ end;
 procedure TArcIWStringGridDatasetContent.Delete;
 var
   ds: TDataset;
-  iSel: integer;
 begin
   if (DatasetState = dsInsert) then
   begin
@@ -2399,13 +2398,6 @@ begin
   ATag.AddStringParam('style', sStyle);
 end;
 
-
-procedure TArcIWStringGridDatasetContent.Loaded;
-begin
-  inherited;
-  FOkToRefresh := True;
-end;
-
 procedure TArcIWStringGridDatasetContent.ForcedCancel;
 begin
   FAvoidReturnToEditMode := True;
@@ -2447,7 +2439,6 @@ procedure TDataFieldItem.BuildEditor(List: TList; Row: integer; var Ctrl: TIWBas
 var
   bFreeControl: boolean;
   intf: IIWBaseComponent;
-  intfc : IIWBaseControl;
 begin
   ctrl := nil;
   if (FReadOnly and (not AlwaysRenderControl)) then

@@ -313,6 +313,7 @@ type
     FScrollToSelectedCell: boolean;
     FScrollToSelectedRow: boolean;
     FOnCaptionButtonClick: TCaptionButtonClickEvent;
+    FAfterCaptionButtonClick: TCaptionButtonClickEvent;
     FButtonBarHeight: integer;
     FStyleControlBar: TArcGridStyle;
     FControlBarAboveHeader: boolean;
@@ -481,6 +482,7 @@ type
     property OnCellData: TArcCellDataEvent read FOnCellData write FOnCellData;
     property OnRowClick: TRowClickEvent read FOnRowClick write FOnRowClick;
     property OnCaptionButtonClick: TCaptionButtonClickEvent read FOnCaptionButtonClick write FOnCaptionButtonClick;
+    property AfterCaptionButtonClick: TCaptionButtonClickEvent read FAfterCaptionButtonClick write FAfterCaptionButtonClick;
     property DetailVisible: boolean read FDetailVisible write FDetailVisible;
     property RowHeight: integer read FRowHeight write FRowHeight;
     property OnOverrideCellStyle: TArcOverrideStyle read FOnOverrideCellStyle write FOnOverrideCellStyle;
@@ -1708,6 +1710,9 @@ begin
             cbtRefresh: FContent.Refresh;
           end;
         end;
+
+        if Assigned(FAfterCaptionButtonClick) then
+          FAfterCaptionButtonClick(Self, bt);
 
       end else
         if sType = '@' then
@@ -3310,7 +3315,7 @@ begin
         '  if (ConfirmString != "") {' + DebugEOL +
         '    if (!confirm(ConfirmString)) { return false; }' + DebugEOL +
         '  }' + DebugEOL +
-        '  '+HTMLName+'_Submit("' + HTMLName + '","b"+ButtonType);' + DebugEOL +
+        '  '+HTMLName+'_Submit("b"+ButtonType);' + DebugEOL +
         '}' + DebugEOL;
     end;
 
