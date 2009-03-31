@@ -31,8 +31,14 @@ interface
 {$I IntraWebVersion.inc}
 
 uses
-  SysUtils, Classes, IniFiles, IWForm, ArcIWControlCommon, ArcIWControlBase,
-  ArcFastStrings {$IFNDEF INTRAWEB5}, IWColor{$ENDIF};
+  SysUtils, Classes, IniFiles, IWForm,
+{$IFNDEF INTRAWEB5} IWColor,{$ENDIF}
+{$IFDEF FASTSTRINGS}
+  ArcFastStrings,
+{$ELSE}
+  ArcStrings,
+{$ENDIF}
+ArcIWControlCommon, ArcIWControlBase;
 
 type
   TArcRuntimeConfig = class(TComponent)

@@ -40,8 +40,12 @@ uses
 {$ELSE}
   System.Text, IWNETJpeg,
 {$ENDIF}
-  ArcIWGridCommon, IWColor, Graphics, ArcIWCustomGrid, IWForm, IWApplication,
-  ArcFastStrings;
+{$IFDEF FASTSTRINGS}
+  ArcFastStrings,
+{$ELSE}
+  ArcStrings,
+{$ENDIF}
+  ArcIWGridCommon, IWColor, Graphics, ArcIWCustomGrid, IWForm, IWApplication;
 
 type
 {$IFDEF INTRAWEB51}
@@ -473,7 +477,7 @@ end;
 
 {$IFNDEF CLR}
 
-procedure StrResetLength(var S: AnsiString);
+procedure StrResetLength(var S: String);
 begin
   SetLength(S, StrLen(PChar(S)));
 end;

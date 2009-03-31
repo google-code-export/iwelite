@@ -10,10 +10,10 @@ interface
 {History
 
 02-July-2008 Russell Weetch
-Added 
+Added
 - Published property OnGetTemplateDir: TArcIWGetTemplateDir read FOnGetTemplateDir write FOnGetTemplateDir;
   enables developer to override the default template directory - usesful for multi lingual sets of templates
-- Public property PassNumber: integer 
+- Public property PassNumber: integer
   returns the pass number (1 or 2) only meaningful if UseTwoPassRender is True
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -38,12 +38,13 @@ uses
   IWCompCheckbox, IWCompEdit, IWCompLabel, IWCompListbox, IWCompMemo, IWCompText,
   IWGlobal, IWCompButton, IWCompDynamicChart, IWCompDynamicChartLegend,
   IWCompRectangle, IWCompFlash, IWKlooch,
-  IWDBExtCtrls, IWDBStdCtrls, IWDBGrids, IWServerControllerBase, IWClientSideDataset,
+  IWDBExtCtrls, IWDBStdCtrls, IWServerControllerBase, IWClientSideDataset,
   IWClientSideDatasetBase, IWContainer,
   IWExtCtrls, IWHTMLControls, IWAppForm, IWGrids, IWProducer, IWFileReference,
   IWModuleController, IWClientSideDatasetDBLink,
   IWForm, IWTreeview, IWPageForm, IWDynGrid, IWCompMenu,
   IWStandAloneServer, IWCSStdCtrls,
+  IWDBGrids,
   IWLayoutMgrHTML, ArcPersistentStream;
 
 type
@@ -181,7 +182,13 @@ Uses
   Variants,
   {$ENDIF}
   InCoderMIME, IWApplication, HTTPApp, IWTemplateProcessing, SWStrings,
-  SWSystem, {$IFNDEF VER130}DateUtils,{$ENDIF} ArcFastStrings, IWBaseContainerLayout, TypInfo,
+  SWSystem, {$IFNDEF VER130}DateUtils,{$ENDIF}
+{$IFDEF FASTSTRINGS}
+  ArcFastStrings,
+{$ELSE}
+  ArcStrings,
+{$ENDIF}
+  IWBaseContainerLayout, TypInfo,
   InCoder;
 
 function MimeDecodeString(str : string) : string;
@@ -1364,7 +1371,7 @@ initialization
       TIWHRule, TIWImage, TIWImageFile, TIWList, TIWLabel, TIWListBox, TIWLink,
       TIWMemo, TIWMenu, TIWRadioGroup, TIWRectangle, TIWRegion, TIWText,
       TIWTimer, TIWGrid, TIWTreeView, TIWURL, TIWDBCheckBox, TIWDBComboBox,
-      TIWDBEdit, TIWDBGrid, TIWDBImage, TIWDBLabel, TIWDBListBox,
+      TIWDBEdit, TIWDBImage, TIWDBLabel, TIWDBListBox,
       TIWDBLookupListBox, TIWDBLookupComboBox, TIWDBFile, TIWDBMemo,
       TIWDBNavigator, TIWDBText, TIWCSLabel, TIWCSNavigator, TIWDynamicChart,
       TIWDynamicChartLegend, TIWDynGrid, TIWTemplateProcessorHTML,
@@ -1377,7 +1384,7 @@ initialization
       TIWURL32, TIWGrid32, TIWMemo32, TIWText32, TIWRectangle32, TIWCheckBox32,
       TIWHyperLink32, TIWDBEdit32, TIWDBCheckBox32, TIWDBComboBox32, TIWDBLabel32,
       TIWDBListBox32, TIWDBLookupComboBox32, TIWDBLookupListBox32, TIWDBMemo32,
-      TIWDBText32, TIWDBImage32, TIWDBRadioGroup32
+      TIWDBText32, TIWDBImage32, TIWDBRadioGroup32, TIWDBGrid
    ]);
 
 

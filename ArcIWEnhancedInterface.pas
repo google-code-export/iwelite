@@ -34,8 +34,7 @@ interface
 uses SysUtils, Classes, IWColor, IWFont, IWHTMLTag, IWControl, Graphics,
   IWTypes, Controls, IWFileReference
   {$IFNDEF INTRAWEB51},IWBaseControl, IWRenderContext{$ENDIF}
-  {$IFDEF INTRAWEB70}, IWBaseInterfaces, IWMarkupLanguageTag, IWLayoutMgrForm {$ENDIF}
-  , IWKlooch;
+  {$IFDEF INTRAWEB70}, IWBaseInterfaces, IWMarkupLanguageTag, IWLayoutMgrForm {$ENDIF};
 
 
 type
@@ -397,7 +396,7 @@ function TArcIWEnhancer.Render(AContext: TIWBaseHTMLComponentContext; InheritedR
       case {$IFDEF INTRAWEB51}FComp.WebApplication.{$ELSE}AContext.{$ENDIF}Browser of
         brIE:
           begin
-            s := lowercase({$IFDEF INTRAWEB51}FComp.{$ELSE}AContext.{$ENDIF}WebApplication.Request.UserAgent);
+            s := lowercase(String({$IFDEF INTRAWEB51}FComp.{$ELSE}AContext.{$ENDIF}WebApplication.Request.UserAgent));
             if Pos('windows nt 5.1',s)>0 then
               iTopOffset := FNotEditableOffsets.IE_XP
             else

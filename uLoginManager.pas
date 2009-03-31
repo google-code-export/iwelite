@@ -78,16 +78,16 @@ type
 
   TLoginItem = class(TCollectionItem)
   private
-    FPassword: string;
+    FPassword: AnsiString;
     FUsername: string;
     FSecurity: TSecurityItems;
-    FUserDetails: string;
+    FUserDetails: AnsiString;
     function GetPassword: string;
     function GetUsername: string;
-    procedure SetPassword(const Value: string);
+    procedure SetPassword(const Value: String);
     procedure SetUsername(const Value: string);
     function GetUserDetails: string;
-    procedure SetUserDetails(const Value: string);
+    procedure SetUserDetails(const Value: String);
   protected
     procedure AssignTo(Dest: TPersistent); override;
   public
@@ -95,12 +95,12 @@ type
     property Username : string read GetUsername write SetUsername;
     property Password : string read GetPassword write SetPassword;
     destructor Destroy; override;
-    property UserDetails : string read GetUserDetails write SetUserDetails;
+    property UserDetails : String read GetUserDetails write SetUserDetails;
   published
     property _Username : string read FUsername write FUsername;
-    property _Password : string read FPassword write FPassword;
+    property _Password : AnsiString read FPassword write FPassword;
     property Security : TSecurityItems read FSecurity write FSecurity;
-    property _UserDetails : string read FUserDetails write FUserDetails;
+    property _UserDetails : AnsiString read FUserDetails write FUserDetails;
   end;
 
   TLoginManagerFile = class;
@@ -155,10 +155,10 @@ type
     property OnSaveFile : TLoginManagerFileEvent read FOnSaveFile write FOnSaveFile;
   end;
 
-function Encrypt( S: String; Key: Word=27469): String;
-function Decrypt(S: String; Key: Word=27469): String;
-function EncryptAsHex(S: String; Key : Word = 8622): string;
-function DecryptFromHex(CryptHexStr: String; Key : Word = 8622): string;
+function Encrypt( S: String; Key: Word=27469): AnsiString;
+function Decrypt(S: AnsiString; Key: Word=27469): String;
+function EncryptAsHex(S: String; Key : Word = 8622): AnsiString;
+function DecryptFromHex(CryptHexStr: AnsiString; Key : Word = 8622): string;
 
 implementation
 
@@ -192,48 +192,82 @@ begin
   end;
 end;
 
-function DecryptFromHex(CryptHexStr: String; Key : Word = 8622): string;
+function DecryptFromHex(CryptHexStr: AnsiString; Key : Word = 8622): string;
 var
   zLen : integer;
 begin
     zLen := length(CryptHexStr) div 2;
     setLength(result, zLen);
-    HexToBin(@CryptHexStr[1], @result[1], zLen);
+    HexToBin(PAnsiChar(@CryptHexStr[1]), @result[1], zLen);
     result := Decrypt(result, 8622);
 end;
 
-function EncryptAsHex(S: String; Key : Word = 8622): string;
+function EncryptAsHex(S: String; Key : Word = 8622): AnsiString;
 var
-  zBuf : string;
+  zBuf : AnsiString;
   zLen : integer;
+  LEncrypted: string;
 begin
-    result := Encrypt(S, 8622);
-    zLen := length(result);
+    LEncrypted := Encrypt(S, 8622);
+    zLen := length(LEncrypted);
     setLength(zBuf, zLen*2);
-    binToHex(@result[1], @zBuf[1], zLen); // so we can see the string as text
+    binToHex(@LEncrypted[1], PAnsiChar(@zBuf[1]), zLen); // so we can see the string as text
     result := lowerCase(zBuf);
 end;
 
-function Encrypt( S: String; Key: Word=27469): String;
-var  I: byte;
-begin
-   s:= RandomStr(PRE)+s+RandomStr(POST);
+function Encrypt( S: String; Key: Word=27469): AnsiString;
+var
+  I: byte;
+  {$IFDEF UNICODE}
+  b: TBytes;
+  {$ENDIF}
 
+begin
+  s:= RandomStr(PRE)+s+RandomStr(POST);
+  {$IFDEF UNICODE}
+  b:= TEncoding.Default.GetBytes(s);
+
+  setLength(result, Length(b));
+  for I := 1 to Length(b) do
+  begin
+    Result[I] := AnsiChar(b[I] xor (Key shr 8));
+    Key := (byte(Result[I]) + Key) * C1 + C2;
+  end;
+  {$ELSE}
   setLength(result, Length(S));
   for I := 1 to Length(S) do
   begin
     Result[I] := char(byte(S[I]) xor (Key shr 8));
     Key := (byte(Result[I]) + Key) * C1 + C2;
   end;
+
+  {$ENDIF}
 end;
 
-function Decrypt(S: String; Key: Word=27469): String;
+function Decrypt(S: AnsiString; Key: Word=27469): String;
 var  I: byte;
   zLen : integer;
+ {$IFDEF UNICODE}
+  b: TBytes;
+ {$ENDIF}
+
 begin
   zLen := Length(S)-(PRE+POST);
   if zLen < 1 then
     exit;
+
+{$IFDEF UNICODE}
+  setLength(b, zLen);
+  for I := 1 to PRE do
+    Key := (byte(S[I]) + Key) * C1 + C2; //Get starting Key, need to walk S
+
+  for I := 1 to zLen do
+  begin
+    b[I] := byte(S[I+PRE]) xor (Key shr 8);
+    Key := (byte(S[I+PRE]) + Key) * C1 + C2;
+  end;
+  result := TEncoding.Default.GetString(b);
+{$ELSE}
   setLength(result, zLen);
   for I := 1 to PRE do
     Key := (byte(S[I]) + Key) * C1 + C2; //Get starting Key, need to walk S
@@ -243,6 +277,7 @@ begin
     Result[I] := char(byte(S[I+PRE]) xor (Key shr 8));
     Key := (byte(S[I+PRE]) + Key) * C1 + C2;
   end;
+{$ENDIF}
 end;
 
 { TLoginManagerFile }
@@ -571,12 +606,12 @@ begin
   Result := DecryptFromHex(FUsername);
 end;
 
-procedure TLoginItem.SetPassword(const Value: string);
+procedure TLoginItem.SetPassword(const Value: String);
 begin
   FPassword := EncryptAsHex(Value);
 end;
 
-procedure TLoginItem.SetUserDetails(const Value: string);
+procedure TLoginItem.SetUserDetails(const Value: String);
 begin
   FUserDetails := EncryptAsHex(Value);
 end;

@@ -27,16 +27,11 @@
 unit ArcIWControlBase;
 
 interface
-{$I Eval.inc}
-
-uses IWKlooch;
 
 implementation
 
 initialization
-{$IFDEF EVAL}
-   GLicense.ThirdPartyHook('Arcana Control Pack Evaluation',True);
-{$ENDIF}
-
+//License Information
+//No longer required
 end.
  

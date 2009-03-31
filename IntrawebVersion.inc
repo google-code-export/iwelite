@@ -3,8 +3,8 @@
 {.$DEFINE INTRAWEB70}
 {.$DEFINE INTRAWEB72}
 {.$DEFINE INTRAWEB80}
-{$DEFINE INTRAWEB90}
-
+{.$DEFINE INTRAWEB90}
+{$DEFINE INTRAWEB100}
 
 
 
@@ -13,8 +13,16 @@
 // not using the latest TMS menus, you may comment out this directive.
 {$DEFINE NEWTMSMENU}
 
+{$DEFINE FASTSTRINGS}
 
+{$IFDEF VER200}
+  //Faststrings have not been ported to D2009 and up. 
+  {$UNDEF FASTSTRINGS}
+{$ENDIF}
 
+{$IFDEF INTRAWEB100}
+  {$DEFINE INTRAWEB90}
+{$ENDIF}
 
 {$IFDEF INTRAWEB90}
   {$DEFINE INTRAWEB80}

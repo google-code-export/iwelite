@@ -31,7 +31,13 @@ interface
 uses
   SysUtils, Classes, ArcIWInteropController, IWBaseHTMLInterfaces, IWBaseForm,
   IWBaseHTMLComponent, IWBaseInterfaces, IWRenderContext, IWHTMLTag, IWHTML40Interfaces,
-  IWBaseRenderContext, ArcIWInteropCommon, ArcFastStrings;
+  IWBaseRenderContext,
+{$IFDEF FASTSTRINGS}
+  ArcFastStrings,
+{$ELSE}
+  ArcStrings,
+{$ENDIF}
+  ArcIWInteropCommon;
 
 type
   TArcIWInteropRenderer = class(TIWBaseHTMLComponent, IIWSubmitControl)

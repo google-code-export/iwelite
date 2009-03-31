@@ -74,16 +74,16 @@ type
     function GetPosition: Int64;
     procedure SetPosition(const Value: Int64);
     procedure SetSize(const Value: Int64);
-    function _FastCharPos(const aSource: String; const C: Char; SourceLen,
+    function _FastCharPos(const aSource: AnsiString; const C: AnsiChar; SourceLen,
       StartPos: Integer): Integer;
-    function _FastCharPosNoCase(const aSource: String; C: Char; SourceLen,
+    function _FastCharPosNoCase(const aSource: AnsiString; C: AnsiChar; SourceLen,
       StartPos: Integer): Integer;
-    function _FastPos(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
-    function _FastPosNoCase(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
-    function _FastPosBack(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
-    function _FastPosBackNoCase(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
-    procedure _MakeBMTable(Buffer: PChar; BufferLen: Integer; var JumpTable: TBMJumpTable);
-    procedure _MakeBMTableNoCase(Buffer: PChar; BufferLen: Integer; var JumpTable: TBMJumpTable);
+    function _FastPos(const aSourceString, aFindString : AnsiString; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
+    function _FastPosNoCase(const aSourceString, aFindString : AnsiString; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
+    function _FastPosBack(const aSourceString, aFindString : AnsiString; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
+    function _FastPosBackNoCase(const aSourceString, aFindString : AnsiString; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
+    procedure _MakeBMTable(Buffer: PAnsiChar; BufferLen: Integer; var JumpTable: TBMJumpTable);
+    procedure _MakeBMTableNoCase(Buffer: PAnsiChar; BufferLen: Integer; var JumpTable: TBMJumpTable);
     function _BMPos(const aSource, aFind: Pointer; const aSourceLen, aFindLen: Integer; var JumpTable: TBMJumpTable): Pointer;
     function _BMPosNoCase(const aSource, aFind: Pointer; const aSourceLen, aFindLen: Integer; var JumpTable: TBMJumpTable): Pointer;
     function GetBytes: PByteArray;
@@ -164,11 +164,11 @@ type
     procedure ReadFloat(var Value : Currency); overload; virtual;
     function ReadBoolean : Boolean; virtual;
 
-    function FindNextMatch(SubStr : string; CaseInsensitive : boolean=False;
+    function FindNextMatch(SubStr : AnsiString; CaseInsensitive : boolean=False;
       FromStart : boolean=True) : Int64; overload; virtual;
-    function FindNextMatch(c : Char; CaseInsensitive : boolean=False;
+    function FindNextMatch(c : AnsiChar; CaseInsensitive : boolean=False;
       FromStart : Boolean=True) : Int64; overload; virtual;
-    function FindPriorMatch(SubStr : string; CaseInsensitive : boolean=False;
+    function FindPriorMatch(SubStr : AnsiString; CaseInsensitive : boolean=False;
       FromEnd: boolean=True) : Int64; virtual;
 
     property Stream : TStream read FStream;
@@ -188,33 +188,33 @@ var
 
 { TPersistentStream }
 
-function TPersistentStream._FastPos(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
+function TPersistentStream._FastPos(const aSourceString, aFindString : AnsiString; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
 var
   JumpTable: TBMJumpTable;
 begin
   //If this assert failed, it is because you passed 0 for StartPos, lowest value is 1 !!
   Assert(StartPos > 0);
 
-  _MakeBMTable(PChar(aFindString), aFindLen, JumpTable);
-  Result := Integer(_BMPos(PChar(aSourceString) + (StartPos - 1), PChar(aFindString),aSourceLen - (StartPos-1), aFindLen, JumpTable));
+  _MakeBMTable(PAnsiChar(aFindString), aFindLen, JumpTable);
+  Result := Integer(_BMPos(PChar(aSourceString) + (StartPos - 1), PAnsiChar(aFindString),aSourceLen - (StartPos-1), aFindLen, JumpTable));
   if Result > 0 then
     Result := Result - Integer(@aSourceString[1]) +1;
 end;
 
-function TPersistentStream._FastPosNoCase(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
+function TPersistentStream._FastPosNoCase(const aSourceString, aFindString : AnsiString; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
 var
   JumpTable: TBMJumpTable;
 begin
   //If this assert failed, it is because you passed 0 for StartPos, lowest value is 1 !!
   Assert(StartPos > 0);
 
-  _MakeBMTableNoCase(PChar(AFindString), aFindLen, JumpTable);
-  Result := Integer(_BMPosNoCase(PChar(aSourceString) + (StartPos - 1), PChar(aFindString),aSourceLen - (StartPos-1), aFindLen, JumpTable));
+  _MakeBMTableNoCase(PAnsiChar(AFindString), aFindLen, JumpTable);
+  Result := Integer(_BMPosNoCase(PAnsiChar(aSourceString) + (StartPos - 1), PAnsiChar(aFindString),aSourceLen - (StartPos-1), aFindLen, JumpTable));
   if Result > 0 then
     Result := Result - Integer(@aSourceString[1]) +1;
 end;
 
-function TPersistentStream._FastPosBack(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
+function TPersistentStream._FastPosBack(const aSourceString, aFindString : AnsiString; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
 var
   SourceLen : Integer;
 begin
@@ -284,7 +284,7 @@ begin
 end;
 
 
-function TPersistentStream._FastPosBackNoCase(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
+function TPersistentStream._FastPosBackNoCase(const aSourceString, aFindString : AnsiString; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
 var
   SourceLen : Integer;
 begin
@@ -368,7 +368,7 @@ begin
   end;
 end;
 
-function TPersistentStream._FastCharPos(const aSource : String; const C: Char; SourceLen : Integer; StartPos : Integer) : Integer;
+function TPersistentStream._FastCharPos(const aSource : AnsiString; const C: AnsiChar; SourceLen : Integer; StartPos : Integer) : Integer;
 var
   L                           : Integer;
 begin
@@ -405,7 +405,7 @@ begin
   end;
 end;
 
-procedure TPersistentStream._MakeBMTable(Buffer: PChar; BufferLen: Integer; var JumpTable: TBMJumpTable);
+procedure TPersistentStream._MakeBMTable(Buffer: PAnsiChar; BufferLen: Integer; var JumpTable: TBMJumpTable);
 begin
   if BufferLen = 0 then raise Exception.Create('BufferLen is 0');
   asm
@@ -434,7 +434,7 @@ begin
   end;
 end;
 
-procedure TPersistentStream._MakeBMTableNoCase(Buffer: PChar; BufferLen: Integer; var JumpTable: TBMJumpTable);
+procedure TPersistentStream._MakeBMTableNoCase(Buffer: PAnsiChar; BufferLen: Integer; var JumpTable: TBMJumpTable);
 begin
   if BufferLen = 0 then raise Exception.Create('BufferLen is 0');
   asm
@@ -585,7 +585,7 @@ begin
   end;
 end;
 
-function TPersistentStream._FastCharPosNoCase(const aSource : String; C: Char; SourceLen : Integer; StartPos : Integer) : Integer;
+function TPersistentStream._FastCharPosNoCase(const aSource : AnsiString; C: AnsiChar; SourceLen : Integer; StartPos : Integer) : Integer;
 var
   L                           : Integer;
 begin
@@ -972,7 +972,7 @@ begin
   ReadInteger(Result);
 end;
 
-function TPersistentStream.FindNextMatch(SubStr: string;
+function TPersistentStream.FindNextMatch(SubStr: AnsiString;
   CaseInsensitive, FromStart : boolean) : Int64;
 begin
 //  Result := 0;
@@ -986,7 +986,7 @@ begin
     FStream.Position := Result;
 end;
 
-function TPersistentStream.FindPriorMatch(SubStr: string; CaseInsensitive,
+function TPersistentStream.FindPriorMatch(SubStr: AnsiString; CaseInsensitive,
   FromEnd: boolean): Int64;
 begin
 //  Result := 0;
@@ -1000,7 +1000,7 @@ begin
     FStream.Position := Result-1;
 end;
 
-function TPersistentStream.FindNextMatch(c: Char; CaseInsensitive,
+function TPersistentStream.FindNextMatch(c: AnsiChar; CaseInsensitive,
   FromStart: Boolean): Int64;
 begin
 //  Result := 0;
