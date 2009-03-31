@@ -75,13 +75,24 @@ type
 
 implementation
 
-uses {$IFDEF CLR} ArcFastStringsDOTNET {$ELSE} ArcFastStrings {$ENDIF},
+uses
+{$IFDEF CLR}
+  ArcFastStringsDOTNET,
+{$ELSE}
+{$IFDEF FASTSTRINGS}
+  ArcFastStrings,
+{$ELSE}
+  ArcStrings,
+{$ENDIF}
+
+{$ENDIF}
   IWContainerBorderOptions, Graphics, IWGridCommon;
 
 
 procedure TfrmDlgSearchReplace.ReplaceClick(Sender: TObject);
 begin
-  Text := FastReplace(Text,edtFind.Text,edtReplace.Text,chkCaseSensitive.Checked);  
+  Text := FastReplace(Text,edtFind.Text,edtReplace.Text,chkCaseSensitive.Checked);
+
   TCompHelper(DlgComponent).DoReplaceEvent(Text);
   Release;
 end;

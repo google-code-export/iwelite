@@ -371,6 +371,7 @@ var
   tagReg: TIWHtmlTag;
   sRegion, sBookmark: string;
 {AS}recKey: integer;
+  LBookmark: string;
 begin
   FNeedsFormTag := False;
   Result := nil;
@@ -421,7 +422,12 @@ begin
       if FDataSource.DataSet.State in [dsEdit, dsInsert] then
         FDataSource.DataSet.Cancel;
 
+{$IFDEF UNICODE}
+      //Todo: In theory we should use the Encoding as set in GServerController
+      sBookmark :=   TEncoding.Default.GetString(FDataSource.DataSet.Bookmark);
+{$ELSE}
       sBookmark := FDataSource.DataSet.Bookmark;
+{$ENDIF}
       FDataSource.DataSet.DisableControls;
       try
         FDataSource.DataSet.First;
@@ -437,20 +443,22 @@ begin
             recKey := FDataSource.DataSet.RecNo;
 {AS ---------------------------------}
 
-// {ORIG} sRegion := Self.HTMLName + 'r' + IntToStr(FDataSource.DataSet.RecNo);
-   {AS}   sRegion := Self.HTMLName + 'r' + IntToStr(recKey);
+          sRegion := Self.HTMLName + 'r' + IntToStr(recKey);
 
           iIdx := RegionList.IndexOf(sRegion);
+          {$IFDEF UNICODE}
+          LBookmark := TEncoding.Default.GetString(FDataSource.DataSet.Bookmark);
+          {$ELSE}
+          LBookmark := FDataSource.DataSet.Bookmark
+          {$ENDIF}
           if iIdx < 0 then
           begin
-
-// {ORIG}   reg := CreateClonedRegion(FDataSource.DataSet.RecNo, FDataSource.DataSet.Bookmark, sRegion);
-   {AS}     reg := CreateClonedRegion(recKey, iCnt, FDataSource.DataSet.Bookmark, sRegion);
+            reg := CreateClonedRegion(recKey, iCnt, LBookmark, sRegion);
             RegionList.AddObject(sRegion, reg);
           end else
           begin
             reg := TIWGridRegion(RegionList.Objects[iIdx]);
-            reg.FBookmark := FDataSource.Dataset.Bookmark;
+            reg.FBookmark := LBookmark;
           end;
 
           DoBeforeRenderRegion(reg);
@@ -465,7 +473,11 @@ begin
         end;
       finally
         FDataSource.DataSet.EnableControls;
+        {$IFDEF UNICODE}
+        FDataSource.DataSet.Bookmark := TEncoding.Default.GetBytes(sBookmark);
+        {$ELSE}
         FDataSource.DataSet.Bookmark := sBookmark;
+        {$ENDIF}
       end;
     end;
   end;

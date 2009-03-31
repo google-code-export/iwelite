@@ -27,7 +27,6 @@
 unit ArcIWRegionGridComponents;
 
 {$I IntraWebVersion.inc}
-{$I Eval.inc}
 
 {$IFDEF INTRAWEB51}
   ERROR: This unit is only valid for IW 7
@@ -116,11 +115,22 @@ begin
 end;
 
 procedure TArcIWRGButton.DoClick;
+var
+  LBookmark: string;
 begin
   if Region <> nil then
   begin
-    if FMoveDataset and (Grid.DataSource.DataSet.Bookmark <> Region.Bookmark) then
+    {$IFDEF UNICODE}
+    LBookmark := TEncoding.Default.GetString(Grid.DataSource.DataSet.Bookmark);
+    {$ELSE}
+    LBookmark := Grid.DataSource.DataSet.Bookmark;
+    {$ENDIF}
+    if FMoveDataset and (LBookmark <> Region.Bookmark) then
+    {$IFDEF UNICODE}
+      Grid.DataSource.DataSet.Bookmark := TEncoding.Default.GetBytes(Region.Bookmark);
+    {$ELSE}
       Grid.DataSource.DataSet.Bookmark := Region.Bookmark;
+    {$ENDIF}
   end;
   inherited;
 end;
@@ -146,8 +156,13 @@ procedure TArcIWRGLink.DoClick;
 begin
   if Region <> nil then
   begin
+    {$IFDEF UNICODE}
+    if FMoveDataset and (TEncoding.Default.GetString(Grid.DataSource.DataSet.Bookmark) <> Region.Bookmark) then
+      Grid.DataSource.DataSet.Bookmark := TEncoding.Default.GetBytes(Region.Bookmark);
+    {$ELSE}
     if FMoveDataset and (Grid.DataSource.DataSet.Bookmark <> Region.Bookmark) then
       Grid.DataSource.DataSet.Bookmark := Region.Bookmark;
+    {$ENDIF}
   end;
   inherited;
 end;
@@ -173,8 +188,13 @@ procedure TArcIWRGImage.DoClick;
 begin
   if Region <> nil then
   begin
+    {$IFDEF UNICODE}
+    if FMoveDataset and (TEncoding.Default.GetString(Grid.DataSource.DataSet.Bookmark) <> Region.Bookmark) then
+      Grid.DataSource.DataSet.Bookmark := TEncoding.Default.GetBytes(Region.Bookmark);
+    {$ELSE}
     if FMoveDataset and (Grid.DataSource.DataSet.Bookmark <> Region.Bookmark) then
       Grid.DataSource.DataSet.Bookmark := Region.Bookmark;
+    {$ENDIF}
   end;
   inherited;
 end;
@@ -200,8 +220,13 @@ procedure TArcIWRGImageFile.DoClick;
 begin
   if Region <> nil then
   begin
+    {$IFDEF UNICODE}
+    if FMoveDataset and (TEncoding.Default.GetString(Grid.DataSource.DataSet.Bookmark) <> Region.Bookmark) then
+      Grid.DataSource.DataSet.Bookmark := TEncoding.Default.GetBytes(Region.Bookmark);
+    {$ELSE}
     if FMoveDataset and (Grid.DataSource.DataSet.Bookmark <> Region.Bookmark) then
       Grid.DataSource.DataSet.Bookmark := Region.Bookmark;
+    {$ENDIF}
   end;
   inherited;
 end;

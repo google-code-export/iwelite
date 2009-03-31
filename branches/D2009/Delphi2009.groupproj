@@ -1,0 +1,48 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{99A2C617-ABFF-46C9-9178-15D78CC5496B}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="IWEliteSuite_100_Delphi2009w32.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="IWEliteSuite_100_Delphi2009w32_dsn.dproj">
+				<Dependencies>IWEliteSuite_100_Delphi2009w32.dproj</Dependencies>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="IWEliteSuite_100_Delphi2009w32">
+			<MSBuild Projects="IWEliteSuite_100_Delphi2009w32.dproj"/>
+		</Target>
+		<Target Name="IWEliteSuite_100_Delphi2009w32:Clean">
+			<MSBuild Targets="Clean" Projects="IWEliteSuite_100_Delphi2009w32.dproj"/>
+		</Target>
+		<Target Name="IWEliteSuite_100_Delphi2009w32:Make">
+			<MSBuild Targets="Make" Projects="IWEliteSuite_100_Delphi2009w32.dproj"/>
+		</Target>
+		<Target DependsOnTargets="IWEliteSuite_100_Delphi2009w32" Name="IWEliteSuite_100_Delphi2009w32_dsn">
+			<MSBuild Projects="IWEliteSuite_100_Delphi2009w32_dsn.dproj"/>
+		</Target>
+		<Target DependsOnTargets="IWEliteSuite_100_Delphi2009w32:Clean" Name="IWEliteSuite_100_Delphi2009w32_dsn:Clean">
+			<MSBuild Targets="Clean" Projects="IWEliteSuite_100_Delphi2009w32_dsn.dproj"/>
+		</Target>
+		<Target DependsOnTargets="IWEliteSuite_100_Delphi2009w32:Make" Name="IWEliteSuite_100_Delphi2009w32_dsn:Make">
+			<MSBuild Targets="Make" Projects="IWEliteSuite_100_Delphi2009w32_dsn.dproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="IWEliteSuite_100_Delphi2009w32;IWEliteSuite_100_Delphi2009w32_dsn"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="IWEliteSuite_100_Delphi2009w32:Clean;IWEliteSuite_100_Delphi2009w32_dsn:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="IWEliteSuite_100_Delphi2009w32:Make;IWEliteSuite_100_Delphi2009w32_dsn:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

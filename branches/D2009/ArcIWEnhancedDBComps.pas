@@ -32,7 +32,7 @@ interface
 
 uses
   SysUtils, Classes, IWColor, IWFont, ArcIWEnhancedInterface,
-  IWHTMLTag, IWBaseControl, IWControl, IWDBStdCtrls, IWDBExtCtrls, IWDBGrids
+  IWHTMLTag, IWBaseControl, IWControl, IWDBStdCtrls, IWDBExtCtrls
   {$IFNDEF INTRAWEB51}, IWRenderContext{$ENDIF};
 
 type

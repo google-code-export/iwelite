@@ -152,7 +152,14 @@ type
 
 implementation
 
-uses ArcD5Fix, ArcFastStrings, IWMarkupLanguageTag;
+uses
+  ArcD5Fix,
+{$IFDEF FASTSTRINGS}
+  ArcFastStrings,
+{$ELSE}
+  ArcStrings,
+{$ENDIF}
+  IWMarkupLanguageTag;
 
 {$IFDEF VER130}
 function StrToBool(s : string) : Boolean;

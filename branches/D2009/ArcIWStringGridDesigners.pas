@@ -85,7 +85,7 @@ begin
   SetLength(S, StrLen(PChar(S)));
 end;
 
-function PidlToPath(IdList: PItemIdList): string;
+function PidlToPath(IdList: PItemIdList): AnsiString;
 begin
   SetLength(Result, MAX_PATH);
   if SHGetPathFromIdList(IdList, PChar(Result)) then

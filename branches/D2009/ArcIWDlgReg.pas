@@ -30,7 +30,6 @@ interface
 
 uses SysUtils, Classes, IWKlooch;
 
-{$I Eval.inc}
 {$I IntrawebVersion.inc}
 (*
 {$R TArcIWDlgConfirmPopup.bmp}
@@ -60,11 +59,6 @@ begin
     TArcIWDlgTimeout, TArcIWDlgPrint, TArcIWDlgConfirmPopup,
     TArcIWDlgScrollableMessageBox {$IFDEF INTRAWEB70}, TArcIWDlgPopupRegion{$ENDIF}]);
 end;
-
-initialization
-  {$IFDEF EVAL}
-  GLicense.ThirdPartyHook('eval mode',True);
-  {$ENDIF}
 
 end.
  

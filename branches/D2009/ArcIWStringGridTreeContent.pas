@@ -31,7 +31,11 @@ interface
 uses SysUtils, {$IFNDEF VER130}StrUtils, Variants, {$ENDIF}
   Classes, ArcIWStringGridContent, ArcIWStringGrid, controls,
   IWBaseControl, IWCompCheckbox, IWCompEdit, IWCompMemo, IWCompButton, IWExtCtrls,
-  Graphics, TypInfo, ArcFastStrings, IWCompListbox, IWBaseInterfaces,
+  Graphics, TypInfo,
+{$IFDEF FASTSTRINGS}
+  ArcFastStrings,
+{$ENDIF}
+  IWCompListbox, IWBaseInterfaces,
   IWRenderContext, IWHTMLTag, IWTypes, IWColor, db, IWFileReference, IWServer,
   ArcIWGridCommon;
 

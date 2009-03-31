@@ -31,7 +31,7 @@ interface
 {$I IntraWebVersion.inc}
 {$I Eval.inc}
 
-uses SysUtils, Classes, Graphics, IWColor, IWFont, IWTypes, IWKlooch
+uses SysUtils, Classes, Graphics, IWColor, IWFont, IWTypes
      {$IFDEF INTRAWEB72},IWFileReference, IWRenderContext{$ENDIF};
 
 type

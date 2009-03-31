@@ -603,8 +603,16 @@ implementation
 
 
 uses IWUtils, IWGlobal, {$IFNDEF VER130}StrUtils, Math, MaskUtils, {$ENDIF}
-  {$IFDEF CLR}ArcFastStringsDOTNET{$ELSE}ArcFastStrings,
-  IWBaseForm{$ENDIF};
+{$IFDEF CLR}
+  ArcFastStringsDOTNET
+{$ELSE}
+{$IFDEF FASTSTRINGS}
+  ArcFastStrings,
+{$ELSE}
+  ArcStrings,
+{$ENDIF}
+  IWBaseForm
+{$ENDIF};
 
 function _DoCaptionButtonClick: string;
 begin

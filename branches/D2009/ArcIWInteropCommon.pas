@@ -28,16 +28,10 @@ unit ArcIWInteropCommon;
 
 interface
 
-{$I Eval.inc}
-
-uses IWKlooch;
 
 implementation
 
 initialization
-  {$IFDEF EVAL}
-    GLicense.ThirdPartyHook('Arcana IW Interop Pack',True);
-  {$ENDIF}
 
 end.
  

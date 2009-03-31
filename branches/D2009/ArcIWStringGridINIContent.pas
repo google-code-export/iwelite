@@ -30,7 +30,13 @@ interface
 
 uses SysUtils, {$IFNDEF VER130}Variants, StrUtils, {$ENDIF}Classes, ArcIWStringGridContent, ArcIWStringGrid, db, controls,
   IWBaseControl,IWCompCheckbox, IWCompEdit, IWCompMemo, IWCompButton, IWExtCtrls, IWRenderContext,
-  IniFiles, Graphics, TypInfo, ArcFastStrings, IWCompListbox, ArcIWGridCommon;
+  IniFiles, Graphics, TypInfo,
+{$IFDEF FASTSTRINGS}
+  ArcFastStrings,
+{$ELSE}
+  ArcStrings,
+{$ENDIF}
+  IWCompListbox, ArcIWGridCommon;
 
 type
   TArcIWStringGridINIContent = class;

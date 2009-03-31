@@ -217,7 +217,14 @@ type
 
 implementation
 
-uses {$IFDEF CLR}ArcFastStringsDOTNET, {$ELSE}ArcFastStrings, {$ENDIF} {$IFNDEF VER130}StrUtils, {$ENDIF}IWBaseControl, Math;
+uses
+{$IFDEF CLR}ArcFastStringsDOTNET, {$ELSE}
+{$IFDEF FASTSTRINGS}
+  ArcFastStrings,
+{$ELSE}
+  ArcStrings,
+{$ENDIF}
+{$ENDIF} {$IFNDEF VER130}StrUtils, {$ENDIF}IWBaseControl, Math;
 
 {$IFDEF VER130}
 

@@ -440,7 +440,13 @@ function GetCPUUsage : integer;
 
 implementation
 
-uses ArcFastStrings, IWResourceStrings, IWKlooch, ArcWebCommon,
+uses
+{$IFDEF FASTSTRINGS}
+  ArcFastStrings,
+{$ELSE}
+  ArcStrings,
+{$ENDIF}
+  IWResourceStrings, IWKlooch, ArcWebCommon,
   TlHelp32, psAPI, Math, IWFileReference, SWStrings {$IFNDEF VER130}, StrUtils{$ENDIF};
 
 var
@@ -1818,7 +1824,7 @@ function TArcIWServerManager.RestartIW : boolean;
     end;
   begin
     ExtractResourceFile('RestartEXE',DLLFilePath+DefaultRestartEXE);
-    WinExec(PChar('"'+DLLFilePath+DefaultRestartEXE+'" "'+DLLFileName+'" "'+ServerController.AppName+'" "'+IsService+'"'), SW_HIDE);
+    WinExec(PAnsiChar('"'+DLLFilePath+DefaultRestartEXE+'" "'+DLLFileName+'" "'+ServerController.AppName+'" "'+IsService+'"'), SW_HIDE);
   end;
   procedure RestartDSO;
   begin
@@ -2746,7 +2752,7 @@ end;
 
 procedure TAdminAppDLL.LoadEXE;
 begin
-  WinExec(PChar(FAdminLoc),SW_NORMAL);
+  WinExec(PAnsiChar(FAdminLoc),SW_NORMAL);
   Initialize(FIP,FPort);
   FServerMan.UpdateSettingsVars;
   FServerMan.UpdateLayoutVars;

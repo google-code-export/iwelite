@@ -28,16 +28,9 @@ unit ArcIWDlgBase;
 
 interface
 
-{$I Eval.inc}
-
-uses IWKlooch;
-
 implementation
 
 initialization
-{$IFDEF EVAL}
-   GLicense.ThirdPartyHook('Arcana Dialogs Pack Evaluation',True);
-{$ENDIF}
 
 end.
  

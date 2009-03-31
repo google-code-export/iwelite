@@ -73,7 +73,13 @@ type
 
 implementation
 
-uses ArcFastStrings, DateUtils;
+uses
+{$IFDEF FASTSTRINGS}
+  ArcFastStrings,
+{$ELSE}
+  ArcStrings,
+{$ENDIF}
+  DateUtils;
 
 { TArcIWDateLabel }
 
@@ -132,7 +138,7 @@ begin
     '<option value ='''+FDateDisplay.FNovember+'''>'+FDateDisplay.FNovember+'</option>' +
     '<option value ='''+FDateDisplay.FDecember+'''>'+FDateDisplay.FDecember+'</option>' +
     '</select>';
-                                       
+
   sMonthHTML := FastReplace(sMonthHTML,' value ='''+FDateDisplay.LookupMonth(MonthOf(FDate))+'''',' selected value ='''+FDateDisplay.LookupMonth(MonthOf(FDate))+'''');
 
   sDayHTML := '<select onchange=''sde_'+HTMLName+'=this.value;dde_'+HTMLName+'(true);''>';
