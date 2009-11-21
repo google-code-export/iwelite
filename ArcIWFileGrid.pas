@@ -492,7 +492,7 @@ end;
 function ExpandEnvironmentVar(var Value: string): Boolean;
 var
   R: Integer;
-  Expanded: string;
+  Expanded: AnsiString;
 {$IFDEF CLR}
   SB: StringBuilder;
 {$ENDIF}
@@ -517,7 +517,7 @@ end;
 
 // Gets the icons of a given file
 
-function GetWindowsSystemFolder: string;
+function GetWindowsSystemFolder: AnsiString;
 var
   Required: Cardinal;
 {$IFDEF CLR}

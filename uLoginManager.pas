@@ -157,7 +157,7 @@ type
 
 function Encrypt( S: String; Key: Word=27469): String;
 function Decrypt(S: String; Key: Word=27469): String;
-function EncryptAsHex(S: String; Key : Word = 8622): string;
+function EncryptAsHex(S: string; Key : Word = 8622): string;
 function DecryptFromHex(CryptHexStr: String; Key : Word = 8622): string;
 
 implementation
@@ -198,7 +198,7 @@ var
 begin
     zLen := length(CryptHexStr) div 2;
     setLength(result, zLen);
-    HexToBin(@CryptHexStr[1], @result[1], zLen);
+    HexToBin(PAnsiChar(@CryptHexStr[1]), @result[1], zLen);
     result := Decrypt(result, 8622);
 end;
 
@@ -210,7 +210,7 @@ begin
     result := Encrypt(S, 8622);
     zLen := length(result);
     setLength(zBuf, zLen*2);
-    binToHex(@result[1], @zBuf[1], zLen); // so we can see the string as text
+    binToHex(PAnsiChar(@result[1]), PAnsiChar(@zBuf[1]), zLen); // so we can see the string as text
     result := lowerCase(zBuf);
 end;
 
