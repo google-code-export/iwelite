@@ -473,7 +473,8 @@ begin
       add  EDI, StartPos
       mov  ECX, L              //Make a note of how many chars to search through
       sub  ECX, StartPos
-      mov  AL,  C              //and which char we want
+			// {LL}
+      mov  AL,  Byte(C)              //and which char we want
     @Loop:
       cmp  Al, [EDI]           //compare it against the SourceString
       jz   @Found
@@ -513,7 +514,8 @@ begin
       sub  ECX, StartPos
 
       xor  EBX, EBX
-      mov  BL,  C
+			// {LL}
+			mov  BL,  Byte(C)
       mov  AL, [EDX+EBX]
     @Loop:
       mov  BL, [EDI]

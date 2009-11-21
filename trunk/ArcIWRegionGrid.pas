@@ -1,19 +1,19 @@
 ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 // The MIT License
-// 
+//
 // Copyright (c) 2008 by Arcana Technologies Incorporated
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,12 +21,13 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 unit ArcIWRegionGrid;
 
 {$I IntraWebVersion.inc}
+{$I IWCompilerDefines.inc}
 {$I Eval.inc}
 
 {$IFDEF INTRAWEB51}
@@ -59,7 +60,13 @@ type
   TIWGridRegion = class(TIWRegion, IIWUpdateNotified, IIWSubmitInvisible, IIWBaseHTMLComponent, IIWHTML40Container)
   private
     FRecordNumber: integer;
+		// {LL}
+    {$IFDEF VCL12ORABOVE}
+    FBookmark : TBookMark;
+    {$ELSE}
     FBookmark: string;
+    {$ENDIF}
+
     FGrid: TArcIWRegionGrid;
     function GetClonedControls(OriginalName: string): TComponent;
   protected
@@ -67,11 +74,25 @@ type
     function RenderStyle(AComponentContext: TIWBaseHTMLComponentContext): string; override;
     procedure ResetPosition(RgnNo: integer);
   public
+
+		//{LL}
+    {$IFDEF VCL12ORABOVE}
+    constructor Create(AOwner: TComponent; AGrid: TArcIWRegionGrid; ARecordNumber: Integer; ABookmark: TBookMark); reintroduce; virtual;
+    {$ELSE}
     constructor Create(AOwner: TComponent; AGrid: TArcIWRegionGrid; ARecordNumber: Integer; ABookmark: string); reintroduce; virtual;
+    {$ENDIF}
+
 
     function DoClonedRender(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; virtual;
     property RecordNumber: integer read FRecordNumber write FRecordNumber;
+
+		//{LL}
+    {$IFDEF VCL12ORABOVE}
+    property Bookmark: TBookmark read FBookmark;
+    {$ELSE}
     property Bookmark: string read FBookmark;
+    {$ENDIF}
+
     property Grid: TArcIWRegionGrid read FGrid;
     property ClonedControls[OriginalName: string]: TComponent read GetClonedControls;
   end;
@@ -206,8 +227,15 @@ function TArcIWRegionGrid.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIW
     end;
 {$ENDIF}
   end;
-// {ORIG} function CreateClonedRegion(RecordNum: integer; Bookmark, RegionName: string): TIWGridRegion;
-   {AS}   function CreateClonedRegion(RecordNum: integer; RegionNum : integer; Bookmark, RegionName: string): TIWGridRegion;
+
+  // {ORIG} function CreateClonedRegion(RecordNum: integer; Bookmark, RegionName: string): TIWGridRegion;
+
+		//{LL}
+  {$IFDEF VCL12ORABOVE}
+ {AS}  function CreateClonedRegion(RecordNum: integer; RegionNum : integer; Bookmark : TBookMark; RegionName: string): TIWGridRegion;
+  {$ELSE}
+ {AS}  function CreateClonedRegion(RecordNum: integer; RegionNum : integer; Bookmark, RegionName: string): TIWGridRegion;
+  {$ENDIF}
   {$IFNDEF CLR}
     procedure CopyProperties(src, dest: TObject; PropOnly: boolean = false);
     var
@@ -369,7 +397,16 @@ var
   intf: IIWBaseContainer;
   iIdx, iCnt: Integer;
   tagReg: TIWHtmlTag;
-  sRegion, sBookmark: string;
+  sRegion: string;
+
+		//{LL}
+  {$IFDEF VCL12ORABOVE}
+    Bookmark : TBookMark;
+  {$ELSE}
+    sBookmark: string;
+  {$ENDIF}
+
+
 {AS}recKey: integer;
 begin
   FNeedsFormTag := False;
@@ -389,6 +426,7 @@ begin
   Owner.GetInterface(IIWBaseContainer, intf);
 {$ENDIF}
 
+
   if not FCacheRegions then
     FreeChildRegions;
 
@@ -405,8 +443,14 @@ begin
       if iIdx < 0 then
       begin
 // {ORIG}  reg := CreateClonedRegion(FDataSource.DataSet.RecordCount, '', sRegion);
-   {AS}    reg := CreateClonedRegion(FDataSource.DataSet.RecordCount, 0, '', sRegion);
-        RegionList.AddObject(sRegion, reg);
+
+		//{LL}
+      {$IFDEF VCL12ORABOVE}
+      {AS} reg := CreateClonedRegion(FDataSource.DataSet.RecordCount, 0, TBytes(0), sRegion);
+      {$ELSE}
+      {AS} reg := CreateClonedRegion(FDataSource.DataSet.RecordCount, 0, '', sRegion);
+      {$ENDIF}
+      RegionList.AddObject(sRegion, reg);
       end else
         reg := TIWGridRegion(RegionList.Objects[iIdx]);
 
@@ -421,7 +465,13 @@ begin
       if FDataSource.DataSet.State in [dsEdit, dsInsert] then
         FDataSource.DataSet.Cancel;
 
+		//{LL}
+      {$IFDEF VCL12ORABOVE}
+      Bookmark :=  FDataSource.DataSet.Bookmark;
+      {$ELSE}
       sBookmark := FDataSource.DataSet.Bookmark;
+      {$ENDIF}
+
       FDataSource.DataSet.DisableControls;
       try
         FDataSource.DataSet.First;
@@ -445,14 +495,22 @@ begin
           begin
 
 // {ORIG}   reg := CreateClonedRegion(FDataSource.DataSet.RecNo, FDataSource.DataSet.Bookmark, sRegion);
-   {AS}     reg := CreateClonedRegion(recKey, iCnt, FDataSource.DataSet.Bookmark, sRegion);
+
+		//{LL}
+      {$IFDEF VCL12ORABOVE}
+      {AS}     reg := CreateClonedRegion(recKey, iCnt, FDataSource.DataSet.Bookmark, sRegion);
+      {$ELSE}
+      {AS}     reg := CreateClonedRegion(recKey, iCnt, FDataSource.DataSet.Bookmark, sRegion);
+      {$ENDIF}
+
             RegionList.AddObject(sRegion, reg);
           end else
           begin
             reg := TIWGridRegion(RegionList.Objects[iIdx]);
-            reg.FBookmark := FDataSource.Dataset.Bookmark;
-          end;
 
+          reg.FBookmark := FDataSource.Dataset.Bookmark;
+
+          end;
           DoBeforeRenderRegion(reg);
           tagReg := reg.DoClonedRender(AContext);
           DoAfterRenderRegion(reg);
@@ -465,7 +523,14 @@ begin
         end;
       finally
         FDataSource.DataSet.EnableControls;
-        FDataSource.DataSet.Bookmark := sBookmark;
+
+		//{LL}
+        {$IFDEF VCL12ORABOVE}
+          FDataSource.DataSet.Bookmark := Bookmark;
+        {$ELSE}
+          FDataSource.DataSet.Bookmark := sBookmark;
+        {$ENDIF}
+
       end;
     end;
   end;
@@ -744,7 +809,12 @@ end;
 
 { TIWGridRegion }
 
+		//{LL}
+{$IFDEF VCL12ORABOVE}
+constructor TIWGridRegion.Create(AOwner: TComponent; AGrid: TArcIWRegionGrid; ARecordNumber: Integer; ABookmark: TBookMark);
+{$ELSE}
 constructor TIWGridRegion.Create(AOwner: TComponent; AGrid: TArcIWRegionGrid; ARecordNumber: Integer; ABookmark: string);
+{$ENDIF}
 begin
   inherited Create(AOwner);
   FGrid := AGrid;
