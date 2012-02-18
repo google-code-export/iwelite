@@ -17,6 +17,7 @@ Installation Instructions:
 {.$DEFINE INTRAWEB72}
 {.$DEFINE INTRAWEB80}
 {$DEFINE INTRAWEB90}
+{.$DEFINE INTRAWEB100}
 
 
 2. Open EliteSuite_IWxx_Delphiyyyy.dpk where xx is the IW version and yyyy is the delphi version.
