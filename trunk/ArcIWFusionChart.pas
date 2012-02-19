@@ -28,21 +28,17 @@ unit ArcIWFusionChart;
 
 interface
 
-{$I IntrawebVersion.inc}
-
 uses
-  Graphics, {$IFDEF D7Plus}StrUtils, {$ENDIF}SyncObjs,
+  Graphics, StrUtils, SyncObjs,
   SysUtils, Classes, Controls, IWVCLBaseControl, IWBaseControl, IWHTMLTag,
   IWBaseHTMLControl, IWControl, IWRenderContext, IWFileReference, IWColor,
-  IWFont, IWTypes, IWBaseInterfaces, ArcD5Fix;
+  IWFont, IWTypes, IWBaseInterfaces, ArcCommon;
 
 type
   TAnimationSpeed = 1..10;
   TPercent = 0..100;
   TAxisSelection = (asNone, asLeft, asRight);
   TSeriesType = (stSingle, stMulti, stCombo);
-
-  TOwnedCollectionCrack = class(TOwnedCollection);
 
   TArcIWFusionNumberFormat = class(TPersistent)
   private
@@ -776,7 +772,7 @@ end;
 function TArcIWFusionDataItem.GetLink: string;
 begin
   if FLinkURL = '' then
-    Result := 'javascript:IWTop().SubmitClick(''' + TIWControl(TOwnedCollectionCrack(TCollectionItem(TOwnedCollectionCrack(Collection).GetOwner).Collection).GetOwner).HTMLName+ ''','''+IntToStr(TCollectionItem(TOwnedCollectionCrack(Collection).GetOwner).Index)+','+IntToStr(Index)+''', false);'
+    Result := 'javascript:IWTop().SubmitClick(''' + TIWControl(TCollectionItem(Collection.Owner).Collection.Owner).HTMLName+ ''','''+IntToStr(TCollectionItem(Collection.Owner).Index)+','+IntToStr(Index)+''', false);'
   else
     Result := FLinkURL;
 end;

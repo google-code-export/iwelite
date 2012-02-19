@@ -1,19 +1,19 @@
 ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 // The MIT License
-// 
+//
 // Copyright (c) 2008 by Arcana Technologies Incorporated
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,7 +21,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 unit ArcIWServerManager;
@@ -31,13 +31,12 @@ unit ArcIWServerManager;
 interface
 
 uses
-  Windows, SysUtils, Classes, IWServerControllerBase, uStatisticFile, {$IFNDEF CLR}{$IFNDEF BCB}SWService,{$ENDIF}{$ENDIF}
+  Windows, SysUtils, Classes, IWServerControllerBase, uStatisticFile,
+  {$IFNDEF CLR}{$IFNDEF BCB} {$IFDEF INTRAWEB110} IWService {$ELSE} SWService {$ENDIF},{$ENDIF}{$ENDIF}
   HTTPApp, IWApplication, IWServer, ActiveX, {$IFDEF INTRAWEB70}IWColor, IWFont, Graphics,{$ENDIF}
   IWBaseForm, SyncObjs, {$IFNDEF VER130} DateUtils, Variants,{$ENDIF} ArcD5Fix,
-  uLoginManager, uSMCommon, ArcIWEliteResources;
-
-
-
+  uLoginManager, uSMCommon, ArcIWEliteResources
+  {$IFDEF INTRAWEB120}, IW.HttpRequest, IW.HttpReply {$ENDIF}, ArcCommon;
 
 type
   TArcIWServerManager = class;
@@ -122,7 +121,7 @@ type
     procedure AssignTo(Dest: TPersistent); override;
   public
     constructor Create; virtual;
-    destructor destroy; override;
+    destructor Destroy; override;
   published
     property MenuItem     : TIWFont read FMenuItem     write SetMenuItem     ;
     property MenuCaption  : TIWFont read FMenuCaption  write SetMenuCaption  ;
@@ -253,9 +252,15 @@ type
     function GetThreadCountMax: integer;
     procedure SetActive(const Value: boolean);
     procedure SetListening(const Value: boolean);
+    {$IFDEF INTRAWEB120}
+    function AcquireHitLogRecord(Request: THttpRequest): THitLogRecord;
+    function FindSessionForRequest(Request: THttpRequest): TIWApplication;
+    function AcquireSession(Request: THttpRequest): TIWApplication;
+    {$ELSE}
     function AcquireHitLogRecord(Request: TWebRequest): THitLogRecord;
     function FindSessionForRequest(Request: TWebRequest): TIWApplication;
     function AcquireSession(Request: TWebRequest): TIWApplication;
+    {$ENDIF}
     function GetUsers: TLoginItemList;
     procedure _SetSecurityDefs(Sender : TObject);
     procedure SetOnLoadAuthFile(const Value: TLoginManagerFileEvent);
@@ -331,10 +336,15 @@ type
     procedure InternalOnNewSession(ASession: TIWApplication; var VMainForm: TIWBaseForm);
     procedure InternalOnCloseSession(ASession: TIWApplication);
     procedure InternalOnDestroySession(Sender : TObject);
+    {$IFDEF INTRAWEB120}
+    procedure InternalBeforeDispatch(Request: THttpRequest; Response: THttpReply);
+    procedure InternalAfterDispatch(Request: THttpRequest; Response: THttpReply);
+    {$ELSE}
     procedure InternalBeforeDispatch(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
     procedure InternalAfterDispatch(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
+    {$ENDIF}
     procedure _LoadAuthFile(Sender : TObject; const Filename : string; Stream : TStream; var Skip : boolean);
     procedure _SaveAuthFile(Sender : TObject; const Filename : string; Stream : TStream; var Skip : boolean);
     procedure UpdateAdminAppVars; virtual;
@@ -440,8 +450,8 @@ function GetCPUUsage : integer;
 
 implementation
 
-uses ArcFastStrings, IWResourceStrings, IWKlooch, ArcWebCommon,
-  TlHelp32, psAPI, Math, IWFileReference, SWStrings {$IFNDEF VER130}, StrUtils{$ENDIF};
+uses IWResourceStrings, IWKlooch, ArcWebCommon, ArcIWControlCommon,
+  TlHelp32, psAPI, Math, IWFileReference, {$IFDEF INTRAWEB110} IWStrings {$ELSE} SWStrings {$ENDIF} {$IFNDEF VER130}, StrUtils{$ENDIF};
 
 var
   AppFileVersionMajor : Cardinal;
@@ -456,8 +466,10 @@ var
   _SessionCountMax: integer;
   _MemoryUsage: integer;
   _MemoryUsageMax: integer;
+  {$IFNDEF INTRAWEB120}
   _ContentBytes : integer;
   _ContentBytesPrev : integer;
+  {$ENDIF}
   _HitCountPrev : integer;
   _HitCount : integer;
   _HitCountMax : Integer;
@@ -657,7 +669,7 @@ end;
 function GetAppVersion(Filename : string) : string;
 var
   Size, FixInfoLen: DWORD;
-  Handle: THandle;
+  Handle: DWORD;
   Buffer: string;
   FixInfoBuf: PVSFixedFileInfo;
 begin
@@ -886,7 +898,7 @@ begin
   try
     if VarIsNull(Value) or VarIsEmpty(Value) then
       LogEvent(lnApplication, lmtWarning, 'Variable '+Varname+' about to be set as null.');
-    if VarType(Value) = varString then
+    if (VarType(Value) = varString) or (VarType(Value) = varUString) then
     begin
       ws := value;
       FAdminApp.ChangeApplicationVariable(VarName, ws);
@@ -910,7 +922,7 @@ begin
     if VarIsNull(Value) or VarIsEmpty(Value) then
       LogEvent(lnApplication, lmtWarning, 'Variable '+Varname+' about to be set as null.');
     case VarType(Value) of
-      varString:
+      varString,varUstring:
         begin
           ws := value;
           FAdminApp.ChangeSettingsVariable(VarName, ws);
@@ -1194,9 +1206,12 @@ begin
   end;
 end;
 
-procedure TArcIWServerManager.InternalBeforeDispatch(
-  Sender: TObject; Request: TWebRequest; Response: TWebResponse;
+{$IFDEF INTRAWEB120}
+procedure TArcIWServerManager.InternalBeforeDispatch(Request: THttpRequest; Response: THttpReply);
+{$ELSE}
+procedure TArcIWServerManager.InternalBeforeDispatch(Sender: TObject; Request: TWebRequest; Response: TWebResponse;
   var Handled: Boolean);
+{$ENDIF}
 var
   ne : TNotifyEvent;
   hr : THitLogRecord;
@@ -1207,11 +1222,14 @@ var
   SessionApp : TIWApplication;
   i : integer;
   sTmp : string;
+  ExecCmd: string;
 begin
    inc(_HitCount);
   _HitCountMax := Max(_HitCount,_HitCountMax);
 
+  {$IFNDEF INTRAWEB120}
   inc(_ContentBytes,Request.ContentLength);
+  {$ENDIF}
 
   hr := THitLogRecord.Create(nil);
 
@@ -1255,34 +1273,51 @@ begin
     inc(_ReturnVisitor);
     hr.NewVisitor := False;
   end;
+
+  {$IFDEF INTRAWEB120}
+  Response.AddGlobalCookie(CookieName,DateTimeToStr(Now),'',EncodeDate(2999,12,31));
+  {$ELSE}
   with Response.Cookies.Add do
   begin
+    // JS: W1058 Implicit string cast with potential data loss from 'string' to 'AnsiString'
     Name := CookieName;
+    // JS: W1058 Implicit string cast with potential data loss from 'string' to 'AnsiString'
     Value := DateTimeToStr(Now);
     Expires := EncodeDate(2999,12,31); // StrToDateTime('12/31/2999'); was causing error in non us locations
   end;
+  {$ENDIF}
 
   AppHost := Request.Host;
 
   hr.Started := Now;
+  {$IFDEF INTRAWEB120}
+  hr.MethodType := Request.HttpMethod;
+  hr.Protocol := ''; // Not supported in IW12
+  {$ELSE}
   hr.MethodType := Request.MethodType;
   hr.Protocol := Request.ProtocolVersion;
+  {$ENDIF}
   hr.PathInfo := Request.PathInfo;
   if Request.PathInfo <> '/' then
   begin
-    hr.FileRequest := FastPosNoCase(Request.PathInfo,'/'+ServerController.ExecCmd+'/',length(Request.PathInfo),length(ServerController.ExecCmd)+2,1)=0;
+    {$IFDEF INTRAWEB110}
+    ExecCmd:= '';
+    {$ELSE}
+    ExecCmd:= ServerController.ExecCmd;
+    {$ENDIF}
+    hr.FileRequest := FastPosNoCase(Request.PathInfo,'/'+ExecCmd+'/',1)=0;
     if hr.FileRequest then
     begin
-      if FastPosNoCase(Request.PathInfo,'/js/',length(Request.PathInfo),4,1)>0 then
+      if FastPosNoCase(Request.PathInfo,'/js/',1)>0 then
         hr.RequestType := rtIntScript
       else
-      if FastPosNoCase(Request.PathInfo,'/cache/',length(Request.PathInfo),4,1)>0 then
+      if FastPosNoCase(Request.PathInfo,'/cache/',1)>0 then
         hr.RequestType := rtCache
       else
-      if FastPosNoCase(Request.PathInfo,'/gfx/',length(Request.PathInfo),4,1)>0 then
+      if FastPosNoCase(Request.PathInfo,'/gfx/',1)>0 then
         hr.RequestType := rtIntGraphic
       else
-        hr.RequestType := rtFile;
+        hr.RequestType := uStatisticFile.rtFile;
     end else
       hr.RequestType := rtForm;
   end else
@@ -1291,14 +1326,20 @@ begin
     hr.RequestType := rtRoot;
   end;
   hr.IP := Request.RemoteAddr;
+  {$IFDEF INTRAWEB120}
+  hr.HostName := Request.Host;
+  {$ELSE}
   hr.HostName := Request.RemoteHost;
+  {$ENDIF}
   hr.Referrer := Request.Referer;
   hr.UserAgent := Request.UserAgent;
   hr.ScriptName := Request.ScriptName;
+  {$IFNDEF INTRAWEB120} {TODO -oPlp -cConversion : Check how this is can be achieved with THttpRequest}
   hr.ContentEncoding := Request.ContentEncoding;
   hr.ContentType := Request.ContentType;
   hr.ContentLength := Request.ContentLength;
   hr.ContentVersion := Request.ContentVersion;
+  {$ENDIF}
 
   HitLogRecords.Add(hr);
   inc(HitLogRecordsCount);
@@ -1317,14 +1358,18 @@ begin
   end;
 
   if Assigned(__OnBeforeDispatch) then
+    {$IFDEF INTRAWEB120}
+    __OnBeforeDispatch(Request, Response);
+    {$ELSE}
     __OnBeforeDispatch(Sender, Request, Response, Handled);
+    {$ENDIF}
 end;
 
 procedure TArcIWServerManager.StartListening;
 var
   sURL : string;
 begin
-  if GLicense.{$IFDEF INTRAWEB70}LicenseVal{$ELSE}License{$ENDIF} = ltEval then
+  if GLicense.{$IFDEF INTRAWEB70} {$IFDEF INTRAWEB120} LicenseType {$ELSE}  LicenseVal {$ENDIF}{$ELSE}License{$ENDIF} = ltEval then
     raise Exception.Create('Due to limitations in the IntraWeb Evaluation, ServerManager will not work when IntraWeb is in Evaluation mode.');
 
   LogEvent(lnApplication, lmtInformation, 'Attempting to Start Server Manager Admin...');
@@ -1364,7 +1409,7 @@ end;
 
 procedure TArcIWServerManager.StartProfiling;
 begin
-  if GLicense.{$IFDEF INTRAWEB70}LicenseVal{$ELSE}License{$ENDIF} = ltEval then
+  if GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} LicenseType {$ELSE}  LicenseVal {$ENDIF}{$ELSE}License{$ENDIF} = ltEval then
     raise Exception.Create('Due to limitations in the IntraWeb Evaluation, ServerManager will not work when IntraWeb is in Evaluation mode.');
 
   if FEnableProfiling then
@@ -1384,50 +1429,60 @@ begin
 
   if FLogLicenseInfo then
   begin
-    if GLicense.{$IFDEF INTRAWEB70}LicenseVal{$ELSE}License{$ENDIF} = ltEval then
+    if GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} LicenseType {$ELSE}  LicenseVal {$ENDIF}{$ELSE}License{$ENDIF} = ltEval then
     begin
       LogMessage('Evaluation Mode');
-      if GLicense.{$IFDEF INTRAWEB70}IsOldKeyVal{$ELSE}IsOldKey{$ENDIF} then begin
+      {$IFNDEF INTRAWEB110}
+      if GLicense.{$IFDEF INTRAWEB70}IsOldKeyVal{$ELSE}IsOldKey{$ENDIF} then
+      begin
         LogMessage('WARNING: The installed key is NOT a valid 6.0 key');
         LogMessage('Please make sure the key starts with +007');
       end;
+      {$ENDIF}
     end else
     begin
-      if GLicense.{$IFDEF INTRAWEB70}RegisteredNameVal{$ELSE}RegisteredName{$ENDIF} <> '' then
-        LogMessage('Registered to: ' + GLicense.{$IFDEF INTRAWEB70}RegisteredNameVal{$ELSE}RegisteredName{$ENDIF});
-      if GLicense.{$IFDEF INTRAWEB70}CompanyVal{$ELSE}Company{$ENDIF} <> '' then
-        LogMessage('Company: ' + GLicense.{$IFDEF INTRAWEB70}CompanyVal{$ELSE}Company{$ENDIF});
-      if GLicense.{$IFDEF INTRAWEB70}ExpireDateVal{$ELSE}ExpireDate{$ENDIF} > 0 then
-        LogMessage('Expiration Date: ' + DateToStr(GLicense.{$IFDEF INTRAWEB70}ExpireDateVal{$ELSE}ExpireDate{$ENDIF}))
+      if GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} CustomerName {$ELSE}  RegisteredNameVal {$ENDIF}{$ELSE}RegisteredName{$ENDIF} <> '' then
+        LogMessage('Registered to: ' + GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} CustomerName {$ELSE}  RegisteredNameVal {$ENDIF}{$ELSE}RegisteredName{$ENDIF});
+      if GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} CustomerCompany {$ELSE} CompanyVal {$ENDIF}{$ELSE}Company{$ENDIF} <> '' then
+        LogMessage('Company: ' + GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} CustomerCompany {$ELSE} CompanyVal {$ENDIF}{$ELSE}Company{$ENDIF});
+      if GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} ExpirationDate {$ELSE} ExpireDateVal {$ENDIF}{$ELSE}ExpireDate{$ENDIF} > 0 then
+        LogMessage('Expiration Date: ' + DateToStr(GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} ExpirationDate {$ELSE} ExpireDateVal {$ENDIF}{$ELSE}ExpireDate{$ENDIF}))
       else
         LogMessage('Expiration Date: Never');
 
-      case GLicense.{$IFDEF INTRAWEB70}LicenseVal{$ELSE}License{$ENDIF} of
+      case GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} LicenseType {$ELSE}  LicenseVal {$ENDIF}{$ELSE}License{$ENDIF} of
+        {$IFDEF INTRAWEB110}
+        ltUltimate: LogMessage('Ultimate Edition');
+        ltStandard: LogMessage('Standard Edition');
+        {$ELSE}
         ltEnterprise: LogMessage('Enterprise Edition');
         ltDeveloper: LogMessage('Developer Edition');
+        {$ENDIF}
         ltPersonal: LogMessage('Personal Edition');
         {$IFNDEF INTRAWEB90}
         ltPackagedPage: LogMessage('Packaged Page');
         ltPackagedEnterprise: LogMessage('Packaged Enterprise');
         {$ENDIF}
       end;
-      if GLicense.{$IFDEF INTRAWEB70}SerialNoVal{$ELSE}SerialNo{$ENDIF} <> 0 then
-        LogMessage(Format(RSLicenseNumber, [IntToStr(GLicense.{$IFDEF INTRAWEB70}SerialNoVal{$ELSE}SerialNo{$ENDIF})]));
+      if GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} SerialNo {$ELSE} SerialNoVal {$ENDIF}{$ELSE}SerialNo{$ENDIF} <> 0 then
+        LogMessage(Format(RSLicenseNumber, [IntToStr(GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} SerialNo {$ELSE} SerialNoVal {$ENDIF}{$ELSE}SerialNo{$ENDIF})]));
     end;
     LogMessage('');
     LogMessage(Format(RSIWVersion, [ServerController.Version]));
-    LogMessage('IntraWeb Build Date: ' + DateToStr(GLicense.{$IFDEF INTRAWEB70}BuildDateVal{$ELSE}BuildDate{$ENDIF}));
+    LogMessage('IntraWeb Build Date: ' + DateToStr(GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} BuildDate {$ELSE} BuildDateVal {$ENDIF}{$ELSE}BuildDate{$ENDIF}));
     if ServerController.Port = 0 then
       LogMessage(RSBindError)
     else
       LogMessage(Format(RSHTTPPort, [IntToStr(ServerController.Port)]));
     if ServerController.SSLOptions.Port > 0 then
       LogMessage(Format(RSHTTPSPort, [IntToStr(ServerController.SSLOptions.Port)]));
+    {$IFNDEF INTRAWEB110}
     if GLicense.{$IFDEF INTRAWEB70}ThirdPartyTextVal{$ELSE}ThirdPartyText{$ENDIF} <> '' then
     begin
       LogMessage('');
       LogMessage(GLicense.{$IFDEF INTRAWEB70}ThirdPartyTextVal{$ELSE}ThirdPartyText{$ENDIF});
     end;
+    {$ENDIF}
     LogMessage('');
     LogMessage('---------------------');
     LogMessage('');
@@ -1572,7 +1627,11 @@ begin
   end;
 end;
 
+{$IFDEF INTRAWEB120}
+function TArcIWServerManager.AcquireHitLogRecord(Request: THttpRequest): THitLogRecord;
+{$ELSE}
 function TArcIWServerManager.AcquireHitLogRecord(Request : TWebRequest) : THitLogRecord;
+{$ENDIF}
 var
   i : integer;
   sTmp : string;
@@ -1593,7 +1652,11 @@ begin
   LogEvent(lnApplication, lmtInformation, 'After Acquire Hit: '+sTmp+': '+IntToStr(i));
 end;
 
+{$IFDEF INTRAWEB120}
+function TArcIWServerManager.AcquireSession(Request: THttpRequest): TIWApplication;
+{$ELSE}
 function TArcIWServerManager.AcquireSession(Request : TWebRequest) : TIWApplication;
+{$ENDIF}
 var
   i : integer;
   sTmp : string;
@@ -1623,7 +1686,11 @@ begin
   LogEvent(lnApplication, lmtInformation, 'After Acquire Session: '+sTmp+': '+IntToStr(i));
 end;
 
+{$IFDEF INTRAWEB120}
+function TArcIWServerManager.FindSessionForRequest(Request: THttpRequest): TIWApplication;
+{$ELSE}
 function TArcIWServerManager.FindSessionForRequest(Request : TWebRequest) : TIWApplication;
+{$ENDIF}
 var
   sAppID, sURL : string;
   iLen : integer;
@@ -1642,6 +1709,9 @@ begin
     Fetch(sURL, '/');
   Fetch(sURL, '/');
 
+  {$IFDEF INTRAWEB110}
+  sAppID := Request.CookieFields.Values['IW_SessionID_'];
+  {$ELSE}
   case ServerController.SessionTrackingMethod of
     tmCookie: sAppID := Request.CookieFields.Values['IW_SessionID_'];
     tmURL:    sAppID := Fetch(sURL, '/');
@@ -1653,6 +1723,7 @@ begin
           sAppID := Request.ContentFields.Values['IW_SessionID_'];
       end;
   end;
+  {$ENDIF}
   {$IFNDEF INTRAWEB71}
   iLen := 24;
   {$ELSE}
@@ -1665,14 +1736,18 @@ begin
   sAppID := Copy(sAppID,1,iLen);
   bIsValid := (sAppID <> '') and
               (length(sAppID) = iLen) and
-              (FastCharPos(sAppID,'.',1) = 0) and
-              (FastCharPos(sAppID,'/',1) = 0);
+              (Pos('.',sAppID) = 0) and
+              (Pos('/',sAppID) = 0);
   if bIsValid then
     Result := LookupSession(sAppID);
 end;
 
+{$IFDEF INTRAWEB120}
+procedure TArcIWServerManager.InternalAfterDispatch(Request: THttpRequest; Response: THttpReply);
+{$ELSE}
 procedure TArcIWServerManager.InternalAfterDispatch(Sender: TObject;
   Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+{$ENDIF}
   function InsertTrackerJS(str : string) : string;
   var
     sJS : string;
@@ -1686,7 +1761,7 @@ procedure TArcIWServerManager.InternalAfterDispatch(Sender: TObject;
            'document.body.clientWidth+'',''+'+
            'document.body.clientHeight+''">'')'+
            ';</script><input ';
-    idx := FastPosNoCase(str,'<input ',length(str),7,1);
+    idx := FastPosNoCase(str,'<input ',1);
     if idx > 0 then
       result := Copy(str,1,idx-1)+sJS+Copy(str,idx+7,high(Integer))
     else
@@ -1696,7 +1771,9 @@ var
   hr : THitLogRecord;
   Session : TIWApplication;
 begin
+  {$IFNDEF INTRAWEB120}
   inc(_ContentBytes,Response.ContentLength);
+  {$ENDIF}
   try
     try
       hr := AcquireHitLogRecord(Request);
@@ -1717,7 +1794,9 @@ begin
 
         hr.UserName := Session.AuthUser;
         hr.SessionID := Session.AppID;
+        {$IFNDEF INTRAWEB110}
         hr.ClientType := Session.ClientType;
+        {$ENDIF}
         hr.FormAction := Session.FormAction;
         {$IFDEF INTRAWEB51}
           // TODO: Must figure out how to determine that a session is secure in IW 5.1
@@ -1738,10 +1817,18 @@ begin
     if HitLogRecordsCount > FMemCacheHitLog then
       FlushHitLog;
 
+    {$IFDEF INTRAWEB120}
+    {TODO -oPlp -cConversion : Check this}
+    {$ELSE}
     Response.Content := InsertTrackerJS(Response.Content);
+    {$ENDIF}
   finally
     if Assigned(__OnAfterDispatch) then
+      {$IFDEF INTRAWEB120}
+      __OnAfterDispatch(Request, Response);
+    {$ELSE}
       __OnAfterDispatch(Sender, Request, Response, Handled);
+    {$ENDIF}
   end;
 end;
 
@@ -1870,8 +1957,11 @@ procedure TArcIWServerManager.ReloadUsers;
 begin
   FUsersLoaded := True;
   FSecurity.LoadFromFile(ExtractFilePath(DLLFilePath+FAdminAppEXE)+'IWUsers.sec');
+
+  {$IFNDEF INTRAWEB110}
   ServerController.AuthList.Clear;
   FSecurity.FillAuthList(ServerController.AuthList);
+  {$ENDIF}
 end;
 
 function TArcIWServerManager.GetUsers: TLoginItemList;
@@ -1993,7 +2083,9 @@ begin
   ChangeApplicationVariable('ThreadCountMax', _ThreadCountMax);
   ChangeApplicationVariable('MemoryUsageCurrent', _MemoryUsage);
   ChangeApplicationVariable('MemoryUsageMax', _MemoryUsageMax);
+  {$IFNDEF INTRAWEB120}
   ChangeApplicationVariable('BytesTransmitted', _ContentBytes);
+  {$ENDIF}
   ChangeApplicationVariable('StartedTime', _StartedRunning);
   ChangeApplicationVariable('CurrentTime', Now);
   ChangeApplicationVariable('Port', ServerController.Port); // do before appname.
@@ -2010,25 +2102,33 @@ begin
   ChangeApplicationVariable('CachePath', ServerController.CacheDir);
   ChangeApplicationVariable('Charset', ServerController.CharSet);
   ChangeApplicationVariable('AppDescription', ServerController.Description);
+  {$IFNDEF INTRAWEB110}
   ChangeApplicationVariable('ExecCmd', ServerController.ExecCmd);
+  {$ENDIF}
   ChangeApplicationVariable('InternalFilesDir', ServerController.InternalFilesDir);
   ChangeApplicationVariable('InternalFilesURL', ServerController.InternalFilesURL);
+  {$IFNDEF INTRAWEB110}
   ChangeApplicationVariable('InvalidCommandURL', ServerController.InvalidCommandURL);
   ChangeApplicationVariable('NoJavascriptFilename', ServerController.NoJavaScriptSupport.Filename);
   ChangeApplicationVariable('NoJavascriptURL', ServerController.NoJavaScriptSupport.URL);
   ChangeApplicationVariable('NoCookieFilename', ServerController.NoCookieSupport.URL);
   ChangeApplicationVariable('NoCookieURL', ServerController.NoCookieSupport.URL);
   ChangeApplicationVariable('StartCmd', ServerController.StartCmd);
+  {$ENDIF}
   ChangeApplicationVariable('TemplateDir', ServerController.TemplateDir);
 
   {$IFNDEF INTRAWEB70}
   ChangeApplicationVariable('TimeoutURL', ServerController.TimeoutURL);
   {$ELSE}
-  ChangeApplicationVariable('TimeoutURL', ServerController.SessionTimeoutURL.URL);
+    {$IFNDEF INTRAWEB110}
+    ChangeApplicationVariable('TimeoutURL', ServerController.SessionTimeoutURL.URL);
+    {$ENDIF}
   {$ENDIF}
 
+  {$IFNDEF INTRAWEB110}
   ChangeApplicationVariable('UnknownBrowserFilename', ServerController.UnknownBrowser.Filename);
   ChangeApplicationVariable('UnknownBrowserURL', ServerController.UnknownBrowser.URL);
+  {$ENDIF}
   ChangeApplicationVariable('URLBase', ServerController.URLBase);
   ChangeApplicationVariable('IWVersion', ServerController.Version);
   ChangeApplicationVariable('AppPath', ServerController.AppPath);
@@ -2120,7 +2220,7 @@ procedure TArcIWServerManager.OnCommand(Command: WideString; Value: Variant);
     sl : TD7StringList;
     app : TIWApplication;
   begin
-    if FastCharPos(Value,'~',1)>0 then
+    if Pos('~',Value)>0 then
     begin
       sl := TD7StringList.Create;
       try
@@ -2173,11 +2273,11 @@ procedure TArcIWServerManager.OnCommand(Command: WideString; Value: Variant);
   end;
   function EscapeString(Text : string) : string;
   begin
-    Result := FastReplace(Text,#13,' ',False);
-    Result := FastReplace(Result,#10,' ',False);
-    Result := FastReplace(Result,'\','\\',False);
-    Result := FastReplace(Result,'"','\"',False);
-    Result := FastReplace(Result,'''','\''',False);
+    Result := ReplaceStr(Text,#13,' ');
+    Result := ReplaceStr(Result,#10,' ');
+    Result := ReplaceStr(Result,'\','\\');
+    Result := ReplaceStr(Result,'"','\"');
+    Result := ReplaceStr(Result,'''','\''');
   end;
 begin
   FLastError := '';
@@ -2568,9 +2668,11 @@ begin
         pr.HitCounter     := _HitCount;
         pr.HitCounterPS   := _HitCount-_HitCountPrev;
         _HitCountPrev     := _HitCount;
+        {$IFNDEF INTRAWEB120}
         pr.ContentBytes   := _ContentBytes;
         pr.ContentBytesPS := _ContentBytes-_ContentBytesPrev;
         _ContentBytesPrev := _ContentBytes;
+        {$ENDIF}
         pr.VisitorsNew    := _NewVisitor;
         pr.VisitorsReturn := _ReturnVisitor;
         GetMemoryInfo(pr.MemTotalPhysical, pr.MemFreePhysical, pr.MemTotalVirtual, pr.MemFreeVirtual,
@@ -2604,7 +2706,7 @@ begin
   except
     on e: exception do
     begin
-      if FastPos(e.Message,'connection with the server',length(e.Message),26,1)>0 then
+      if Pos('connection with the server',e.Message)>0 then
       begin
         LoadEXE;
         raise EServerManCrash.Create;
@@ -2623,7 +2725,7 @@ begin
   except
     on e: exception do
     begin
-      if FastPos(e.Message,'connection with the server',length(e.Message),26,1)>0 then
+      if Pos('connection with the server',e.Message)>0 then
       begin
         LoadEXE;
         raise EServerManCrash.Create;
@@ -2641,7 +2743,7 @@ begin
   except
     on e: exception do
     begin
-      if FastPos(e.Message,'connection with the server',length(e.Message),26,1)>0 then
+      if Pos('connection with the server',e.Message)>0 then
       begin
         LoadEXE;
         raise EServerManCrash.Create;
@@ -2660,7 +2762,7 @@ begin
   except
     on e: exception do
     begin
-      if FastPos(e.Message,'connection with the server',length(e.Message),26,1)>0 then
+      if Pos('connection with the server',e.Message)>0 then
       begin
         LoadEXE;
         raise EServerManCrash.Create;
@@ -2679,7 +2781,7 @@ begin
   except
     on e: exception do
     begin
-      if FastPos(e.Message,'connection with the server',length(e.Message),26,1)>0 then
+      if Pos('connection with the server',e.Message)>0 then
       begin
         LoadEXE;
         raise EServerManCrash.Create;
@@ -2714,7 +2816,7 @@ begin
   except
     on e: exception do
     begin
-      if FastPos(e.Message,'connection with the server',length(e.Message),26,1)>0 then
+      if Pos('connection with the server',e.Message)>0 then
       begin
         LoadEXE;
         raise EServerManCrash.Create;
@@ -2734,7 +2836,7 @@ begin
   except
     on e: exception do
     begin
-      if FastPos(e.Message,'connection with the server',length(e.Message),26,1)>0 then
+      if Pos('connection with the server',e.Message)>0 then
       begin
         LoadEXE;
         raise EServerManCrash.Create;
@@ -2923,7 +3025,7 @@ begin
   FGraphText.Style := [fsBold];
 end;
 
-destructor TLayoutFonts.destroy;
+destructor TLayoutFonts.Destroy;
 begin
   FGridText.Free;
   FPageTitle.Free;
@@ -3088,5 +3190,5 @@ initialization
 
   DefaultAppFile := ExtractFilename(DLLFileName)+'.Admin\IWServerManager.exe';
   DefaultRestartEXE := ExtractFilename(DLLFileName)+'.Admin\Restart.exe';
-  SetLogApplication('Server Manager');
+  //SetLogApplication('Server Manager'); // tem se ser configurado com direitos Administrativos.
 end.

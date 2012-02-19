@@ -40,8 +40,9 @@ uses
   IWVCLBaseControl, IWBaseControl, IWBaseHTMLControl, IWRenderContext, IWApplication,
   ArcIWGridCommon, ArcIWCustomGrid, IWRegion, DB, TypInfo, IWBaseRenderContext,
   IWBaseInterfaces, IWBaseContainerLayout, IWLayoutMgrForm, IWVCLComponent,
-  IWMarkupLanguageTag, Forms, IWStreams, IWContainerLayout, IWBaseHTMLInterfaces,
-  ArcIWRegionGrid, IWCompButton, IWExtCtrls, IWHTMLControls;
+  IWMarkupLanguageTag, Forms, IWContainerLayout, IWBaseHTMLInterfaces,
+  ArcIWRegionGrid, IWCompButton, IWHTMLControls
+  {$IFDEF INTRAWEB120}, IWRenderStream, IWCompExtCtrls, {$ELSE}, IWStreams, IWExtCtrls, {$ENDIF} ArcCommon;
 
 type
   TArcIWRGLink = class(TIWLink, IIWSubmitInvisible)

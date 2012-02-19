@@ -396,7 +396,7 @@ procedure TControlTranslations.BuildComponent(AComponent: TComponent;
         {$ENDIF}
         for i := 0 to iCnt-1 do
         begin
-          if ppl[i].PropType^^.Kind in [tkString, tkLString, tkWString] then
+          if ppl[i].PropType^^.Kind in [tkString, tkLString, tkWString, tkUString] then
           begin
             if not Prop_AvoidName(ppl[i].Name) then
               list.Add(sPrefix+ppl[i].Name);
@@ -428,7 +428,7 @@ procedure TControlTranslations.BuildComponent(AComponent: TComponent;
       {$ENDIF}
       for i := 0 to iCnt-1 do
       begin
-        if ppl[i].PropType^^.Kind in [tkString, tkLString, tkWString] then
+        if ppl[i].PropType^^.Kind in [tkString, tkLString, tkWString, tkUString] then
         begin
           if not Prop_AvoidName(ppl[i].Name) then
             list.Add(sPrefix+ppl[i].Name);
@@ -470,7 +470,7 @@ begin
     {$ENDIF}
     for i := 0 to iCount-1 do
     begin
-      if ppl[i].PropType^^.Kind in [tkString, tkLString, tkWString] then
+      if ppl[i].PropType^^.Kind in [tkString, tkLString, tkWString, tkUString] then
       begin
         if not Prop_AvoidName(ppl[i].Name) then
           sl.Add(ppl[i].Name);

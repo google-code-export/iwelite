@@ -73,7 +73,7 @@ uses
   Windows, Messages, Graphics, SysUtils, Classes, IWControl,
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, IWScriptEvents, {$ENDIF}
   {$IFDEF INTRAWEB70} IWRenderContext, {$ENDIF}
-  IWHTMLTag;
+  IWHTMLTag, ArcCommon;
 
 type
   TArcIWToolWindow = class(TIWControl)

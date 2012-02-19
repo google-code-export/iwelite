@@ -28,14 +28,15 @@ unit uAppDialogForm;
 {PUBDIST}                                                                                      
 
 interface
+
 {$I IntrawebVersion.inc}
 
 uses
   IWAppForm, IWApplication, IWTypes, Forms, ArcIWDlgMessageBox, Classes,
   Controls, IWContainer, IWRegion, IWControl, IWCompRectangle, IWCompText,
-  IWCompLabel, IWExtCtrls, IWCompButton, ArcIWDlgBase, Graphics,
-  IWGridCommon, IWColor, IWBaseControl, IWVCLBaseControl, IWVCLBaseContainer,
-  IWBaseHTMLControl, IWHTMLContainer;
+  IWCompLabel, IWCompButton, ArcIWDlgBase, Graphics, IWColor, IWBaseControl,
+  IWVCLBaseControl, IWVCLBaseContainer, IWBaseHTMLControl, IWHTMLContainer
+  {$IFDEF INTRAWEB120}, IWCompExtCtrls, IWCompGridCommon {$ELSE}, IWExtCtrls, IWGridCommon {$ENDIF};
 
 type
   TCompHelper = class(TArcIWDlgMessageBox)

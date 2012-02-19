@@ -37,7 +37,7 @@ procedure Register;
 
 implementation
 
-uses ArcRuntimeConfig, ArcIWLoginManager, ArcRuntimeConfigEditor,
+uses ArcRuntimeConfig, {$IFNDEF INTRAWEB110} ArcIWLoginManager, {$ENDIF} ArcRuntimeConfigEditor,
   ArcServerConfig, ArcStyleManager,
   {$IFDEF INTRAWEB51}ArcIWTemplateProcessor,{$ELSE}
   {$IFDEF INTRAWEB72}ArcIWTemplateProcessor7,{$ELSE}
@@ -46,7 +46,7 @@ uses ArcRuntimeConfig, ArcIWLoginManager, ArcRuntimeConfigEditor,
 
 procedure Register;
 begin
-  RegisterComponents( 'IWES NonVisual', [TArcRuntimeConfig, TArcIWLoginManager,
+  RegisterComponents( 'IWES NonVisual', [TArcRuntimeConfig, {$IFNDEF INTRAWEB110} TArcIWLoginManager, {$ENDIF}
     TArcIWServerConfig, TArcIWTemplateProcessor, TArcIWServerTimer, TArcIWPageIcon,
     TArcStyleManager]);
     //,TArcIWFilterManager]);

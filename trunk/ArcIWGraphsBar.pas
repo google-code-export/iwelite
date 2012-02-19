@@ -32,7 +32,7 @@ interface
 
 uses SysUtils, Classes, {$IFNDEF VER130}Types, {$ENDIF}Graphics, IWColor, IWFont,
   IWControl, IWTypes, IWHTMLTag
-  {$IFNDEF INTRAWEB51}, IWRenderContext {$ENDIF};
+  {$IFNDEF INTRAWEB51}, IWRenderContext {$ENDIF}, ArcCommon;
 
 type
   TArcIWBorderStyle = (bsNone, bsLowered, bsRaised, bsSolid, bsRidge);
@@ -217,7 +217,7 @@ type
 
 implementation
 
-uses {$IFDEF CLR}ArcFastStringsDOTNET, {$ELSE}ArcFastStrings, {$ENDIF} {$IFNDEF VER130}StrUtils, {$ENDIF}IWBaseControl, Math;
+uses {$IFNDEF VER130}StrUtils, {$ENDIF}IWBaseControl, Math;
 
 {$IFDEF VER130}
 
@@ -1090,8 +1090,8 @@ end;
 
 function TArcIWGraphBar.CalcValueHint: string;
 begin
-  Result := FastReplace(FValueHintFormat,'<#caption>',FCaption,False);
-  Result := FastReplace(Result,'<#value>',FloatToStr(FValue),False);
+  Result := ReplaceStr(FValueHintFormat,'<#caption>',FCaption);
+  Result := ReplaceStr(Result,'<#value>',FloatToStr(FValue));
 end;
 
 constructor TArcIWGraphBar.Create(Collection : TCollection);

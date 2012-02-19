@@ -34,7 +34,7 @@ uses
   SysUtils, Classes, Controls, IWHTMLTag, IWControl, IWTypes,
   {$IFDEF INTRAWEB70} IWBaseRenderContext, IWMarkupLanguageTag,{$ENDIF}
   {$IFNDEF INTRAWEB51} IWVCLBaseControl, IWRenderContext, {$ENDIF}
-  IWFileReference;
+  IWFileReference, ArcCommon;
 
 type
   TArcIWPageIcon = class({$IFNDEF INTRAWEB51}TIWCustomControl{$ELSE}TIWControl{$ENDIF})

@@ -36,8 +36,8 @@ uses
   {$IFNDEF VER130}Types,{$ENDIF}
   {$IFDEF INTRAWEB72}IWVCLBaseControl, IWBaseControl, IWBaseHTMLControl, IWRenderContext, IWContainer,
   IWBaseRenderContext, IWBaseHTMLInterfaces, IWHTML40Interfaces, IWFileReference, IWBaseInterfaces,
-  IWVCLComponent, IWContainerLayout, IWLayoutMgrForm, IWXMLTag,{$ENDIF} IWMarkupLanguageTag, IWScriptEvents,
-  IWTemplateProcessorHTML, DB, IWApplication, ArcIWGridCommon, ArcIWCustomGrid, IWServer, IWForm;
+  IWVCLComponent, IWContainerLayout, IWLayoutMgrForm, IWXMLTag,{$ENDIF}
+  IWTemplateProcessorHTML, DB, IWApplication, ArcIWGridCommon, ArcIWCustomGrid, IWServer, IWForm, ArcCommon;
 
 type
   TArcGridStringColumn = class;
@@ -313,7 +313,6 @@ type
     FScrollToSelectedCell: boolean;
     FScrollToSelectedRow: boolean;
     FOnCaptionButtonClick: TCaptionButtonClickEvent;
-    FAfterCaptionButtonClick: TCaptionButtonClickEvent;
     FButtonBarHeight: integer;
     FStyleControlBar: TArcGridStyle;
     FControlBarAboveHeader: boolean;
@@ -329,7 +328,6 @@ type
 
     //comment by peter 2005/05/18
     FOnCellHint: TOnCellHintEvent;
-    FUseAsyncEvents: boolean;
     function CWT: string;
   protected
     procedure InitControl; override;
@@ -374,11 +372,8 @@ type
     procedure ContentRetrieveCBObject(x: integer; var ctrl: TControl); virtual;
     procedure ContentAfterRenderHTML; virtual;
     procedure ContentAssignSession(ASession : TIWApplication);
-    procedure DoAsyncSubmit(AParams: TStringList);
 
     procedure SetRowHeaderHeight(const Value: integer);
-    procedure RenderInnerHTML(AContext: TIWBaseHTMLComponentContext; Result : TIWHTMLTag); virtual;
-    procedure AssignAsyncEvents(APageContext: TIWPageContext40; AScriptEvents: TIWScriptEvents); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -395,7 +390,6 @@ type
       AAutoFields: boolean = true; AStartRow: integer = 0; ACount: integer = -1); overload;
     procedure Invalidate; override;
     function SupportsSubmit: Boolean;
-    function RenderAsync(AContext: TIWBaseHTMLComponentContext): TIWXMLTag; override;
     function RenderAsyncComponent(AContext: TIWBaseComponentContext): TIWXMLTag; override;
     property Cells[x, y: integer]: string read GetCell write SetCell;
     property Objects[x, y: integer]: TObject read GetObject write SetObject;
@@ -441,7 +435,7 @@ type
     procedure set_ShowHint(Value: Boolean);
     property ContainerContext: TIWContainerContext read get_ContainerContext write set_ContainerContext;
     property LayoutMgr: TIWContainerLayout read get_LayoutMgr write set_LayoutMgr;
-    property Component[AIndex: Integer]: TPlatformComponent read get_Component;
+    property Component[AIndex: Integer]: TComponent read get_Component;
     property IWComponentsCount: Integer read get_IWComponentsCount;
 {$ENDIF}
     property FirstSelectedRow: integer read GetFirstSelectedRow;
@@ -482,7 +476,6 @@ type
     property OnCellData: TArcCellDataEvent read FOnCellData write FOnCellData;
     property OnRowClick: TRowClickEvent read FOnRowClick write FOnRowClick;
     property OnCaptionButtonClick: TCaptionButtonClickEvent read FOnCaptionButtonClick write FOnCaptionButtonClick;
-    property AfterCaptionButtonClick: TCaptionButtonClickEvent read FAfterCaptionButtonClick write FAfterCaptionButtonClick;
     property DetailVisible: boolean read FDetailVisible write FDetailVisible;
     property RowHeight: integer read FRowHeight write FRowHeight;
     property OnOverrideCellStyle: TArcOverrideStyle read FOnOverrideCellStyle write FOnOverrideCellStyle;
@@ -506,17 +499,8 @@ type
     property RowHeaderHeight: integer read FRowHeaderHeight write SetRowHeaderHeight;
     //
 
-    property UseAsyncEvents : boolean read FUseAsyncEvents write FUseAsyncEvents;
-
     //comment by peter 2005/05/18
     property OnCellHint: TOnCellHintEvent read FOnCellHint write FOnCellHint;
-    property OnAsyncEnter;
-    property OnAsyncExit;
-    property OnAsyncMouseDown;
-    property OnAsyncMouseMove;
-    property OnAsyncMouseOver;
-    property OnAsyncMouseOut;
-    property OnAsyncMouseUp;
   end;
 
   TStyleExportFile = class(TComponent)
@@ -600,11 +584,8 @@ function _tbl: string;
 
 implementation
 
-
-
 uses IWUtils, IWGlobal, {$IFNDEF VER130}StrUtils, Math, MaskUtils, {$ENDIF}
-  {$IFDEF CLR}ArcFastStringsDOTNET{$ELSE}ArcFastStrings,
-  IWBaseForm{$ENDIF};
+  IWBaseForm, uSMCommon;
 
 function _DoCaptionButtonClick: string;
 begin
@@ -1007,7 +988,7 @@ procedure TCaptionButtons.RenderButtons(HTMLName: string; AContext: TIWBaseHTMLC
     begin
       tag := nil;
       sLoc := Button.IconLocation(AContext.PageContext.WebApplication.InternalURLBase);
-      if (AContext.Browser = brIE) and (lowercase(ExtractFileExt(sLoc)) = '.png') then
+      if BrowserIsIE(AContext.Browser) and (lowercase(ExtractFileExt(sLoc)) = '.png') then
       begin
         case Button.Alignment of
           taLeftJustify: tag := LeftTag.Contents.AddTag('span');
@@ -1234,11 +1215,6 @@ begin
   FContainerImplementation.Free;
 end;
 
-procedure TArcIWStringGrid.DoAsyncSubmit(AParams: TStringList);
-begin
-  Submit(AParams.Values['Data']);
-end;
-
 procedure TArcIWStringGrid.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
@@ -1283,13 +1259,6 @@ begin
     ms.Free;
     fs.Free;
   end;
-end;
-
-procedure TArcIWStringGrid.AssignAsyncEvents(APageContext: TIWPageContext40;
-  AScriptEvents: TIWScriptEvents);
-begin
-  inherited;
-  APageContext.WebApplication.RegisterCallBack(HTMLName+'.Submit', DoAsyncSubmit);
 end;
 
 function TArcIWStringGrid.ContainerClassname: String;
@@ -1599,20 +1568,13 @@ end;
 procedure TArcIWStringGrid.SetCell(x, y: integer; Value: string);
 begin
   EnsureXYValues(x, y);
-  if FColumns[x].Values[y] <> Value then
-  begin
-    FColumns[x].Values[y] := Value;
-    Invalidate;
-  end;
+  FColumns[x].Values[y] := Value;
+  Invalidate;
 end;
 
 procedure TArcIWStringGrid.SetRowHeaderHeight(const Value: integer);
 begin
-  if FRowHeaderHeight <> Value then
-  begin
-    FRowHeaderHeight := Value;
-    Invalidate;
-  end;
+  FRowHeaderHeight := Value;
 end;
 
 function TArcIWStringGrid.GetObject(x, y: integer): TObject;
@@ -1624,11 +1586,8 @@ end;
 procedure TArcIWStringGrid.SetObject(x, y: integer; Value: TObject);
 begin
   EnsureXYValues(x, y);
-  if FColumns[x].Values.Objects[y] <> Value then
-  begin
-    FColumns[x].Values.Objects[y] := Value;
-    Invalidate;
-  end;
+  FColumns[x].Values.Objects[y] := Value;
+  Invalidate;
 end;
 
 procedure TArcIWStringGrid.Submit(const AValue: string);
@@ -1710,9 +1669,6 @@ begin
             cbtRefresh: FContent.Refresh;
           end;
         end;
-
-        if Assigned(FAfterCaptionButtonClick) then
-          FAfterCaptionButtonClick(Self, bt);
 
       end else
         if sType = '@' then
@@ -1873,7 +1829,6 @@ begin
       break;
     ADataSet.Next;
   end;
-  Invalidate;
 end;
 
 
@@ -1933,7 +1888,7 @@ begin
           else
             TArcGridStringColumn(FColumns.Items[x]).Values[y - SkipRows] := slCols[x];
 
-          if AValuesAreLinks and (FastCharPos(slCols[x], '=', 1) > 0) then
+          if AValuesAreLinks and (Pos('=',slCols[x]) > 0) then
             TArcGridStringColumn(FColumns.Items[x]).FValuesHaveLinks := True;
         end;
       end;
@@ -1977,7 +1932,6 @@ var
 begin
   for i := 0 to FColumns.Count - 1 do
     SelectedCol[i] := False;
-  Invalidate;
 end;
 
 {$IFDEF INTRAWEB72}
@@ -1985,7 +1939,11 @@ end;
 function TArcIWStringGrid.CheckComponentForRender(AComponent: TComponent): Boolean;
 begin
   if SupportsInterface(Parent, IIWHTML40Form) then begin
+    {$IFDEF INTRAWEB110}
+    result := False;
+    {$ELSE}
     result := HTML40FormInterface(Parent).PageContext.UpdateMode = umPartial;
+    {$ENDIF}
   end else begin
     if SupportsInterface(Parent, IIWHTML40Container) then begin
       result := HTML40ContainerInterface(Parent).CheckComponentForRender(AComponent);
@@ -2212,12 +2170,8 @@ end;
 procedure TArcIWStringGrid.SetSelected(x, y: integer; Value: boolean);
 begin
   EnsureXYValues(x, y);
-  if FColumns[x].Selected[y] <> Value then
-  begin
-    ContentSelect(x, y, Value);
-    FColumns[x].Selected[y] := Value;
-    invalidate;
-  end;
+  ContentSelect(x, y, Value);
+  FColumns[x].Selected[y] := Value;
 end;
 
 function TArcIWStringGrid.GetSelectedRow(y: integer): boolean;
@@ -2255,7 +2209,6 @@ begin
     FColumns[x].Selected[y] := Value;
   end;
   ContentSelectRow(y, Value);
-  Invalidate;
 end;
 
 function TArcIWStringGrid.GetSelectedCol(x: integer): boolean;
@@ -2294,7 +2247,6 @@ begin
   begin
     FColumns[x].Selected[y] := Value;
   end;
-  Invalidate;
 end;
 
 function TArcIWStringGrid.GetFirstSelectedRow: integer;
@@ -2325,71 +2277,19 @@ begin
   end;
 end;
 
-function TArcIWStringGrid.RenderAsync(AContext: TIWBaseHTMLComponentContext): TIWXMLTag;
-var
-  tag : TIWMarkupLanguageTag;
-begin
-  Result := TIWXMLTag.CreateTag('control');
-  try
-    Result.AddStringParam('id', HTMLName);
-    Result.AddStringParam('type', 'ARCIWSTRINGGRID');
-    tag := Result.Contents.AddTag('innerHTML');
-    RenderInnerHTML(TIWBaseHTMLComponentContext(AContext), TIWHTMLTag(tag));
-    RenderAsyncCommonProperties(TIWBaseHTMLComponentContext(AContext), Result, [acpEnabled..acpAlignment]);
-  except
-    FreeAndNil(Result);
-  end;
-  if (AContext.Browser in [brIE, brIE4]) then
-     AContext.WebApplication.CallBackResponse.AddJavaScriptToExecute('Body_OnResize();');
-
-end;
-
 function TArcIWStringGrid.RenderAsyncComponent(
   AContext: TIWBaseComponentContext): TIWXMLTag;
 begin
-  Result := inherited RenderAsyncComponent(AContext);
+  // Todo?
 end;
 
 procedure TArcIWStringGrid.RenderAsyncComponents(AContext: TIWContainerContext;
   APageContext: TIWBasePageContext);
-Var
-  i: integer;
-  LContainerContext: IWBaseRenderContext.TIWContainerContext;
-  LIWContainer: IIWBaseContainer;
 begin
-  //Todo: Render initially invisible controls
-  //Initially invisible controls are  currently not rendered when set to visible true.
-  //For that readson they do not have a ContainerContext at all
-  if visible and assigned(ContainerContext) then begin
-    with ContainerContext do begin
-      for i := 0 to ComponentsCount - 1 do begin
-        if SupportsInterface(ComponentsList[i], IIWBaseContainer) then begin
-          LIWContainer := BaseContainerInterface(ComponentsList[i]);
-          LContainerContext := LIWContainer.InitContainerContext(APageContext.WebApplication);
-          if Assigned(LContainerContext) then begin
-            LContainerContext.UpdateTree := {CheckUpdateTree(LComponent) or }AContext.UpdateTree;
-            LIWContainer.RenderComponents(LContainerContext, APageContext);
-          end;
-        end;
-        // Because HTML Tags are already embeded into table tag we should clear the HTML pointer inside container context.
-        TIWBaseHTMLComponentContext(ComponentContext[BaseHTMLComponentInterface(ComponentsList[i]).HTMLName]).HTMLTag := nil;
-      end;
-    end;
-  end;
+  // Todo?
 end;
 
 function TArcIWStringGrid.RenderHTML{$IFNDEF INTRAWEB72}: TIWHTMLTag; {$ELSE}(AContext: TIWBaseHTMLComponentContext): TIWHTMLTag; {$ENDIF}
-begin
-  Result := TIWHTMLTag.CreateTag('span');
-  try
-    RenderInnerHTML(AContext, Result);
-  except
-    FreeAndNil(Result);
-    raise;
-  end;
-end;
-
-procedure TArcIWStringGrid.RenderInnerHTML(AContext: TIWBaseHTMLComponentContext; Result: TIWHTMLTag);
   function IsNotTemplate(str : string; alt : string='') : string;
   begin
     {$IFDEF INTRAWEB72}
@@ -2408,7 +2308,7 @@ procedure TArcIWStringGrid.RenderInnerHTML(AContext: TIWBaseHTMLComponentContext
     {$IFDEF VER150}
       result := sl.ValueFromIndex[y];
     {$ELSE}
-      iPos := FastCharPos(sl[y],'=',1);
+      iPos := Pos('=',sl[y]);
       if iPos > 0 then
         result := Copy(sl[y],iPos+1,High(Integer))
       else
@@ -2420,19 +2320,12 @@ procedure TArcIWStringGrid.RenderInnerHTML(AContext: TIWBaseHTMLComponentContext
     result := Assigned(FOnOverrideCellStyle) or (Assigned(FContent) and FContent.DoNeedStyleOverride(Self));
   end;
   function ShouldRenderLink(idx, Row : integer): boolean;
-  var
-    b : boolean;
   begin
     result := TArcGridStringColumn(FColumns.Items[idx]).ClickEventAsLinks and
       Assigned(TArcGridStringColumn(FColumns.Items[idx]).OnClick);
 
     if Result and Assigned(TArcGridStringColumn(FColumns.Items[idx]).FOnCellClickable) then
-    begin
-      b := Result;
       TArcGridStringColumn(FColumns.Items[idx]).FOnCellClickable(Self, FColumns[idx], Row, Result);
-      if b <> Result then
-        Invalidate;
-    end;
   end;
 {$IFDEF INTRAWEB72}
   procedure RenderControl(Tag: TIWHTMLTag; ctrl: TControl; FullWidth, FullHeight : boolean);
@@ -2440,40 +2333,40 @@ procedure TArcIWStringGrid.RenderInnerHTML(AContext: TIWBaseHTMLComponentContext
     var
       iPos: integer;
     begin
-      Result := IsNotTemplate(FastReplace(str, ':absolute;', ':static;',false),'relative');
+      Result := IsNotTemplate(ReplaceStr(str, ':absolute;', ':static;'),'relative');
 
-      iPos := FastPosNoCase(Result, ':static',length(Result),7,1);
+      iPos := FastPosNoCase(Result, ':static',1);
       if iPos = 0 then
         Result := 'position:static;'+Result;
 
-      iPos := FastPosNoCase(Result, 'left:', Length(Result), 5, 1);
+      iPos := FastPosNoCase(Result, 'left:', 1);
       if iPos > 0 then
-        Result := Copy(Result, 1, iPos - 1) + Copy(Result, FastCharPos(Result, ';', iPos + 5) + 1, High(Integer));
+        Result := Copy(Result, 1, iPos - 1) + Copy(Result, PosEx(';', Result, iPos + 5) + 1, High(Integer));
 
-      iPos := FastPosNoCase(Result, 'left :', Length(Result), 5, 1);
+      iPos := FastPosNoCase(Result, 'left :', 1);
       if iPos > 0 then
-        Result := Copy(Result, 1, iPos - 1) + Copy(Result, FastCharPos(Result, ';', iPos + 5) + 1, High(Integer));
+        Result := Copy(Result, 1, iPos - 1) + Copy(Result, PosEx(';', Result, iPos + 5) + 1, High(Integer));
 
-      iPos := FastPosNoCase(Result, 'top:', Length(Result), 4, 1);
+      iPos := FastPosNoCase(Result, 'top:', 1);
       if iPos > 0 then
-        Result := Copy(Result, 1, iPos - 1) + Copy(Result, FastCharPos(Result, ';', iPos + 4) + 1, High(Integer));
+        Result := Copy(Result, 1, iPos - 1) + Copy(Result, PosEx( ';',Result, iPos + 4) + 1, High(Integer));
 
-      iPos := FastPosNoCase(Result, 'top :', Length(Result), 4, 1);
+      iPos := FastPosNoCase(Result, 'top :', 1);
       if iPos > 0 then
-        Result := Copy(Result, 1, iPos - 1) + Copy(Result, FastCharPos(Result, ';', iPos + 4) + 1, High(Integer));
+        Result := Copy(Result, 1, iPos - 1) + Copy(Result, PosEx( ';',Result, iPos + 4) + 1, High(Integer));
       if FullWidth then
       begin
-        iPos := FastPosNoCase(Result, 'width :', Length(Result), 7, 1);
+        iPos := FastPosNoCase(Result, 'width :', 1);
         if iPos > 0 then
-          Result := Copy(Result, 1, iPos - 1) + 'width :100%;' + Copy(Result, FastCharPos(Result, ';', iPos + 7) + 1, High(Integer))
+          Result := Copy(Result, 1, iPos - 1) + 'width :100%;' + Copy(Result, PosEx(';', Result, iPos + 7) + 1, High(Integer))
         else
           Result := Result + 'width: 100%;';
       end;
       if FullHeight then
       begin
-        iPos := FastPosNoCase(Result, 'height :', Length(Result), 7, 1);
+        iPos := FastPosNoCase(Result, 'height :', 1);
         if iPos > 0 then
-          Result := Copy(Result, 1, iPos - 1) + 'height :100%;' + Copy(Result, FastCharPos(Result, ';', iPos + 7) + 1, High(Integer))
+          Result := Copy(Result, 1, iPos - 1) + 'height :100%;' + Copy(Result, PosEx(';', Result, iPos + 7) + 1, High(Integer))
         else
           Result := Result + 'height: 100%;';
       end;
@@ -2506,7 +2399,7 @@ procedure TArcIWStringGrid.RenderInnerHTML(AContext: TIWBaseHTMLComponentContext
 		
 		    //ctrl.Parent := TWinControl(Self);
 		    //ctrli.ParentChanging(ctrl.Parent, Self);
-
+		
 		    ctrl.Visible := true;
 		    ctrlContext := TIWComponent40Context.Create(ctrl, cntrContext, AContext.PageContext);
 		
@@ -2549,7 +2442,7 @@ procedure TArcIWStringGrid.RenderInnerHTML(AContext: TIWBaseHTMLComponentContext
 		      begin
 		        Result.AddStringParam('NAME', BaseHTMLControlInterface(ctrl).HTMLName);
 		      end;
-
+		
 		      Result.AddStringParam('STYLE', s);
 		
 		      if SupportsInterface(ctrl, IIWHTML40Component) then begin
@@ -2557,7 +2450,7 @@ procedure TArcIWStringGrid.RenderInnerHTML(AContext: TIWBaseHTMLComponentContext
 		      end;
 		    end;
 		    cntrContext.AddComponent(ctrlContext);
-
+		
 		    DoRefreshControl := DoRefreshControl or HTML40ComponentInterface(ctrl).DoRefreshControl;
 		    if DoRefreshControl then
 		    begin
@@ -2587,7 +2480,11 @@ procedure TArcIWStringGrid.RenderInnerHTML(AContext: TIWBaseHTMLComponentContext
   end;
   function NeedStyleDetail: boolean;
   begin
+    {$IFDEF INTRAWEB110}
+    result := False;
+    {$ELSE}
     result := (AContext.Browser = brIE) and AContext.WebApplication.IsPartialUpdate;
+    {$ENDIF}
   end;
 {$ENDIF}
   function RenderScrollbarStyle: string;
@@ -2602,8 +2499,8 @@ procedure TArcIWStringGrid.RenderInnerHTML(AContext: TIWBaseHTMLComponentContext
 {$ELSE}
     case FScrollbars of
       scrNone: result := 'overflow:hidden;';
-      scrHorizontal: result := IfThen(AContext.Browser in [brIE], 'overflow-y:hidden;overflow-x: auto;', 'overflow:auto;');
-      scrVertical: result := IfThen(AContext.Browser in [brIE], 'overflow-x:hidden;overflow-y: auto;', 'overflow:auto;');
+      scrHorizontal: result := IfThen(BrowserIsIE(AContext.Browser), 'overflow-y:hidden;overflow-x: auto;', 'overflow:auto;');
+      scrVertical: result := IfThen(BrowserIsIE(AContext.Browser), 'overflow-x:hidden;overflow-y: auto;', 'overflow:auto;');
       scrBoth: result := 'overflow:auto;';
     end;
 {$ENDIF}
@@ -2800,7 +2697,7 @@ var
             else
               sStyle := sStyle + 'cursor: pointer;';
 {$ELSE}
-            if AContext.Browser = brIE then
+            if BrowserIsIE(AContext.Browser) then
               sStyle := sStyle + 'cursor: hand;'
             else
               sStyle := sStyle + 'cursor: pointer;';
@@ -2829,7 +2726,7 @@ var
           if (not FColumns[i].CaptionIcon.Empty) and (FColumns[i].CaptionIconAlignment = iaLeft) then
           begin
             sURL := FColumns[i].CaptionIcon.Location(AContext.WebApplication.InternalURLBase);
-            if (AContext.Browser = brIE) and (FastPos(sURL,'.png',length(sURL),4,1)>0) then
+            if BrowserIsIE(AContext.Browser) and (Pos('.png',sURL)>0) then
             begin
               tagCol.Contents.AddText('<span width=16 height=16 style="position:static;width:16px;height:16px;float:none;filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='''+
                 sURL+''', sizingMethod=''scale'');"></span>');
@@ -2842,7 +2739,7 @@ var
           if (not FColumns[i].CaptionIcon.Empty) and (FColumns[i].CaptionIconAlignment = iaRight) then
           begin
             sURL := FColumns[i].CaptionIcon.Location(AContext.WebApplication.InternalURLBase);
-            if (AContext.Browser = brIE) and (FastPos(sURL,'.png',length(sURL),4,1)>0) then
+            if BrowserIsIE(AContext.Browser) and (Pos('.png',sURL)>0) then
             begin
               tagCol.Contents.AddText('<span width=16 height=16 style="position:static;width:16px;height:16px;float:none;filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='''+
                 sURL+''', sizingMethod=''scale'');"></span>');
@@ -2855,14 +2752,6 @@ var
     end;
   end;
   procedure DoRenderDetail;
-    function RenderScrollScript(HTMLName, _selected : string; i,y : integer) : string; inline;
-    begin
-      result := 'var o = IWTop().document.getElementById("' + HTMLName + _selected + '_' + IntToStr(i) + '_' + IntToStr(y) + '"); if(o) {o.scrollIntoView(false)};';
-    end;
-    function RenderScrollRowScript(HTMLName, _selected : string; y : integer) : string; inline;
-    begin
-      result := 'var o = IWTop().document.getElementById("' + HTMLName + _selected + '_' + IntToStr(y) + '"); if(o) {o.scrollIntoView(false)};';
-    end;
   var
     bShow : boolean;
     y, i: integer;
@@ -2963,7 +2852,7 @@ var
                 else
                   sStyle := sStyle + 'cursor:pointer;';
 {$ELSE}
-                if AContext.Browser = brIE then
+                if BrowserIsIE(AContext.Browser) then
                   sStyle := sStyle + 'cursor:hand;'
                 else
                   sStyle := sStyle + 'cursor:pointer;';
@@ -3050,13 +2939,17 @@ var
               if Selected[i, y] then
               begin
                 tagCol.AddStringParam('class', HTMLName + _selected);
-                if FScrollToSelectedCell and (AContext.Browser in [brIE, brNetscape7]) then
+                if FScrollToSelectedCell and (BrowserIsIE(AContext.Browser) or BrowserIsNetscape7(AContext.Browser)) then
                 begin
                   tagCol.AddStringParam('id', HTMLName + _selected + '_' + IntToStr(i) + '_' + IntToStr(y));
+                  {$IFDEF INTRAWEB110}
+                  if False then
+                  {$ELSE}
                   if AContext.PageContext.WebApplication.IsPartialUpdate then
-                    TIWPageContext40(AContext.PageContext).AddToUpdateInitProc(RenderScrollScript(HTMLName, _selected, i, y))
+                  {$ENDIF}
+                    TIWPageContext40(AContext.PageContext).AddToUpdateInitProc('IWTop().document.getElementById("' + HTMLName + _selected + '_' + IntToStr(i) + '_' + IntToStr(y) + '").scrollIntoView(false)')
                   else
-                    TIWPageContext40(AContext.PageContext).AddToInitProc(RenderScrollScript(HTMLName, _selected, i, y));
+                    TIWPageContext40(AContext.PageContext).AddToInitProc('IWTop().document.getElementById("' + HTMLName + _selected + '_' + IntToStr(i) + '_' + IntToStr(y) + '").scrollIntoView(false)');
                 end;
               end else
                 if FUseAltStyles then
@@ -3168,13 +3061,17 @@ var
           end;
           if SelectedRow[y] then
           begin
-            if FScrollToSelectedRow and (AContext.Browser in [brIE, brNetscape7]) then
+            if FScrollToSelectedRow and (BrowserIsIE(AContext.Browser) or BrowserIsNetscape7(AContext.Browser)) then
             begin
               tagRow.AddStringParam('id', HTMLName + _SelectedRow + '_' + IntToStr(y));
+              {$IFDEF INTRAWEB110}
+              if False then
+              {$ELSE}
               if AContext.PageContext.WebApplication.IsPartialUpdate then
-                TIWPageContext40(AContext.PageContext).AddToUpdateInitProc(RenderScrollRowScript(HTMLName, _SelectedRow, y))
+              {$ENDIF}
+                TIWPageContext40(AContext.PageContext).AddToUpdateInitProc('IWTop().document.getElementById("' + HTMLName + _SelectedRow + '_' + IntToStr(y) + '").scrollIntoView(false)')
               else
-                TIWPageContext40(AContext.PageContext).AddToInitProc(RenderScrollRowScript(HTMLName, _SelectedRow, y))
+                TIWPageContext40(AContext.PageContext).AddToInitProc('IWTop().document.getElementById("' + HTMLName + _SelectedRow + '_' + IntToStr(y) + '").scrollIntoView(false)');
             end;
           end;
         end;
@@ -3191,6 +3088,8 @@ var
 begin
   ContentBeforeRenderHTML(AContext);
   ContainerContext := IWBaseRenderContext.TIWContainerContext.Create(AContext.WebApplication);
+
+  Result := TIWHTMLTag.CreateTag('span');
 
   s := 'width:' + IntToStr(Width) + 'px;';
   if not FAutoHeight then
@@ -3245,79 +3144,28 @@ begin
   tagScript := AContext.PageContext.BodyTag.Contents.AddTag('script');
   //tagScript := Result.Contents.AddTag('script');
 
-  sScript := '';
-  // ajax support code
-  if FUseAsyncEvents then
-  begin
-    sScript := DebugEOL+
-      (*'function '+HTMLName+'_SubmitEvent() {'+DebugEOL+
-      '  this.type = "'+HTMLName+'_Submit";'+DebugEOL+
-      '  this.data = "";'+DebugEOL+
-      '}'+DebugEOL+
-      'eventList += '''+HTMLName+'_Submit'';'+DebugEOL+
-      'eventGenerators += function(lEvent) { alert("here: "+lEvent.data); return "&data="+lEvent.data;}'+DebugEOL+
-      *)'var ' + HTMLName + _ReturnStyle + ' = "' + HTMLName + _col + '";' + DebugEOL +
-      'function '+HTMLName+'_Submit(Param) {'+DebugEOL+
-      //'  var e = new '+HTMLName+'_SubmitEvent();'+DebugEOL+
-      //'  e.type = "'+HTMLName+'_Submit";'+DebugEOL+
-      //'  e.data = Param;'+DebugEOL+
-      //'  processAjaxEvent(e, '+HTMLName+'IWCL, '''+HTMLName+'.'+HTMLName+'_Submit'', false, null, false);'+ DebugEOL+
-      '  executeAjaxEvent("&data="+Param, '+HTMLName+'IWCL, '''+HTMLName+'.Submit'', false, null, false);'+DebugEOL+
-      '}'+DebugEOL+
-      'function ' + HTMLName + _SubmitOnEnterKey + '(e, Param1, Param2, Param3, Param4) {' + DebugEOL +
-      '  var c;' + DebugEOL +
-      '  c=e.keyCode;' + DebugEOL +
-      '  if (c==13) { SubmitClickConfirm(Param1, Param2, Param3, Param4); return false;} else { return true; }' + DebugEOL +
-      '}' + DebugEOL +
-      'function ' + HTMLName + _DoCaptionClick + '(col) {' + DebugEOL +
-      '  '+HTMLName+'_Submit("hx"+col);' + DebugEOL +
-      '}' + DebugEOL +
-      'function ' + HTMLName + _DoColumnClick + '(row,col) {' + DebugEOL +
-      '  '+HTMLName+'_Submit("cy"+row+"x"+col);' + DebugEOL +
-      '}' + DebugEOL;
-  end else
-  begin
-    sScript := sScript+DebugEOL + 'var ' + HTMLName + _ReturnStyle + ' = "' + HTMLName + _col + '";' + DebugEOL +
-      'function ' + HTMLName + _SubmitOnEnterKey + '(e, Param1, Param2, Param3, Param4) {' + DebugEOL +
-      '  var c;' + DebugEOL +
-      '  c=e.keyCode;' + DebugEOL +
-      '  if (c==13) { SubmitClickConfirm(Param1, Param2, Param3, Param4); return false;} else { return true; }' + DebugEOL +
-      '}' + DebugEOL +
-      'function ' + HTMLName + _DoCaptionClick + '(col) {' + DebugEOL +
-      //'  alert("hx"+col);'+DebugEOL+
-    '  SubmitClickConfirm("' + HTMLName + '","hx"+col,false,"");' + DebugEOL +
-      '}' + DebugEOL +
-      'function ' + HTMLName + _DoColumnClick + '(row,col) {' + DebugEOL +
-      //'  alert("cy"+row+"x"+col);'+DebugEOL+
-    '  SubmitClickConfirm("' + HTMLName + '","cy"+row+"x"+col,false,"");' + DebugEOL +
-      '}' + DebugEOL;
-  end;
-  
-  sScript := sScript+
-    'function ' + HTMLName +'_ShowLoading() {' + DebugEOL+
-    '  IWTop().FindElem('''+HTMLName+''').innerHTML=''<img style="position:relative;top:50%;left:50%;" src="'+AContext.WebApplication.AppURLBase+'/gfx/loading.gif">'';'+
-    '}'+DebugEOL;
-
+  sScript := DebugEOL + 'var ' + HTMLName + _ReturnStyle + ' = "' + HTMLName + _col + '";' + DebugEOL +
+    'function ' + HTMLName + _SubmitOnEnterKey + '(e, Param1, Param2, Param3, Param4) {' + DebugEOL +
+    '  var c;' + DebugEOL +
+    '  c=e.keyCode;' + DebugEOL +
+    '  if (c==13) { SubmitClickConfirm(Param1, Param2, Param3, Param4); return false;} else { return true; }' + DebugEOL +
+    '}' + DebugEOL +
+    'function ' + HTMLName + _DoCaptionClick + '(col) {' + DebugEOL +
+    //'  alert("hx"+col);'+DebugEOL+
+  '  SubmitClickConfirm("' + HTMLName + '","hx"+col,false,"");' + DebugEOL +
+    '}' + DebugEOL +
+    'function ' + HTMLName + _DoColumnClick + '(row,col) {' + DebugEOL +
+    //'  alert("cy"+row+"x"+col);'+DebugEOL+
+  '  SubmitClickConfirm("' + HTMLName + '","cy"+row+"x"+col,false,"");' + DebugEOL +
+    '}' + DebugEOL;
   if FShowButtonBar then
-    if not FUseAsyncEvents then
-    begin
-      sScript := sScript +
-        'function ' + HTMLName + _DoCaptionButtonClick + '(ButtonType,ConfirmString) {' + DebugEOL +
-        '  if (ConfirmString != "") {' + DebugEOL +
-        '    if (!confirm(ConfirmString)) { return false; }' + DebugEOL +
-        '  }' + DebugEOL +
-        '  SubmitClickConfirm("' + HTMLName + '","b"+ButtonType,false,"");' + DebugEOL +
-        '}' + DebugEOL;
-    end else
-    begin
-      sScript := sScript +
-        'function ' + HTMLName + _DoCaptionButtonClick + '(ButtonType,ConfirmString) {' + DebugEOL +
-        '  if (ConfirmString != "") {' + DebugEOL +
-        '    if (!confirm(ConfirmString)) { return false; }' + DebugEOL +
-        '  }' + DebugEOL +
-        '  '+HTMLName+'_Submit("b"+ButtonType);' + DebugEOL +
-        '}' + DebugEOL;
-    end;
+    sScript := sScript +
+      'function ' + HTMLName + _DoCaptionButtonClick + '(ButtonType,ConfirmString) {' + DebugEOL +
+      '  if (ConfirmString != "") {' + DebugEOL +
+      '    if (!confirm(ConfirmString)) { return false; }' + DebugEOL +
+      '  }' + DebugEOL +
+      '  SubmitClickConfirm("' + HTMLName + '","b"+ButtonType,false,"");' + DebugEOL +
+      '}' + DebugEOL;
 
   (*if FRollover <> rtNone then
   begin
@@ -3344,7 +3192,7 @@ begin
   tagStyle := AContext.PageContext.BodyTag.Contents.AddTag('style');
 
   iTableWidth := width;
-  if ({$IFDEF INTRAWEB72}AContext.Browser{$ELSE}WebApplication.Browser{$ENDIF} = brIE) and (not (FStyleTable.BorderStyle.Style in [brdNone, brdHidden])) then
+  if BrowserIsIE({$IFDEF INTRAWEB72}AContext.Browser{$ELSE}WebApplication.Browser{$ENDIF}) and (not (FStyleTable.BorderStyle.Style in [brdNone, brdHidden])) then
     iTableWidth := width - (FStyleTable.BorderStyle.Width * 2);
 
   iWidthTotal := 0;
@@ -3452,12 +3300,16 @@ begin
   
   if FAutoHeight and bShow then
   begin
-    s := 'document.getElementById('''+HTMLName+''').style.height=IWTop().FindElem('''+HTMLName+_tbl+''').clientHeight;';
+    s := 'document.getElementById('''+HTMLName+''').style.height=IWTop().FindElem('''+HTMLName+_tbl+''').clientHeight';
 
     if FShowButtonBar then
       s := s+'+IWTop().FindElem('''+HTMLName+_btnbar+''').clientHeight;';
 
+    {$IFDEF INTRAWEB110}
+    if False then
+    {$ELSE}
     if AContext.PageContext.WebApplication.IsPartialUpdate then
+    {$ENDIF}
       TIWPageContext40(AContext.PageContext).AddToUpdateInitProc(s)
     else
       TIWPageContext40(AContext.PageContext).AddToInitProc(s);

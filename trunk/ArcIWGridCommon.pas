@@ -32,7 +32,7 @@ interface
 {$I Eval.inc}
 
 uses SysUtils, Classes, Graphics, IWColor, IWFont, IWTypes, IWKlooch
-     {$IFDEF INTRAWEB72},IWFileReference, IWRenderContext{$ENDIF};
+     {$IFDEF INTRAWEB72},IWFileReference, IWRenderContext{$ENDIF}, ArcCommon;
 
 type
   TArcScrollbarStyle = (scrNone, scrHorizontal, scrVertical, scrBoth);

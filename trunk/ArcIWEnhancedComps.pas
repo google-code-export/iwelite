@@ -35,8 +35,9 @@ uses
   IWHTMLTag, IWBaseControl, IWControl, IWCompCalendar, IWCompActiveX,
   IWCompButton, IWCompCheckBox, IWCompFlash, IWCompLabel,
   IWCompListbox, IWCompMemo, IWCompMPEG, IWCOmpProgressBar, IWCompQuicktime,
-  IWCompText, IWExtCtrls, IWHTMLControls{$IFNDEF INTRAWEB51}, IWRenderContext{$ENDIF}
-  {$IFDEF INTRAWEB71}, IWCompTimeEdit, IWCompOrderedListbox{$ENDIF};
+  IWCompText, IWHTMLControls{$IFNDEF INTRAWEB51}, IWRenderContext{$ENDIF}
+  {$IFDEF INTRAWEB71}, IWCompTimeEdit, IWCompOrderedListbox{$ENDIF}, ArcCommon
+  {$IFDEF INTRAWEB120}, IWCompExtCtrls {$ELSE}, IWExtCtrls {$ENDIF};
 
 type
   TArcIWEnhEdit = class(TIWEdit)

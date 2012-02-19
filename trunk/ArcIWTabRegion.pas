@@ -2,8 +2,10 @@ unit ArcIWTabRegion;
 
 interface
 
+{$I IntrawebVersion.inc}
+
 uses SysUtils, Classes, IWRenderContext, IWHTMLTag, IWRegion, IWFont, IWColor,
-  ArcFastStrings, IWBaseInterfaces, Messages;
+  IWBaseInterfaces, Messages, ArcCommon;
 
 type
   TArcTabNotifyEvent = procedure(Sender : TObject; TabIndex : integer; Caption : string) of object;

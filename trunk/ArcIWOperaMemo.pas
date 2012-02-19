@@ -64,7 +64,7 @@ uses
   ArcIWOperaFix,
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, IWScriptEvents, {$ENDIF}
   {$IFDEF INTRAWEB70} IWRenderContext, {$ENDIF}
-  IWHTMLTag;
+  IWHTMLTag, ArcCommon;
 
 type
   TArcIWOperaMemo = class(TIWMemo)
@@ -91,10 +91,13 @@ uses IWAppForm;
 { TArcIWOperaMemo }
 
 constructor TArcIWOperaMemo.Create(AOwner: TComponent);
+{$IFNDEF INTRAWEB110}
 var
   browsers : TIWBrowsers;
+{$ENDIF}
 begin
   inherited;
+  {$IFNDEF INTRAWEB110}
   if (csDesigning in ComponentState) then
   begin
     if not (brOpera in  TIWAppForm(Owner).SupportedBrowsers) then
@@ -104,6 +107,7 @@ begin
       TIWAppForm(Owner).SupportedBrowsers := browsers;
     end;
   end;
+  {$ENDIF}
 end;
 
 {$IFDEF IWVERCLASS5}

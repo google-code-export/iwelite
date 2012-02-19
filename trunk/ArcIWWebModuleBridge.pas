@@ -1,19 +1,19 @@
 ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 // The MIT License
-// 
+//
 // Copyright (c) 2008 by Arcana Technologies Incorporated
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,23 +21,26 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 unit ArcIWWebModuleBridge;
 
 interface
 
+{$I IntrawebVersion.inc}
+
 uses
   SysUtils, Classes, IWForm, IWApplication, IWServerControllerBase, IWBaseForm,
-  HTTPApp, ArcIWIOPPooling, InGlobalProtocols, SWSystem, Windows,
-  ArcD5Fix, ArcIWInteropCommon;
+  HTTPApp, ArcIWIOPPooling, InGlobalProtocols, {$IFDEF INTRAWEB110} IWSystem, IWURLResponder {$ELSE} SWSystem {$ENDIF},
+  Windows, ArcD5Fix, ArcIWInteropCommon
+  {$IFDEF INTRAWEB120}, IW.HttpRequest, IW.HttpReply {$ENDIF};
 
 {$I IntrawebVersion.inc}
 
 type
   EArcIWBridgeSessionNotFound = class(Exception);
-  
+
   TWebModuleClass = class of TWebModule;
   TGetWebModuleClassEvent = procedure(Sender : TObject; var WebModuleClass : TWebModuleClass) of object;
 
@@ -58,11 +61,22 @@ type
 
   TArcIWWebModuleBridge = class(TComponent)
   private
-    _OnInvalidCommand : TOnInvalidCommandEvent;
     FActive: boolean;
     FOnGetWebModuleClass: TGetWebModuleClassEvent;
     FBrowsingPaths: TD7StringList;
     FFileAliases: TD7StringList;
+    {$IFDEF INTRAWEB110}
+      {$IFDEF INTRAWEB120}
+    function IWURLResponderEventRequest(AApplication: TIWApplication;
+      ARequest: THttpRequest; AResponse: THttpReply): Boolean;
+      {$ELSE}
+    function IWURLResponderEventRequest(AApplication: TIWApplication;
+      ARequest: TWebRequest; AResponse: TWebResponse): Boolean;
+      {$ENDIF}
+    function GetURLResponder: TIWURLResponderEvent;
+    {$ELSE}
+    _OnInvalidCommand : TOnInvalidCommandEvent;
+    {$ENDIF}
     procedure SetActive(const Value: boolean);
     function GetPoolSize: integer;
     procedure SetPoolSize(const Value: integer);
@@ -75,12 +89,24 @@ type
     function AcquireWebModule : TWebModule; virtual;
     procedure ReleaseWebModule(wm : TWebModule); virtual;
     procedure Loaded; override;
+    {$IFDEF INTRAWEB110}
+      {$IFDEF INTRAWEB120}
+    function InternalOnInvalidCommand(ARequest: THttpRequest; AResponse: THttpReply): Boolean; virtual;
+      {$ELSE}
+    function InternalOnInvalidCommand(ARequest: TWebRequest; AResponse: TWebResponse): Boolean; virtual;
+      {$ENDIF}
+    {$ELSE}
     procedure InternalOnInvalidCommand(ARequest: TWebRequest; AResponse: TWebResponse; AMsg: string); virtual;
+    {$ENDIF}
     procedure InternalOnCreateWebModule(Sender : TObject; var AObject : TObject); virtual;
     procedure InternalOnDestroyWebModule(Sender : TObject; var AObject : TObject); virtual;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure HandlePathBrowse(ARequest : TWebRequest; AResponse : TWebResponse; APathIndex : integer); virtual;
     procedure HandleFileAliases(ARequest : TWebRequest; AResponse : TWebResponse; APathIndex : integer); virtual;
+
+    {$IFDEF INTRAWEB110}
+    property URLResponder: TIWURLResponderEvent read GetURLResponder;
+    {$ENDIF}
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -176,8 +202,36 @@ begin
   AObject.Free;
 end;
 
-procedure TArcIWWebModuleBridge.InternalOnInvalidCommand(
-  ARequest: TWebRequest; AResponse: TWebResponse; AMsg: string);
+{$IFDEF INTRAWEB110}
+
+  {$IFDEF INTRAWEB120}
+function TArcIWWebModuleBridge.IWURLResponderEventRequest(AApplication: TIWApplication;
+  ARequest: THttpRequest; AResponse: THttpReply): Boolean;
+  {$ELSE}
+function TArcIWWebModuleBridge.IWURLResponderEventRequest(AApplication: TIWApplication;
+  ARequest: TWebRequest; AResponse: TWebResponse): Boolean;
+  {$ENDIF}
+begin
+  Result:= InternalOnInvalidCommand(ARequest,AResponse);
+end;
+
+function TArcIWWebModuleBridge.GetURLResponder: TIWURLResponderEvent;
+begin
+  Result:= TIWServerControllerBase(Owner).UnhandledRequest as TIWURLResponderEvent;
+end;
+
+{$ENDIF}
+
+{$IFDEF INTRAWEB110}
+  {$IFDEF INTRAWEB120}
+function TArcIWWebModuleBridge.InternalOnInvalidCommand(ARequest: THttpRequest; AResponse: THttpReply): Boolean;
+  {$ELSE}
+function TArcIWWebModuleBridge.InternalOnInvalidCommand(ARequest: TWebRequest; AResponse: TWebResponse): Boolean;
+  {$ENDIF}
+{$ELSE}
+procedure TArcIWWebModuleBridge.InternalOnInvalidCommand(ARequest: TWebRequest; AResponse: TWebResponse;
+  AMsg: string);
+{$ENDIF}
 var
   wm : TWebModule;
   idx : integer;
@@ -199,18 +253,18 @@ begin
       begin
         wm := AcquireWebModule;
         try
-          {$IFNDEF VER130}
-          WebContext := TWebContext.Create(nil,ARequest,AResponse,nil);  // May need to implement session and webmodulelist here eventually.
+          {$IFNDEF VER130} {TODO -oPlp -cConversion : Check this}
+//          WebContext := TWebContext.Create(nil,ARequest,AResponse,nil);  // May need to implement session and webmodulelist here eventually.
           try
           {$ENDIF}
             {$IFDEF VER130}
             bHandled := TWebModuleHelper(wm).DispatchAction(ARequest,AResponse);
-            {$ELSE}
-            bHandled := (wm as IWebRequestHandler).HandleRequest(ARequest, AResponse);
+            {$ELSE} {TODO -oPlp -cConversion : Check this}
+//            bHandled := (wm as IWebRequestHandler).HandleRequest(ARequest, AResponse);
             {$ENDIF}
           {$IFNDEF VER130}
           finally
-            WebContext.Free;
+//            WebContext.Free; {TODO -oPlp -cConversion : Check this}
           end;
           {$ENDIF}
         finally
@@ -226,13 +280,18 @@ begin
       HandlePathBrowse(ARequest, AResponse, idx);
       bHandled := True;
     end;
-  end else
-    AResponse.StatusCode := 404;
+  end  else
+    AResponse.StatusCode := 404; {TODO -oPlp -cConversion : Check this}
   if not bHandled then
   begin
+    {$IFNDEF INTRAWEB110}
     if Assigned(_OnInvalidCommand) then
       _OnInvalidCommand(ARequest, AResponse, AMsg);
+    {$ENDIF}
   end;
+  {$IFDEF INTRAWEB110}
+  Result:= bHandled;
+  {$ENDIF}
 end;
 
 procedure TArcIWWebModuleBridge.Loaded;
@@ -240,8 +299,16 @@ begin
   inherited;
   if not (csDesigning in ComponentState) then
   begin
+    {$IFDEF INTRAWEB110}
+    if Assigned(TIWServerControllerBase(Owner).UnhandledRequest) then
+      raise Exception.Create('TArcIWWebModuleBridge cannot work when ServerController has UnhandledRequest assigned!');
+
+     TIWServerControllerBase(Owner).UnhandledRequest:= TIWURLResponderEvent.Create(Self);
+     URLResponder.OnRequest:= IWURLResponderEventRequest;
+    {$ELSE}
     _OnInvalidCommand := TIWServerControllerBase(Owner).OnInvalidCommand;
     TIWServerControllerBase(Owner).OnInvalidCommand := InternalOnInvalidCommand;
+    {$ENDIF}
     if Active then
       Start;
   end;
@@ -325,7 +392,9 @@ procedure TArcIWWebModuleBridge.CurrentAppIDAsCookie(
 begin
   with Response.Cookies.Add do
   begin
+    // JS: W1058 Implicit string cast with potential data loss from 'string' to 'AnsiString'
     Name := FAppIDParam;
+    // JS: W1058 Implicit string cast with potential data loss from 'string' to 'AnsiString'
     Value := CurrentAppId;
     Path := '/';
   end;
@@ -502,6 +571,7 @@ begin
 
   fs := TFileStream.Create(sFile,fmShareDenyNone and fmOpenRead);
   try
+    // JS: W1058 Implicit string cast with potential data loss from 'string' to 'AnsiString'
     AResponse.ContentType := GetMIMETypeFromFile(sFile);
     AResponse.CustomHeaders.Add('content-disposition: attachment;filename="'+ExtractFilename(sFile)+'"');
     AResponse.SendStream(fs);

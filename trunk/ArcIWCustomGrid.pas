@@ -43,7 +43,7 @@ interface
 uses
   SysUtils, Classes, Controls, IWControl, IWHTMLTag, IWColor, ArcIWEliteResources,
   {$IFDEF INTRAWEB72}IWVCLBaseControl, IWBaseControl, IWBaseHTMLControl, IWApplication, IWRenderContext, IWTypes,{$ENDIF}
-  {$IFDEF VER130}TypInfo,{$ENDIF}ArcIWGridCommon, Graphics;
+  {$IFDEF VER130}TypInfo,{$ENDIF}ArcIWGridCommon, Graphics, ArcCommon;
 
 type
   TArcIWStringGridContentBase = class(TComponent)
@@ -336,7 +336,7 @@ var
 begin
   tk := [tkUnknown, tkInteger, tkChar, tkEnumeration, tkFloat,
     tkString, tkSet, tkClass, tkMethod, tkWChar, tkLString, tkWString,
-    tkVariant, tkArray, tkRecord, tkInterface, tkInt64, tkDynArray];
+    tkVariant, tkArray, tkRecord, tkInterface, tkInt64, tkDynArray, tkUString];
 
   Result := GetPropList2(PTypeInfo(AObject.ClassInfo), tk, PropList);
 
@@ -353,7 +353,7 @@ var
 begin
   case PropInfo^.PropType^.Kind of
     tkString,
-    tkLString: Result := GetStrProp(Instance, PropInfo);
+    tkLString,tkUString: Result := GetStrProp(Instance, PropInfo);
     tkWString:
       begin
         Getter := Longint(PropInfo^.GetProc);

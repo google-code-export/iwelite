@@ -72,7 +72,7 @@ uses
   Windows, Messages, SysUtils, Classes, Controls, IWControl,
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, {$ENDIF}
   {$IFDEF INTRAWEB70} IWRenderContext, {$ENDIF}
-  IWHTMLTag;
+  IWHTMLTag, ArcCommon;
 
 
 type

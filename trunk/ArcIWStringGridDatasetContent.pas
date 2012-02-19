@@ -26,13 +26,16 @@
 
 unit ArcIWStringGridDatasetContent;
 
+{$I IntraWebVersion.inc}
+
 interface
 
 uses SysUtils, {$IFNDEF VER130}StrUtils, Variants, {$ENDIF}
   Classes, ArcIWStringGridContent, ArcIWStringGrid, controls,
-  IWBaseControl, IWCompCheckbox, IWCompEdit, IWCompMemo, IWCompButton, IWExtCtrls,
-  Graphics, TypInfo, ArcFastStrings, IWCompListbox, IWBaseInterfaces,
-  IWRenderContext, IWHTMLTag, IWTypes, IWColor, db;
+  IWBaseControl, IWCompCheckbox, IWCompEdit, IWCompMemo, IWCompButton,
+  Graphics, TypInfo, IWCompListbox, IWBaseInterfaces,
+  IWRenderContext, IWHTMLTag, IWTypes, IWColor, db
+  {$IFDEF INTRAWEB120}, IWCompExtCtrls, IW.Browser.Browser {$ELSE}, IWExtCtrls {$ENDIF}, ArcCommon;
 
 type
   TIWBaseControlHack = class(TIWBaseControl)
@@ -227,7 +230,11 @@ type
     FOldSuppressRowClick: boolean;
     FAvoidReturnToEditMode: boolean;
 
+    {$IFDEF INTRAWEB120}
+    LastKnownBrowser: TBrowser;
+    {$ELSE}
     LastKnownBrowser: TIWBrowser;
+    {$ENDIF}
     FFilterString: string;
     procedure ClearEditorList(All: boolean = false); virtual;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
@@ -249,6 +256,7 @@ type
     procedure SetSelectedDataRow(const Value: Integer); override;
     procedure MaskTagStyle(ASender: TObject; ATag: TIWHTMLTag);
     function RecNo(ds: TDataset): integer; virtual;
+    procedure Loaded; override;
   public
     destructor Destroy; override;
     constructor Create(AOwner: TComponent); override;
@@ -395,7 +403,6 @@ begin
   FDataFields := TDataFieldsCollection.Create(Self);
   FDataFields.Content := Self;
   FDatasetState := dsBrowse;
-  FOkToRefresh := True;
 end;
 
 destructor TArcIWStringGridDatasetContent.Destroy;
@@ -592,6 +599,7 @@ end;
 procedure TArcIWStringGridDatasetContent.Delete;
 var
   ds: TDataset;
+  iSel: integer;
 begin
   if (DatasetState = dsInsert) then
   begin
@@ -1641,12 +1649,12 @@ procedure TArcIWStringGridDatasetContent.RenderEditorsForRow(row: integer);
       begin
         if value <> '' then
         begin
-          if value[1] in ['T', 't'] then
+          if CharInSet(value[1],['T', 't']) then
           begin
             b := True;
             Result := True;
           end else
-            if value[1] in ['F', 'f'] then
+            if CharInSet(value[1],['F', 'f']) then
             begin
               b := False;
               Result := True;
@@ -1926,8 +1934,8 @@ function TArcIWStringGridDatasetContent.ProcessCaption(str: string): string;
     end;
   end;
 begin
-  Result := FastReplace(str, '<#>', PageNumber, true);
-  Result := FastReplace(Result, '{#}', PageCount, true);
+  Result := ReplaceText(str, '<#>', PageNumber);
+  Result := ReplaceText(Result, '{#}', PageCount);
 end;
 
 procedure TArcIWStringGridDatasetContent.SetSyncDataset(
@@ -2398,6 +2406,13 @@ begin
   ATag.AddStringParam('style', sStyle);
 end;
 
+
+procedure TArcIWStringGridDatasetContent.Loaded;
+begin
+  inherited;
+  FOkToRefresh := True;
+end;
+
 procedure TArcIWStringGridDatasetContent.ForcedCancel;
 begin
   FAvoidReturnToEditMode := True;
@@ -2439,6 +2454,7 @@ procedure TDataFieldItem.BuildEditor(List: TList; Row: integer; var Ctrl: TIWBas
 var
   bFreeControl: boolean;
   intf: IIWBaseComponent;
+  intfc : IIWBaseControl;
 begin
   ctrl := nil;
   if (FReadOnly and (not AlwaysRenderControl)) then

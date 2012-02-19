@@ -1,3 +1,29 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// The MIT License
+// 
+// Copyright (c) 2008 by Arcana Technologies Incorporated
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+// 
+////////////////////////////////////////////////////////////////////////////////
+
 unit ArcIWTemplateProcessor7;
 
 interface
@@ -7,44 +33,33 @@ interface
 {$IFNDEF INTRAWEB72}
   ERROR: This unit is designed to work only with IW 7.2 and above.
 {$ENDIF}
-{History
-
-02-July-2008 Russell Weetch
-Added 
-- Published property OnGetTemplateDir: TArcIWGetTemplateDir read FOnGetTemplateDir write FOnGetTemplateDir;
-  enables developer to override the default template directory - usesful for multi lingual sets of templates
-- Public property PassNumber: integer 
-  returns the pass number (1 or 2) only meaningful if UseTwoPassRender is True
------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-}
-
-
 
 uses
   Classes,
-  Windows, IWContainerLayout, IWRenderContext, IWTypes,
-  IWStreams, IWUtils, ArcD5Fix,
+  Windows, IWContainerLayout, IWRenderContext, IWTypes, IWUtils,
   IWBaseInterfaces, IWBaseRenderContext, IWBaseHTMLInterfaces, IWMarkupLanguageTag,
   IWHTML40Interfaces, IWTemplateProcessorHTML, ArcIWControlBase,
   IWHTMLTag, Graphics, IWControl, IWScriptEvents, ArcIWControlCommon,
   IWRegion, Controls, Forms, IWBaseControl, IWColor,
+  {$IFNDEF INTRAWEB110}
   IWAppForm32, IWCompLabel32, IWTemplateProcessorHTML32, IWControl32, IWCompEdit32,
   IWCompButton32, IWHTMLControls32, IWCompListBox32, IWExtCtrls32, IWGrids32,
   IWCompMemo32, IWCompText32, IWCompRectangle32, IWCompCheckBox32, IWDBStdCtrls32,
-  IWDBExtCtrls32, IWLayoutMgrHTML32, IWCompProgressBar, IWProducer32, IWPageForm32,
-  IWCompActiveX, IWCompCalendar, IWImageList, IWBaseForm,
+  IWDBExtCtrls32, IWLayoutMgrHTML32, IWProducer32, IWPageForm32, IWCompDynamicChart,
+  IWCompDynamicChartLegend, IWClientSideDataset, IWClientSideDatasetBase, IWProducer,
+  IWModuleController, IWClientSideDatasetDBLink, IWPageForm, IWDynGrid, IWCSStdCtrls,
+  {$ENDIF}
+  IWCompProgressBar, IWCompActiveX, IWCompCalendar, IWImageList, IWBaseForm,
   IWCompCheckbox, IWCompEdit, IWCompLabel, IWCompListbox, IWCompMemo, IWCompText,
-  IWGlobal, IWCompButton, IWCompDynamicChart, IWCompDynamicChartLegend,
-  IWCompRectangle, IWCompFlash, IWKlooch,
-  IWDBExtCtrls, IWDBStdCtrls, IWDBGrids, IWServerControllerBase, IWClientSideDataset,
-  IWClientSideDatasetBase, IWContainer,
-  IWExtCtrls, IWHTMLControls, IWAppForm, IWGrids, IWProducer, IWFileReference,
-  IWModuleController, IWClientSideDatasetDBLink,
-  IWForm, IWTreeview, IWPageForm, IWDynGrid, IWCompMenu,
-  IWStandAloneServer, IWCSStdCtrls,
-  IWLayoutMgrHTML, ArcPersistentStream;
+  IWGlobal, IWCompButton, IWCompRectangle, IWCompFlash, IWKlooch,
+  IWDBExtCtrls, IWDBStdCtrls, IWDBGrids, IWServerControllerBase,
+  IWContainer, IWHTMLControls, IWAppForm, IWFileReference,
+  IWForm, IWCompMenu, IWStandAloneServer, IWLayoutMgrHTML, ArcPersistentStream
+  {$IFDEF INTRAWEB120}
+  , IWRenderStream, IWCompExtCtrls, IWCompGrids, IWCompTreeview, IWCompFile, IW.HttpRequest
+  {$ELSE}
+  , IWStreams, IWExtCtrls, IWGrids, IWTreeview {$ENDIF}
+  , ArcCommon;
 
 type
   TTagType = (ttNone, ttHead, ttBody, ttEndBody, ttTitle, ttIW, ttIW2, ttSSI, ttScript);
@@ -103,15 +118,9 @@ type
   TArcIWBeforeRenderTagEvent = procedure(Sender : TObject; TagName : string; Params : TStringList; var DoRender : boolean) of object;
   TArcIWAfterRenderTagEvent = procedure(Sender : TObject; TagName : string; Params : TStringList) of object;
   TArcIWOnFullUnknownTagEvent = procedure(const AName: string; Params: TStrings; var VValue: string) of object;
-  //added by Russell Weetch 02-July-2008
-  TArcIWGetTemplateDir = procedure(Sender: TObject; const IsMaster: boolean; var TemplateDir: string) of object;
   TArcIWTemplateProcessor = class(TIWTemplateProcessorHTML)
-
   private
     FOnNewControl: TArcIWNewControlEvent;
-    //added by Russell Weetch 02-July-2008
-    FPassNumber: integer;
-    //end added by Russell Weetch 02-July-2008
   protected
     FUseTwoPassRender: boolean;
     FCacheTemplate: boolean;
@@ -121,7 +130,7 @@ type
     FSSIOptions: TSSIOptions;
     FOnAfterRenderTag: TArcIWAfterRenderTagEvent;
     FOnBeforeRenderTag: TArcIWBeforeRenderTagEvent;
-    AlreadyProcessedTemplate : boolean;
+    AlreadyProcessedTemplate : boolean;  
     //
     FUseMasterTemplate: boolean;
     FMasterTemplate: string;
@@ -129,12 +138,6 @@ type
     FCacheUpdated: TDateTime;
     FOnFullUnknownTag: TArcIWOnFullUnknownTagEvent;
     FCachedTemplate: TMemoryStream;
-
-    //added by Russell Weetch 02-July-2008
-    FOnGetTemplateDir: TArcIWGetTemplateDir;
-    function ArcTemplatePathName: string;
-    //end added by Russell Weetch 02-July-2008
-
     function GetMasterTemplate: string;
     function DoFullUnknownTag(const AName: string; Params: TStrings): string; virtual;
     //
@@ -153,9 +156,6 @@ type
       APageContext: TIWBaseHTMLPageContext; AControl: IIWBaseHTMLComponent); override;
     procedure Process( AStream : TIWRenderStream;
       AContainerContext: TIWContainerContext; APageContext: TIWBasePageContext); override;
-    //added by Russell Weetch 02-July-2008
-    property PassNumber: integer read FPassNumber;
-    //end Added by Russell Weetch 02-July-2008      
   published
     property SSIOptions : TSSIOptions read FSSIOptions write SetSSIOptions;
     property OnBeforeRenderTag : TArcIWBeforeRenderTagEvent read FOnBeforeRenderTag write FOnBeforeRenderTag;
@@ -168,9 +168,6 @@ type
     property UseMasterTemplate: boolean read FUseMasterTemplate write FUseMasterTemplate;
     property OnFullUnknownTag: TArcIWOnFullUnknownTagEvent read FOnFullUnknownTag write FOnFullUnknownTag;
     property CacheLimit: Integer read FCacheLimit write FCacheLimit;
-    //added by Russell Weetch 02-July-2008
-    property OnGetTemplateDir: TArcIWGetTemplateDir read FOnGetTemplateDir write FOnGetTemplateDir;
-    //end added by Russell Weetch 02-July-2008
   end;
 
 implementation
@@ -180,9 +177,10 @@ Uses
   {$IFDEF VCL6PRABOVE}
   Variants,
   {$ENDIF}
-  InCoderMIME, IWApplication, HTTPApp, IWTemplateProcessing, SWStrings,
-  SWSystem, {$IFNDEF VER130}DateUtils,{$ENDIF} ArcFastStrings, IWBaseContainerLayout, TypInfo,
-  InCoder;
+  InCoderMIME, IWApplication, HTTPApp, IWTemplateProcessing,
+  {$IFDEF INTRAWEB110} IWStrings, IWSystem, {$ELSE} SWStrings, SWSystem, {$ENDIF}
+  {$IFNDEF VER130}DateUtils,{$ENDIF} IWBaseContainerLayout, TypInfo,
+  InCoder, StrUtils, uSMCommon;
 
 function MimeDecodeString(str : string) : string;
 begin
@@ -230,7 +228,7 @@ var
     StripQuoteChar := #0;
     if StripQuotes then
       for I := Length(Result) downto 1 do
-        if Result[I] in ['''', '"'] then
+        if CharInSet(Result[I],['''', '"']) then
           if InStripQuote and (StripQuoteChar = Result[I]) then
           begin
           Delete(Result, I, 1);
@@ -251,14 +249,14 @@ begin
   Tail := Content;
   QuoteChar := #0;
   repeat
-    while Tail^ in WhiteSpaceWithCRLF do Inc(Tail);
+    while CharInSet(Tail^,WhiteSpaceWithCRLF) do Inc(Tail);
     Head := Tail;
     InQuote := False;
     LeadQuote := False;
     while True do
     begin
-     while (InQuote and not (Tail^ in [#0, '"'])) or
-        not (Tail^ in SeparatorsWithCRLF) do Inc(Tail);
+     while (InQuote and not CharInSet(Tail^,[#0, '"'])) or
+        not CharInSet(Tail^,SeparatorsWithCRLF) do Inc(Tail);
       if Tail^ = '"' then
       begin
         if (QuoteChar <> #0) and (QuoteChar = Tail^) then
@@ -282,6 +280,7 @@ begin
     begin
       SetString(ExtractedField, Head, Tail-Head);
       if Decode then
+        // JS: W1058 Implicit string cast with potential data loss from 'string' to 'AnsiString'
         Strings.Add(HTTPDecode(DoStripQuotes(ExtractedField)))
       else Strings.Add(DoStripQuotes(ExtractedField));
     end;
@@ -290,25 +289,6 @@ begin
 end;
 
 { TArcIWTemplateProcessor }
-//added by Russell Weetch 02-July-2008
-function TArcIWTemplateProcessor.ArcTemplatePathName: string;
-var
- aTemplateDir: string;
-begin
-  result := TemplatePathname;
-  aTemplateDir := GServerController.TemplateDir;
-  if assigned(FOnGetTemplateDir) then
-  begin
-     FOnGetTemplateDir(self, False, aTemplateDir);
-     if (aTemplateDir <> GServerController.TemplateDir) then
-     begin
-        result := copy(result, length(GServerController.TemplateDir) + 1, length(result));
-        result := IncludeTrailingBackslash(aTemplateDir) + result;
-     end;
-  end;
-
-end;
-//end added by Russell Weetch 02-July-2008
 
 constructor TArcIWTemplateProcessor.Create(AOwner: TComponent);
 begin
@@ -355,10 +335,6 @@ begin
 end;
 
 function TArcIWTemplateProcessor.GetMasterTemplate: string;
-var
-  //added by Russell Weetch 02-July-2008
-  aTemplateDir: string;
-  //end added by Russell Weetch 02-July-2008
 begin
   result := '';
   if HTML40FormInterface(Container.InterfaceInstance)<>nil then begin
@@ -366,16 +342,7 @@ begin
         exit;
      result := FMasterTemplate;
      if (result <> '') then begin
-
-       //added by Russell Weetch 02-July-2008
-       aTemplateDir := GServerController.TemplateDir;
-       if assigned(FOnGetTemplateDir) then
-          FOnGetTemplateDir(self, True, aTemplateDir);
-       result := IncludeTrailingBackslash(aTemplateDir) + result;
-       //end added by Russell Weetch 02-July-2008
-       //removed by Russell Weetch 02-July-2008
-         //result := GServerController.TemplateDir + result;
-	   //end removed by Russell Weetch 02-July-2008
+       result := GServerController.TemplateDir + result;
        if not FileExists(result) then
           result := '';
      end;
@@ -383,17 +350,9 @@ begin
      if result = '' then begin
         result := GGetWebApplicationThreadVar.ActiveMasterTemplate;
         if result <> '' then begin
-          //added by Russell Weetch 02-July-2008
-          aTemplateDir := GServerController.TemplateDir;
-          if assigned(FOnGetTemplateDir) then
-             FOnGetTemplateDir(self, True, aTemplateDir);
-          result := IncludeTrailingBackslash(aTemplateDir) + result;
-          //end added by Russell Weetch 02-July-2008
-		  //removed by Russell Weetch 02-July-2008
-            //result := GServerController.TemplateDir + result;
-		  //end removed by Russell Weetch 02-July-2008
-          if not FileExists(result) then
-             result := '';
+           result := GServerController.TemplateDir + result;
+        if not FileExists(result) then
+           result := '';
         end;
      end;
   end;
@@ -410,15 +369,15 @@ var
   begin
     slParams := TStringList.Create;
     try
-      iSpacePos := FastCharPos(Tag,' ',3);
+      iSpacePos := PosEx(' ',Tag,3);
       if iSpacePos > 0 then
       begin
         sCtrlName := Copy(Tag,3,iSpacePos-3);
-        iColonPos := FastCharPos(Copy(Tag,iSpacePos,5),':',1);
+        iColonPos := Pos(':',Copy(Tag,iSpacePos,5));
         if iColonPos > 0 then
         begin
           s := TrimLeft(Copy(Tag,iColonPos+iSpacePos,high(Integer)));
-          i := FastCharPos(s,' ',1);
+          i := Pos(' ',s);
           if i > 0 then
             s := Copy(s,1,i-1);
 
@@ -447,7 +406,7 @@ var
   begin
     slParams := TStringList.Create;
     try
-      iSpacePos := FastCharPos(Tag,' ',3);
+      iSpacePos := PosEx(' ',Tag,3);
       sCtrlName := Copy(Tag,6,iSpacePos-6);
       _ExtractHeaderFields( [' '], [' '], PChar(Copy(Tag,iSpacePos,TagLen-iSpacePos-1)),slParams, False, True);
       if DoBeforeRenderTag(sCtrlName, slParams) then
@@ -472,7 +431,7 @@ var
 
       function Contains(AString, AContains:string):boolean;
       begin
-        Result := FastPosNoCase(AString, AContains,length(AString),length(AContains),1)>0;
+        Result := FastPosNoCase(AString, AContains,1)>0;
       end;
       
   var
@@ -537,7 +496,7 @@ var
     slParams := TStringList.Create;
     try
       sAttributes := Copy(Tag,6,High(Integer));
-      sAttributes := Copy(sAttributes,1,FastCharPos(sAttributes,'>',1)-1);
+      sAttributes := Copy(sAttributes,1,Pos('>',sAttributes)-1);
       _ExtractHeaderFields([' '],[' '],PChar(sAttributes),slParams,False,False);
       for i := 0 to slParams.Count-1 do
       begin
@@ -558,10 +517,10 @@ var
       rs := TIWRenderStream.Create;
       try
         APageContext.BodyTag.Render(rs);
+        APageContext.FormTag.ClosingTag := cbTrue;
+        rs.WriteString('{/FORM\}');
         if MasterFormTag then
         begin
-          APageContext.FormTag.ClosingTag := cbTrue;
-          rs.WriteString('{/FORM\}');
           tagTmp := TIWHTMLTag.CreateHTMLTag('form',cbFalse);
           try
             tagTmp.AddStringParam('onSubmit','return FormDefaultSubmit();');
@@ -570,9 +529,7 @@ var
           finally
             tagTmp.Free;
           end;
-        end
-        else
-          APageContext.FormTag.ClosingTag := cbFalse;
+        end;
         if not bHeadWritten then
         begin
           Tag := '<HEAD></HEAD>';
@@ -659,7 +616,7 @@ var
         end;
     end;
 
-    iCutPos := FastPosNoCase(str,sEndTag,Len,iEndTagLen,Pos+iTagLen);
+    iCutPos := FastPosNoCase(str,sEndTag,Pos+iTagLen);
 
     if iCutPos = 0 then
     begin
@@ -690,10 +647,6 @@ var
 begin
   if (not UseTwoPassRender) and (Pass = 2) then
     exit;
- //added by Russell Weetch 02-July-2008
-   FPassNumber := Pass;
- //end added by Russell Weetch 02-July-2008
-
   if (Pass = 2) and Assigned(aPageContext.WebApplication.ActiveForm) then
   begin
     TIWFormHack(aPageContext.WebApplication.ActiveForm).ClearRealTabOrders;
@@ -748,9 +701,6 @@ var
   fsTemplate : TStream;
   LMasterSrc: TStream;
   masterFileName: TFileName;
-  //added by Russell Weetch 02-July-2008
-  templateFileName: TFileName;
-  //end added by Russell Weetch 02-July-2008
 begin
   if FCacheTemplate and (FCachedTemplate.Size > 0) and
      ((FCacheLimit = 0) or
@@ -770,26 +720,14 @@ begin
     masterFileName := GetMasterTemplate; //needs a $body tag
                                          //page templates need to be std html <html>...</html>
 
-    //added by Russell Weetch 02-July-2008
-    templateFileName := ArcTemplatePathName;
-    if FileExists(templateFileName) then
+    if FileExists(TemplatePathname) then
     begin
       fsTemplate := TMemoryStream.Create;
-      TMemoryStream(fsTemplate).LoadFromFile(TemplateFileName);
+      TMemoryStream(fsTemplate).LoadFromFile(TemplatePathname);
       try
         if Assigned(FOnBeforeProcess) then begin
           OnBeforeProcess(fsTemplate);
         end;
-    //end added by Russell Weetch 02-July-2008
-
-//    if FileExists(TemplatePathname) then
-//    begin
-//      fsTemplate := TMemoryStream.Create;
-//      TMemoryStream(fsTemplate).LoadFromFile(TemplatePathname);
-//      try
-//        if Assigned(FOnBeforeProcess) then begin
-//          OnBeforeProcess(fsTemplate);
-//        end;
 
         if masterFileName <> '' then
         begin
@@ -960,12 +898,12 @@ function TArcIWTemplateProcessor.ProcessIW(
 
     if iPos = 0 then
     begin
-      iPos2 := FastCharPos(sProp,'[',1);
+      iPos2 := Pos('[',sProp);
       if iPos2 > 0 then
       begin
         sObj := Copy(sProp,1,iPos2-1);
         sIdx := Copy(sProp,iPos2+1,High(Integer));
-        iPos2 := FastCharPos(sIdx,']',1);
+        iPos2 := Pos(']',sIdx);
         sIdx := Copy(sIdx,1,iPos2-1);
 
         obj := TComponent(GetObjectProp(obj,sObj));
@@ -981,7 +919,7 @@ function TArcIWTemplateProcessor.ProcessIW(
     begin
       while iPos > 0 do
       begin
-        iPos2 := FastCharPos(sProp,'[',1);
+        iPos2 := Pos('[',sProp);
         if iPos2 <= 0 then
         begin
           obj := TComponent(GetObjectProp(obj,Copy(sProp,1,iPos-1)));
@@ -991,7 +929,7 @@ function TArcIWTemplateProcessor.ProcessIW(
         begin
           sObj := Copy(sProp,1,iPos2-1);
           sIdx := Copy(sProp,iPos2+1,High(Integer));
-          iPos2 := FastCharPos(sIdx,']',1);
+          iPos2 := Pos(']',sIdx);
           sIdx := Copy(sIdx,1,iPos2-1);
 
           obj := TComponent(GetObjectProp(obj,sObj));
@@ -1039,7 +977,7 @@ function TArcIWTemplateProcessor.ProcessIW(
       {$ENDIF}
       tkFloat:
         SetFloatProp(obj,pi,val);
-      tkLString, tkString:
+      tkLString, tkString, tkUString:
         {$IFDEF VER130}ArcIWControlCommon.{$ENDIF}SetStrProp(obj,pi,val);
       tkWChar, tkWString:
         SetWideStrProp(obj,pi,val);
@@ -1227,7 +1165,7 @@ begin
           s := Params.values['file'];
           if s <> '' then
           begin
-            if FastPos(s,'..',length(s),2,1)>0 then
+            if Pos('..',s)>0 then
             begin
               Result := 'ERROR in SSI Include Path';
               exit;
@@ -1267,7 +1205,7 @@ begin
             s := Params.Values['virtual'];
             if s <> '' then
             begin
-              if FastPos(s,'..',length(s),2,1)>0 then
+              if Pos('..',s)>0 then
               begin
                 Result := 'ERROR in SSI Include Path';
                 exit;
@@ -1279,7 +1217,7 @@ begin
           if CompareText(sTag, 'echo')=0 then
           begin
             s := Params.Values['var'];
-            case TEchoVars(FastPos(SSIEchoVars,s,SSIEchoVarsLen,Length(s),1) div 24) of
+            case TEchoVars(Pos(s,SSIEchoVars) div 24) of
               evUnknown:;
               evDocumentName:          Result := TIWForm(Owner).Name;
               evDocumentURI:           Result := TIWForm(Owner).WebApplication.Request.URL;
@@ -1290,21 +1228,47 @@ begin
               evServerSoftware:        Result := 'IntraWeb '+GServerController.Version;
               evServerName:            Result := TIWForm(Owner).WebApplication.Request.Host;
               evGatewayInterface:      Result := 'CGI/unknown';
+              {$IFDEF INTRAWEB120}
+              evServerProtocol:        Result := ''; // TIWForm(Owner).WebApplication.Request.ProtocolVersion;
+              {$ELSE}
               evServerProtocol:        Result := TIWForm(Owner).WebApplication.Request.ProtocolVersion;
+              {$ENDIF}
               evServerPort:            Result := IntToStr(GServerController.Port);
+              {$IFDEF INTRAWEB120}
+              evRequestMethod:
+              begin
+                Result:= GetEnumName(TypeInfo(THttpMethod),Ord(TIWForm(Owner).WebApplication.Request.HttpMethod));
+                System.Delete(Result,1,2); // hm
+              end;
+              {$ELSE}
               evRequestMethod:         Result := TIWForm(Owner).WebApplication.Request.Method;
+              {$ENDIF}
               evPathInfo:              Result := TIWForm(Owner).WebApplication.Request.PathInfo;
+              {$IFDEF INTRAWEB120}
+              evPathTranslated:        Result := TIWForm(Owner).WebApplication.Request.PathInfo; {*}
+              {$ELSE}
               evPathTranslated:        Result := TIWForm(Owner).WebApplication.Request.PathTranslated;
+              {$ENDIF}
               evScriptName:            Result := TIWForm(Owner).WebApplication.Request.ScriptName;
               evQueryString:           Result := TIWForm(Owner).WebApplication.Request.Query;
+              {$IFDEF INTRAWEB120}
+              evRemoteHost:            Result := TIWForm(Owner).WebApplication.Request.Host;
+              {$ELSE}
               evRemoteHost:            Result := TIWForm(Owner).WebApplication.Request.RemoteHost;
+              {$ENDIF}
               evRemoteAddr:            Result := TIWForm(Owner).WebApplication.Request.RemoteAddr;
               evAuthType:              Result := TIWForm(Owner).WebApplication.Request.Authorization;
               evRemoteUser:            Result := DecodeUsername(TIWForm(Owner).WebApplication.Request.Authorization);
               evRemoteIdent:           Result := DecodeUsername(TIWForm(Owner).WebApplication.Request.Authorization);
+              {$IFDEF INTRAWEB120}     {TODO -oPlp -cConversion : Check This}
+              evContentType:           Result := ''; // TIWForm(Owner).WebApplication.Request.ContentType;
+              evContentLength:         Result := ''; // IntToStr(length(TIWForm(Owner).WebApplication.Request.Content));
+              evHTTPAccept:            Result := ''; // TIWForm(Owner).WebApplication.Request.Accept;
+              {$ELSE}
               evContentType:           Result := TIWForm(Owner).WebApplication.Request.ContentType;
               evContentLength:         Result := IntToStr(length(TIWForm(Owner).WebApplication.Request.Content));
               evHTTPAccept:            Result := TIWForm(Owner).WebApplication.Request.Accept;
+              {$ENDIF}
               evHTTPUserAgent:         Result := TIWForm(Owner).WebApplication.Request.UserAgent;
             end;
           end else
@@ -1313,7 +1277,7 @@ begin
               s := Params.values['file'];
               if s <> '' then
               begin
-                if FastPos(s,'..',length(s),2,1)>0 then
+                if Pos('..',s)>0 then
                 begin
                   Result := 'ERROR in SSI Include Path';
                   exit;
@@ -1333,7 +1297,7 @@ begin
                 s := Params.Values['virtual'];
                 if s <> '' then
                 begin
-                  if FastPos(s,'..',length(s),2,1)>0 then
+                  if Pos('..',s)>0 then
                   begin
                     Result := 'ERROR in SSI Include Path';
                     exit;
@@ -1366,18 +1330,21 @@ initialization
       TIWTimer, TIWGrid, TIWTreeView, TIWURL, TIWDBCheckBox, TIWDBComboBox,
       TIWDBEdit, TIWDBGrid, TIWDBImage, TIWDBLabel, TIWDBListBox,
       TIWDBLookupListBox, TIWDBLookupComboBox, TIWDBFile, TIWDBMemo,
-      TIWDBNavigator, TIWDBText, TIWCSLabel, TIWCSNavigator, TIWDynamicChart,
-      TIWDynamicChartLegend, TIWDynGrid, TIWTemplateProcessorHTML,
-      TIWPageProducer,  TIWModuleController, TIWClientSideDataset,
-      TIWClientSideDatasetDBLink, TIWStandAloneServer, TIWLayoutMgrHTML,
-      TIWProgressBar, TIWURLWindow, TIWActiveX, TIWCalendar, TIWDBRadioGroup,
+      TIWDBNavigator, TIWDBText,
+      {$IFNDEF INTRAWEB110}
+      TIWCSLabel, TIWCSNavigator, TIWDynamicChart, TIWDynamicChartLegend, TIWDynGrid,
+      TIWPageProducer, TIWModuleController, TIWClientSideDataset, TIWClientSideDatasetDBLink,
       TIWTemplateProcessorHTML32, TIWPageProducer32, TIWLAyoutMgrHTML32,
       TIWImageList, TIWLabel32, TIWEdit32, TIWButton32, TIWList32, TIWHRule32,
       TIWListBox32, TIWComboBox32, TIWRadioGroup32, TIWImage32, TIWImageFile32,
       TIWURL32, TIWGrid32, TIWMemo32, TIWText32, TIWRectangle32, TIWCheckBox32,
       TIWHyperLink32, TIWDBEdit32, TIWDBCheckBox32, TIWDBComboBox32, TIWDBLabel32,
       TIWDBListBox32, TIWDBLookupComboBox32, TIWDBLookupListBox32, TIWDBMemo32,
-      TIWDBText32, TIWDBImage32, TIWDBRadioGroup32
+      TIWDBText32, TIWDBImage32, TIWDBRadioGroup32,
+      {$ENDIF}
+      TIWTemplateProcessorHTML, TIWStandAloneServer, TIWLayoutMgrHTML,
+      TIWProgressBar, TIWURLWindow, TIWActiveX, TIWCalendar, TIWDBRadioGroup
+
    ]);
 
 

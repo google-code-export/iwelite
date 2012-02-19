@@ -33,10 +33,11 @@ interface
 uses
   IWAppForm, IWApplication, IWTypes, Forms, ArcIWDlgMessageBox, ArcIWDlgScrollableMessageBox, Classes, IWColor,
   Controls, IWContainer, IWRegion, IWControl, IWCompRectangle, IWCompText,
-  IWCompLabel, IWExtCtrls, IWCompButton, ArcIWDlgBase{$IFNDEF INTRAWEB50}, IWBaseControl,
+  IWCompLabel, IWCompButton, ArcIWDlgBase{$IFNDEF INTRAWEB50}, IWBaseControl,
   IWCompMemo{$ENDIF} {$IFDEF INTRAWEB60},IWVCLBaseControl, IWVCLBaseContainer,
-  IWBaseHTMLControl, IWHTMLContainer{$ENDIF};
-  
+  IWBaseHTMLControl, IWHTMLContainer{$ENDIF}
+  {$IFDEF INTRAWEB120}, IWCompExtCtrls {$ELSE}, IWExtCtrls {$ENDIF};
+
 type
   TCompHelper = class(TArcIWDlgScrollableMessageBox)
   end;
@@ -71,7 +72,9 @@ type
 
 implementation
 
-uses IWContainerBorderOptions, Graphics, IWGridCommon;
+uses
+  IWContainerBorderOptions, Graphics
+  {$IFDEF INTRAWEB120}, IWCompGridCommon {$ELSE}, IWGridCommon {$ENDIF};
 
 procedure TfrmAppDialogScroll.btn1Click(Sender: TObject);
 begin

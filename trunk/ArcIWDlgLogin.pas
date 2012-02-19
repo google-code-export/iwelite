@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 // The MIT License
-// 
+//
 // Copyright (c) 2008 by Arcana Technologies Incorporated
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,9 +30,7 @@ interface
 
 uses
   SysUtils, Classes, IWAppForm, IWCompButton, IWFont, IWTypes, Controls,
-  Graphics, IWForm, ArcIWDlgBase;
-
-
+  Graphics, IWForm, ArcIWDlgBase, ArcCommon;
 
 type
   TArcLoginNotifyEvent = procedure(Sender : TObject; Username, Password : string) of object;
@@ -193,7 +191,7 @@ begin
       btn1.Caption := FElementText.FBtnTxtCancel;
       btn2.Caption := FElementText.FBtnTxtLogin;
     end;
-    if (TIWAppForm(Self.Owner).WebApplication.Browser = brOpera) then
+    if BrowserIsOpera(TIWAppForm(Self.Owner).WebApplication.Browser) then
     begin
       btn1.Top := btn1.Top+rgnParent.Top+rgnText.Top+rgnButtons.Top;
       btn2.Top := btn2.Top+rgnParent.Top+rgnText.Top+rgnButtons.Top;

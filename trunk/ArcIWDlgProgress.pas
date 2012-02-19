@@ -30,7 +30,7 @@ interface
 
 uses
   SysUtils, Classes, IWAppForm, IWCompButton, IWFont, IWTypes, Controls,
-  Graphics, IWForm, ArcIWDlgBase;
+  Graphics, IWForm, ArcIWDlgBase, ArcCommon;
 
 {$I IntraWebVersion.inc}
 
@@ -183,7 +183,7 @@ begin
   if FHasCancelButton then
     frm.btnCancel.Visible := True;
 
-  if (TIWAppForm(Self.Owner).WebApplication.Browser = brOpera) then
+  if BrowserIsOpera(TIWAppForm(Self.Owner).WebApplication.Browser) then
   begin
     frm.btnCancel.Top := frm.btnCancel.Top+frm.rgnParent.Top+frm.rgnText.Top+frm.rgnButtons.Top;
     frm.btnCancel.Left := frm.btnCancel.Left+frm.rgnParent.Left+frm.rgnText.Left+frm.rgnButtons.Left;

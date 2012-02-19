@@ -28,12 +28,14 @@ unit ArcIWStringGridTreeContent;
 
 interface
 
+{$I IntraWebVersion.inc}
+
 uses SysUtils, {$IFNDEF VER130}StrUtils, Variants, {$ENDIF}
   Classes, ArcIWStringGridContent, ArcIWStringGrid, controls,
-  IWBaseControl, IWCompCheckbox, IWCompEdit, IWCompMemo, IWCompButton, IWExtCtrls,
-  Graphics, TypInfo, ArcFastStrings, IWCompListbox, IWBaseInterfaces,
-  IWRenderContext, IWHTMLTag, IWTypes, IWColor, db, IWFileReference, IWServer,
-  ArcIWGridCommon;
+  IWBaseControl, IWCompCheckbox, IWCompEdit, IWCompMemo, IWCompButton,
+  Graphics, TypInfo, IWCompListbox, IWBaseInterfaces, IWRenderContext,
+  IWHTMLTag, IWTypes, IWColor, db, IWFileReference, IWServer, ArcIWGridCommon
+  {$IFDEF INTRAWEB120}, IWCompExtCtrls {$ELSE}, IWExtCtrls {$ENDIF}, ArcCommon;
 
 type
   TArcIWStringGridTreeContent = class;

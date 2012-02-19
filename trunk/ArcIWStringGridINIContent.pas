@@ -28,9 +28,12 @@ unit ArcIWStringGridINIContent;
 
 interface
 
+{$I IntraWebVersion.inc}
+
 uses SysUtils, {$IFNDEF VER130}Variants, StrUtils, {$ENDIF}Classes, ArcIWStringGridContent, ArcIWStringGrid, db, controls,
-  IWBaseControl,IWCompCheckbox, IWCompEdit, IWCompMemo, IWCompButton, IWExtCtrls, IWRenderContext,
-  IniFiles, Graphics, TypInfo, ArcFastStrings, IWCompListbox, ArcIWGridCommon;
+  IWBaseControl,IWCompCheckbox, IWCompEdit, IWCompMemo, IWCompButton, IWRenderContext,
+  IniFiles, Graphics, TypInfo, IWCompListbox, ArcIWGridCommon
+  {$IFDEF INTRAWEB120}, IWCompExtCtrls {$ELSE}, IWExtCtrls {$ENDIF}, ArcCommon;
 
 type
   TArcIWStringGridINIContent = class;
@@ -592,11 +595,11 @@ end;
 function TArcIWStringGridINIContent.ProcessCaption(str: string): string;
 begin
   if SelectedSection <> nil then
-    Result := FastReplace(str,'<SECTION>',SelectedSection.SectionName, false)
+    Result := ReplaceStr(str,'<SECTION>',SelectedSection.SectionName)
   else
-    Result := FastReplace(str,'<SECTION>','All', false);
-  Result := FastReplace(Result,'<FILENAME>',ExtractFilename(FFilename), false);
-  Result := FastReplace(Result,'<FILEPATH>',FFilename, false);
+    Result := ReplaceStr(str,'<SECTION>','All');
+  Result := ReplaceStr(Result,'<FILENAME>',ExtractFilename(FFilename));
+  Result := ReplaceStr(Result,'<FILEPATH>',FFilename);
 end;
 
 procedure TArcIWStringGridINIContent.Refresh;

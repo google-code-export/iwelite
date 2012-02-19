@@ -68,6 +68,9 @@ const
 
 implementation
 
+uses
+  StrUtils;
+
 {$IFDEF VER130}
 procedure SetWideStrProp(Instance: TObject; PropInfo: PPropInfo;
   const Value: WideString);
@@ -82,7 +85,7 @@ var
 begin
   case PropInfo^.PropType^.Kind of
     tkString,
-    tkLString: SetStrProp(Instance, PropInfo, Value);
+    tkLString, tkUString: SetStrProp(Instance, PropInfo, Value);
     tkWString:
       begin
         Setter := Longint(PropInfo^.SetProc);
@@ -123,7 +126,7 @@ var
 begin
   case PropInfo^.PropType^.Kind of
     tkString,
-    tkLString: SetStrProp(Instance, PropInfo, Value);
+    tkLString, tkUString: SetStrProp(Instance, PropInfo, Value);
     tkWString:
       begin
         Setter := Longint(PropInfo^.SetProc);
@@ -275,7 +278,7 @@ procedure SetStrProp(Instance: TObject; PropInfo: PPropInfo;
 begin    // helper functions minimize temps in general case
   case PropInfo^.PropType^.Kind of
     tkString: SetShortStrPropAsLongStr(Instance, PropInfo, Value);
-    tkLString: SetLongStrProp(Instance, PropInfo, Value);
+    tkLString, tkUString: SetLongStrProp(Instance, PropInfo, Value);
     tkWString: SetWideStrPropAsLongStr(Instance, PropInfo, Value);
   end;
 end;

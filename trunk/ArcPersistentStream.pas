@@ -74,18 +74,8 @@ type
     function GetPosition: Int64;
     procedure SetPosition(const Value: Int64);
     procedure SetSize(const Value: Int64);
-    function _FastCharPos(const aSource: String; const C: Char; SourceLen,
-      StartPos: Integer): Integer;
-    function _FastCharPosNoCase(const aSource: String; C: Char; SourceLen,
-      StartPos: Integer): Integer;
-    function _FastPos(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
-    function _FastPosNoCase(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
-    function _FastPosBack(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
-    function _FastPosBackNoCase(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
-    procedure _MakeBMTable(Buffer: PChar; BufferLen: Integer; var JumpTable: TBMJumpTable);
-    procedure _MakeBMTableNoCase(Buffer: PChar; BufferLen: Integer; var JumpTable: TBMJumpTable);
-    function _BMPos(const aSource, aFind: Pointer; const aSourceLen, aFindLen: Integer; var JumpTable: TBMJumpTable): Pointer;
-    function _BMPosNoCase(const aSource, aFind: Pointer; const aSourceLen, aFindLen: Integer; var JumpTable: TBMJumpTable): Pointer;
+    function _FastPosBack(const aSourceString, aFindString : String; const StartPos : Integer) : Integer;
+    function _FastPosBackNoCase(const aSourceString, aFindString : String; const StartPos : Integer) : Integer;
     function GetBytes: PByteArray;
   protected
     function GetDataString: string; virtual;
@@ -179,6 +169,9 @@ type
 
 implementation
 
+uses
+  uSMCommon, StrUtils;
+
 const
   cDeltaSize = 1.5;
 var
@@ -188,443 +181,24 @@ var
 
 { TPersistentStream }
 
-function TPersistentStream._FastPos(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
+function TPersistentStream._FastPosBack(const aSourceString, aFindString : String; const StartPos : Integer) : Integer;
 var
-  JumpTable: TBMJumpTable;
+  i: integer;
 begin
-  //If this assert failed, it is because you passed 0 for StartPos, lowest value is 1 !!
-  Assert(StartPos > 0);
-
-  _MakeBMTable(PChar(aFindString), aFindLen, JumpTable);
-  Result := Integer(_BMPos(PChar(aSourceString) + (StartPos - 1), PChar(aFindString),aSourceLen - (StartPos-1), aFindLen, JumpTable));
-  if Result > 0 then
-    Result := Result - Integer(@aSourceString[1]) +1;
-end;
-
-function TPersistentStream._FastPosNoCase(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
-var
-  JumpTable: TBMJumpTable;
-begin
-  //If this assert failed, it is because you passed 0 for StartPos, lowest value is 1 !!
-  Assert(StartPos > 0);
-
-  _MakeBMTableNoCase(PChar(AFindString), aFindLen, JumpTable);
-  Result := Integer(_BMPosNoCase(PChar(aSourceString) + (StartPos - 1), PChar(aFindString),aSourceLen - (StartPos-1), aFindLen, JumpTable));
-  if Result > 0 then
-    Result := Result - Integer(@aSourceString[1]) +1;
-end;
-
-function TPersistentStream._FastPosBack(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
-var
-  SourceLen : Integer;
-begin
-  if aFindLen < 1 then begin
-    Result := 0;
-    exit;
-  end;
-  if aFindLen > aSourceLen then begin
-    Result := 0;
-    exit;
-  end;
-
-  if (StartPos = 0) or  (StartPos + aFindLen > aSourceLen) then
-    SourceLen := aSourceLen - (aFindLen-1)
-  else
-    SourceLen := StartPos;
-
-  asm
-          push ESI
-          push EDI
-          push EBX
-
-          mov EDI, aSourceString
-          add EDI, SourceLen
-          Dec EDI
-
-          mov ESI, aFindString
-          mov ECX, SourceLen
-          Mov  Al, [ESI]
-
-    @ScaSB:
-          cmp  Al, [EDI]
-          jne  @NextChar
-
-    @CompareStrings:
-          mov  EBX, aFindLen
-          dec  EBX
-          jz   @FullMatch
-
-    @CompareNext:
-          mov  Ah, [ESI+EBX]
-          cmp  Ah, [EDI+EBX]
-          Jnz  @NextChar
-
-    @Matches:
-          Dec  EBX
-          Jnz  @CompareNext
-
-    @FullMatch:
-          mov  EAX, EDI
-          sub  EAX, aSourceString
-          inc  EAX
-          mov  Result, EAX
-          jmp  @TheEnd
-    @NextChar:
-          dec  EDI
-          dec  ECX
-          jnz  @ScaSB
-
-          mov  Result,0
-
-    @TheEnd:
-          pop  EBX
-          pop  EDI
-          pop  ESI
+  Result:= -1;
+  for i:= StartPos downto 1 do
+  begin
+    if aFindString = copy(aSourceString,i,Length(aSourceString)) then
+    begin
+      Result:= i;
+      Break;
+    end;
   end;
 end;
 
-
-function TPersistentStream._FastPosBackNoCase(const aSourceString, aFindString : String; const aSourceLen, aFindLen, StartPos : Integer) : Integer;
-var
-  SourceLen : Integer;
+function TPersistentStream._FastPosBackNoCase(const aSourceString, aFindString : String; const StartPos : Integer) : Integer;
 begin
-  if aFindLen < 1 then begin
-    Result := 0;
-    exit;
-  end;
-  if aFindLen > aSourceLen then begin
-    Result := 0;
-    exit;
-  end;
-
-  if (StartPos = 0) or  (StartPos + aFindLen > aSourceLen) then
-    SourceLen := aSourceLen - (aFindLen-1)
-  else
-    SourceLen := StartPos;
-
-  asm
-          push ESI
-          push EDI
-          push EBX
-
-          mov  EDI, aSourceString
-          add  EDI, SourceLen
-          Dec  EDI
-
-          mov  ESI, aFindString
-          mov  ECX, SourceLen
-
-          mov  EDX, GUpcaseLUT
-          xor  EBX, EBX
-
-          mov  Bl, [ESI]
-          mov  Al, [EDX+EBX]
-
-    @ScaSB:
-          mov  Bl, [EDI]
-          cmp  Al, [EDX+EBX]
-          jne  @NextChar
-
-    @CompareStrings:
-          PUSH ECX
-          mov  ECX, aFindLen
-          dec  ECX
-          jz   @FullMatch
-
-    @CompareNext:
-          mov  Bl, [ESI+ECX]
-          mov  Ah, [EDX+EBX]
-          mov  Bl, [EDI+ECX]
-          cmp  Ah, [EDX+EBX]
-          Jz   @Matches
-
-    //Go back to findind the first char
-          POP  ECX
-          Jmp  @NextChar
-
-    @Matches:
-          Dec  ECX
-          Jnz  @CompareNext
-
-    @FullMatch:
-          POP  ECX
-
-          mov  EAX, EDI
-          sub  EAX, aSourceString
-          inc  EAX
-          mov  Result, EAX
-          jmp  @TheEnd
-    @NextChar:
-          dec  EDI
-          dec  ECX
-          jnz  @ScaSB
-
-          mov  Result,0
-
-    @TheEnd:
-          pop  EBX
-          pop  EDI
-          pop  ESI
-  end;
-end;
-
-function TPersistentStream._FastCharPos(const aSource : String; const C: Char; SourceLen : Integer; StartPos : Integer) : Integer;
-var
-  L                           : Integer;
-begin
-  //If this assert failed, it is because you passed 0 for StartPos, lowest value is 1 !!
-  Assert(StartPos > 0);
-
-  Result := 0;
-  L := SourceLen;
-  if L = 0 then exit;
-  if StartPos > L then exit;
-  Dec(StartPos);
-  asm
-      PUSH EDI                 //Preserve this register
-
-      mov  EDI, aSource        //Point EDI at aSource
-      add  EDI, StartPos
-      mov  ECX, L              //Make a note of how many chars to search through
-      sub  ECX, StartPos
-      mov  AL,  Byte(C)              //and which char we want
-    @Loop:
-      cmp  Al, [EDI]           //compare it against the SourceString
-      jz   @Found
-      inc  EDI
-      dec  ECX
-      jnz  @Loop
-      jmp  @NotFound
-    @Found:
-      sub  EDI, aSource        //EDI has been incremented, so EDI-OrigAdress = Char pos !
-      inc  EDI
-      mov  Result,   EDI
-    @NotFound:
-
-      POP  EDI
-  end;
-end;
-
-procedure TPersistentStream._MakeBMTable(Buffer: PChar; BufferLen: Integer; var JumpTable: TBMJumpTable);
-begin
-  if BufferLen = 0 then raise Exception.Create('BufferLen is 0');
-  asm
-        push    EDI
-        push    ESI
-
-        mov     EDI, JumpTable
-        mov     EAX, BufferLen
-        mov     ECX, $100
-        REPNE   STOSD
-
-        mov     ECX, BufferLen
-        mov     EDI, JumpTable
-        mov     ESI, Buffer
-        dec     ECX
-        xor     EAX, EAX
-@@loop:
-        mov     AL, [ESI]
-        lea     ESI, ESI + 1
-        mov     [EDI + EAX * 4], ECX
-        dec     ECX
-        jg      @@loop
-
-        pop     ESI
-        pop     EDI
-  end;
-end;
-
-procedure TPersistentStream._MakeBMTableNoCase(Buffer: PChar; BufferLen: Integer; var JumpTable: TBMJumpTable);
-begin
-  if BufferLen = 0 then raise Exception.Create('BufferLen is 0');
-  asm
-        push    EDI
-        push    ESI
-
-        mov     EDI, JumpTable
-        mov     EAX, BufferLen
-        mov     ECX, $100
-        REPNE   STOSD
-
-        mov     EDX, GUpcaseLUT
-        mov     ECX, BufferLen
-        mov     EDI, JumpTable
-        mov     ESI, Buffer
-        dec     ECX
-        xor     EAX, EAX
-@@loop:
-        mov     AL, [ESI]
-        lea     ESI, ESI + 1
-        mov     AL, [EDX + EAX]
-        mov     [EDI + EAX * 4], ECX
-        dec     ECX
-        jg      @@loop
-
-        pop     ESI
-        pop     EDI
-  end;
-end;
-
-function TPersistentStream._BMPos(const aSource, aFind: Pointer; const aSourceLen, aFindLen: Integer; var JumpTable: TBMJumpTable): Pointer;
-var
-  LastPos: Pointer;
-begin
-  LastPos := Pointer(Integer(aSource) + aSourceLen - 1);
-  asm
-        push    ESI
-        push    EDI
-        push    EBX
-
-        mov     EAX, aFindLen
-        mov     ESI, aSource
-        lea     ESI, ESI + EAX - 1
-        std
-        mov     EBX, JumpTable
-
-@@comparetext:
-        cmp     ESI, LastPos
-        jg      @@NotFound
-        mov     EAX, aFindLen
-        mov     EDI, aFind
-        mov     ECX, EAX
-        push    ESI //Remember where we are
-        lea     EDI, EDI + EAX - 1
-        xor     EAX, EAX
-@@CompareNext:
-        mov     al, [ESI]
-        cmp     al, [EDI]
-        jne     @@LookAhead
-        lea     ESI, ESI - 1
-        lea     EDI, EDI - 1
-        dec     ECX
-        jz      @@Found
-        jmp     @@CompareNext
-
-@@LookAhead:
-        //Look up the char in our Jump Table
-        pop     ESI
-        mov     al, [ESI]
-        mov     EAX, [EBX + EAX * 4]
-        lea     ESI, ESI + EAX
-        jmp     @@CompareText
-
-@@NotFound:
-        mov     Result, 0
-        jmp     @@TheEnd
-@@Found:
-        pop     EDI //We are just popping, we don't need the value
-        inc     ESI
-        mov     Result, ESI
-@@TheEnd:
-        cld
-        pop     EBX
-        pop     EDI
-        pop     ESI
-  end;
-end;
-
-function TPersistentStream._BMPosNoCase(const aSource, aFind: Pointer; const aSourceLen, aFindLen: Integer; var JumpTable: TBMJumpTable): Pointer;
-var
-  LastPos: Pointer;
-begin
-  LastPos := Pointer(Integer(aSource) + aSourceLen - 1);
-  asm
-        push    ESI
-        push    EDI
-        push    EBX
-
-        mov     EAX, aFindLen
-        mov     ESI, aSource
-        lea     ESI, ESI + EAX - 1
-        std
-        mov     EDX, GUpcaseLUT
-
-@@comparetext:
-        cmp     ESI, LastPos
-        jg      @@NotFound
-        mov     EAX, aFindLen
-        mov     EDI, aFind
-        push    ESI //Remember where we are
-        mov     ECX, EAX
-        lea     EDI, EDI + EAX - 1
-        xor     EAX, EAX
-@@CompareNext:
-        mov     al, [ESI]
-        mov     bl, [EDX + EAX]
-        mov     al, [EDI]
-        cmp     bl, [EDX + EAX]
-        jne     @@LookAhead
-        lea     ESI, ESI - 1
-        lea     EDI, EDI - 1
-        dec     ECX
-        jz      @@Found
-        jmp     @@CompareNext
-
-@@LookAhead:
-        //Look up the char in our Jump Table
-        pop     ESI
-        mov     EBX, JumpTable
-        mov     al, [ESI]
-        mov     al, [EDX + EAX]
-        mov     EAX, [EBX + EAX * 4]
-        lea     ESI, ESI + EAX
-        jmp     @@CompareText
-
-@@NotFound:
-        mov     Result, 0
-        jmp     @@TheEnd
-@@Found:
-        pop     EDI //We are just popping, we don't need the value
-        inc     ESI
-        mov     Result, ESI
-@@TheEnd:
-        cld
-        pop     EBX
-        pop     EDI
-        pop     ESI
-  end;
-end;
-
-function TPersistentStream._FastCharPosNoCase(const aSource : String; C: Char; SourceLen : Integer; StartPos : Integer) : Integer;
-var
-  L                           : Integer;
-begin
-  Result := 0;
-  L := SourceLen;
-  if L = 0 then exit;
-  if StartPos > L then exit;
-  Dec(StartPos);
-  if StartPos < 0 then StartPos := 0;
-
-  asm
-      PUSH EDI                 //Preserve this register
-      PUSH EBX
-      mov  EDX, GUpcaseLUT
-
-      mov  EDI, aSource        //Point EDI at aSource
-      add  EDI, StartPos
-      mov  ECX, L              //Make a note of how many chars to search through
-      sub  ECX, StartPos
-
-      xor  EBX, EBX
-      mov  BL,  Byte(C)
-      mov  AL, [EDX+EBX]
-    @Loop:
-      mov  BL, [EDI]
-      inc  EDI
-      cmp  Al, [EDX+EBX]
-      jz   @Found
-      dec  ECX
-      jnz  @Loop
-      jmp  @NotFound
-    @Found:
-      sub  EDI, aSource        //EDI has been incremented, so EDI-OrigAdress = Char pos !
-      mov  Result,   EDI
-    @NotFound:
-
-      POP  EBX
-      POP  EDI
-  end;
+  Result:= _FastPosBack(UpperCase(aSourceString),UpperCase(aFindString),StartPos);
 end;
 
 procedure TPersistentStream.LoadCompProperty(Reader: TStream);
@@ -818,7 +392,7 @@ begin
     WriteInteger(iSize);
   end else
     iSize := Len;
-  FStream.Write(PChar(AString)^, iSize);
+  FStream.Write(PChar(AString)^, iSize*sizeof(Char));
 end;
 
 procedure TPersistentStream.WriteInteger(const Value: Cardinal);
@@ -964,7 +538,7 @@ begin
   else
     iSize := len;
   SetLength(Result,iSize);
-  FStream.Read(Result[1],iSize);
+  FStream.Read(Result[1],iSize*sizeof(Char));
 end;
 
 function TPersistentStream.ReadInteger: integer;
@@ -979,9 +553,9 @@ begin
   if FromStart then
     FStream.Position := 0;
   if CaseInsensitive then
-    Result := _FastPosNoCase(PChar(TMemoryStream(FStream).Memory),SubStr,FStream.Size,Length(SubStr),FStream.Position+1)
+    Result := FastPosNoCase(PChar(TMemoryStream(FStream).Memory),SubStr,FStream.Position+1)
   else
-    Result := _FastPos(PChar(TMemoryStream(FStream).Memory),SubStr,FStream.Size,Length(SubStr),FStream.Position+1);
+    Result := PosEx(SubStr,PChar(TMemoryStream(FStream).Memory),FStream.Position+1);
   if Result > 0 then
     FStream.Position := Result;
 end;
@@ -993,9 +567,9 @@ begin
   if FromEnd then
     FStream.Position := FStream.Size;
   if CaseInsensitive then
-    Result := _FastPosBackNoCase(PChar(TMemoryStream(FStream).Memory),SubStr,FStream.Size,Length(SubStr),FStream.Position)
+    Result := _FastPosBackNoCase(PChar(TMemoryStream(FStream).Memory),SubStr,FStream.Position)
   else
-    Result := _FastPosBack(PChar(TMemoryStream(FStream).Memory),SubStr,FStream.Size,Length(SubStr),FStream.Position);
+    Result := _FastPosBack(PChar(TMemoryStream(FStream).Memory),SubStr,FStream.Position);
   if Result > 0 then
     FStream.Position := Result-1;
 end;
@@ -1007,15 +581,16 @@ begin
   if FromStart then
     FStream.Position := 0;
   if CaseInsensitive then
-    Result := _FastCharPosNoCase(PChar(TMemoryStream(FStream).Memory),c,FStream.Size,FStream.Position+1)
+    Result := FastPosNoCase(PChar(TMemoryStream(FStream).Memory),c,FStream.Position+1)
   else
-    Result := _FastCharPos(PChar(TMemoryStream(FStream).Memory),c,FStream.Size,FStream.Position+1);
+    Result := PosEx(c,PChar(TMemoryStream(FStream).Memory),FStream.Position+1);
   if Result > 0 then
     FStream.Position := Result;
 end;
 
 var
   I: Integer;
+
 function TPersistentStream.GetBytes: PByteArray;
 begin
   Result := PByteArray(TMemoryStream(FStream).Memory);

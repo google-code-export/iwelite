@@ -34,9 +34,10 @@ interface
 uses
   IWAppForm, IWApplication, IWTypes, IWCompButton, IWControl, IWCompRectangle, IWColor,
   Classes, Controls, Forms, IWContainer, IWRegion, IWCompEdit, IWCompLabel,
-  ArcIWDlgSearchReplace, SysUtils, IWExtCtrls, IWHTMLTag, IWCompCheckbox,
+  ArcIWDlgSearchReplace, SysUtils, IWHTMLTag, IWCompCheckbox,
   ArcIWDlgBase{$IFDEF INTRAWEB51}, IWBaseControl, IWVCLBaseControl,
-  IWVCLBaseContainer, IWBaseHTMLControl, IWHTMLContainer{$ENDIF};
+  IWVCLBaseContainer, IWBaseHTMLControl, IWHTMLContainer{$ENDIF}
+  {$IFDEF INTRAWEB120}, IWCompExtCtrls {$ELSE}, IWExtCtrls {$ENDIF};
 
 type
   TCompHelper = class(TArcIWDlgSearchReplace)
@@ -75,13 +76,16 @@ type
 
 implementation
 
-uses {$IFDEF CLR} ArcFastStringsDOTNET {$ELSE} ArcFastStrings {$ENDIF},
-  IWContainerBorderOptions, Graphics, IWGridCommon;
-
+uses
+  IWContainerBorderOptions, Graphics, StrUtils
+  {$IFDEF INTRAWEB120}, IWCompGridCommon {$ELSE}, IWGridCommon {$ENDIF};
 
 procedure TfrmDlgSearchReplace.ReplaceClick(Sender: TObject);
 begin
-  Text := FastReplace(Text,edtFind.Text,edtReplace.Text,chkCaseSensitive.Checked);  
+  if chkCaseSensitive.Checked then
+    Text := ReplaceText(Text,edtFind.Text,edtReplace.Text)
+  else
+    Text := ReplaceStr(Text,edtFind.Text,edtReplace.Text);
   TCompHelper(DlgComponent).DoReplaceEvent(Text);
   Release;
 end;

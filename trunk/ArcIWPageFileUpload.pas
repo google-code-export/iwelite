@@ -1,19 +1,19 @@
 ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 // The MIT License
-// 
+//
 // Copyright (c) 2008 by Arcana Technologies Incorporated
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,16 +21,15 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 unit ArcIWPageFileUpload;
 
 interface
 
-{$I IntrawebVersion.inc}
+{$I IntraWebVersion.inc}
 
-{$IFDEF D7Plus}
 uses
   {$IFDEF VSNET}System.ComponentModel, System.Drawing, {$ENDIF}
   {$IFDEF VSNET}
@@ -40,13 +39,14 @@ uses
   {$IFDEF Linux}
   QTypes, IWCLXComponent, IWCLXClasses,
   {$ELSE}
-  IWVCLComponent, IWVCLClasses,
+  IWVCLComponent, {$IFNDEF INTRAWEB120} IWVCLClasses, {$ENDIF}
   {$ENDIF}
   {$IFDEF Linux}QControls, {$ELSE}Controls, {$ENDIF}
   {$ENDIF}
-  {$IFDEF Linux}QGraphics, {$ELSE}Graphics, {$ENDIF} ArcIWEliteResources, ArcD5Fix,
+  {$IFDEF Linux}QGraphics, {$ELSE}Graphics, {$ENDIF} ArcIWEliteResources,
   IWTypes, IWHTMLTag, IWControl, IWScriptEvents, IWRenderContext, IWBaseInterfaces, SyncObjs, IWServer,
-  IWColor, IWCompButton, IWFileReference, IWGLobal, IWFont, IWForm, IWServerControllerBase, HTTPApp;
+  IWColor, IWCompButton, IWFileReference, IWGLobal, IWFont, IWForm, IWServerControllerBase, HTTPApp
+  {$IFDEF INTRAWEB120}, IW.HttpRequest, IW.HttpReply {$ENDIF}, ArcCommon;
 
 type
   TValidRID = class(TObject)
@@ -68,7 +68,11 @@ type
     property Filename : string read FFilename;
     property ContentType : string read FContentType;
     property FileData : TMemoryStream read FFileData;
+    {$IFDEF INTRAWEB120}
+    constructor Create(ARequest : THttpRequest); virtual;
+    {$ELSE}
     constructor Create(ARequest : TWebRequest); virtual;
+    {$ENDIF}
     destructor Destroy; override;
   end;
 
@@ -82,7 +86,11 @@ type
   protected
     _OnBeforeDispatch : TOnDispatch;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    {$IFDEF INTRAWEB120}
+    procedure OnBeforeDispatch(Request: THttpRequest; Response: THttpReply); virtual;
+    {$ELSE}
     procedure OnBeforeDispatch(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean); virtual;
+    {$ENDIF}
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -127,14 +135,13 @@ type
   published
     property PageFileUpload : TArcIWPageFileUpload read FPageFileUpload write SetPageFileUpload;
   end;
-{$ENDIF}
+
 implementation
-{$IFDEF D7Plus}
+
 
 
 uses
-  DateUtils,
-  IWBaseHTMLControl;
+  DateUtils, IWBaseHTMLControl;
 
 var
   _CatcherRefCount : integer;
@@ -190,7 +197,11 @@ begin
   end;
 end;
 
+{$IFDEF INTRAWEB120}
+function AddValidRID(ARequest : THttpRequest) : TValidRID;
+{$ELSE}
 function AddValidRID(ARequest : TWebRequest) : TValidRID;
+{$ENDIF}
 begin
   Result := TValidRID.Create;
   _RIDListCS.Enter;
@@ -432,14 +443,23 @@ begin
   end;
 end;
 
+{$IFDEF INTRAWEB120}
+procedure TArcIWFileUploadCatcher.OnBeforeDispatch(Request: THttpRequest; Response: THttpReply);
+{$ELSE}
 procedure TArcIWFileUploadCatcher.OnBeforeDispatch(Sender: TObject;
   Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+{$ENDIF}
 var
   iLen : integer;
   fi: TArcFileInfo;
   sURLBase: string;
+  Content: string;
 begin
+  {$IFDEF INTRAWEB120}
+  if (Request.HttpMethod = hmPost) then
+  {$ELSE}
   if (Request.MethodType = mtPost) then
+  {$ENDIF}
   begin
     iLen := Length(S_FileUploadPath);
     if (Copy(Request.PathInfo,iLen-iLen,iLen) = S_FileUploadPath) then // fixes check in the case of URLBase or Dll.
@@ -451,21 +471,32 @@ begin
       finally
         FFileListCS.Leave;
       end;
+      {$IFNDEF INTRAWEB120}
       Handled := True;
+      {$ENDIF}
 
       sURLBase := Copy(Request.PathInfo,1,Length(Request.PathInfo)-iLen);
       if (sURLBase = '') and (GserverController.URLBase <> '') then
         sURLBase := GserverController.URLBase;
-      Response.Content :=
+      Content  :=
         GenerateUploadFormHTML(Request.ContentFields.Values['HTMLName'],
           sURLBase+S_FileUploadPath,
           Request.ContentFields.Values['RID'],
           Request.ContentFields.Values['stamp'],
           Request.ContentFields.Values['width'],
           Request.ContentFields.Values['height']);
+       {$IFDEF INTRAWEB120}
+       Response.WriteString(Content);
+       {$ELSE}
+       Response.Content:= Content;
+       {$ENDIF}
     end;
   end;
+  {$IFDEF INTRAWEB120}
+  if (Request.HttpMethod = hmGet) then
+  {$ELSE}
   if (Request.MethodType = mtGet) then
+  {$ENDIF}
   begin
     iLen := Length(S_FilePagePath);
     if (Copy(Request.PathInfo,iLen-iLen,iLen) = S_FilePagePath) then // fixes check in the case of URLBase or Dll.
@@ -474,14 +505,19 @@ begin
       if (sURLBase = '') and (GserverController.URLBase <> '') then
         sURLBase := GserverController.URLBase;
 
-      Response.Content :=
+      Content :=
         GenerateUploadFormHTML(Request.QueryFields.Values['HTMLName'],
           sURLBase+S_FileUploadPath,
-          Request.QueryFields.Values['RID'], 
+          Request.QueryFields.Values['RID'],
           Request.QueryFields.Values['stamp'],
-          Request.QueryFields.Values['width'], 
+          Request.QueryFields.Values['width'],
           Request.QueryFields.Values['height']);
-      Handled := True;
+       {$IFDEF INTRAWEB120}
+       Response.WriteString(Content);
+       {$ELSE}
+       Response.Content:= Content;
+       Handled := True;
+       {$ENDIF}
     end;
   end;
 end;
@@ -565,7 +601,11 @@ end;
 
 { TArcFileInfo }
 
+{$IFDEF INTRAWEB120}
+constructor TArcFileInfo.Create(ARequest : THttpRequest);
+{$ELSE}
 constructor TArcFileInfo.Create(ARequest : TWebRequest);
+{$ENDIF}
 var
   iRID : integer;
   sStamp : string;
@@ -592,8 +632,12 @@ begin
   begin
     FFilename := ARequest.Files[0].FileName;
     FContentType := ARequest.Files[0].ContentType;
+    {$IFDEF INTRAWEB120}
+    ARequest.Files[0].SaveToStream(FFileData);
+    {$ELSE}
     ARequest.Files[0].Stream.Position := 0;
     FFileData.CopyFrom(ARequest.Files[0].Stream,ARequest.Files[0].Stream.Size);
+    {$ENDIF}
   end else
   begin
     FFilename := '';
@@ -640,6 +684,5 @@ finalization
   _RIDCS.Free;
   _RIDListCS.Free;
   _RIDList.Free
-{$ENDIF}
 
 end.

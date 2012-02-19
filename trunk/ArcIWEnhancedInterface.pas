@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 // The MIT License
 // 
 // Copyright (c) 2008 by Arcana Technologies Incorporated
@@ -35,7 +35,7 @@ uses SysUtils, Classes, IWColor, IWFont, IWHTMLTag, IWControl, Graphics,
   IWTypes, Controls, IWFileReference
   {$IFNDEF INTRAWEB51},IWBaseControl, IWRenderContext{$ENDIF}
   {$IFDEF INTRAWEB70}, IWBaseInterfaces, IWMarkupLanguageTag, IWLayoutMgrForm {$ENDIF}
-  , IWKlooch;
+  , IWKlooch, ArcCommon;
 
 
 type
@@ -229,7 +229,8 @@ type
 
 implementation
 
-uses Math;
+uses
+  Math {$IFDEF INTRAWEB120}, IW.Browser.Browser {$ENDIF};
 
 {$IFNDEF INTRAWEB51}
 function Canvas(FComp : TIWCustomControl) : TCanvas;
@@ -389,26 +390,36 @@ function TArcIWEnhancer.Render(AContext: TIWBaseHTMLComponentContext; InheritedR
   var
     s, sWH : string;
     iTopOffset : integer;
+    Browser: {$IFDEF INTRAWEB120} TBrowser {$ELSE} TIWBrowser {$ENDIF};
   begin
+
     iTopOffset := 0;
-    
+
     if (not TIWControlHelper(FComp).Editable) then
     begin
-      case {$IFDEF INTRAWEB51}FComp.WebApplication.{$ELSE}AContext.{$ENDIF}Browser of
-        brIE:
-          begin
-            s := lowercase({$IFDEF INTRAWEB51}FComp.{$ELSE}AContext.{$ENDIF}WebApplication.Request.UserAgent);
-            if Pos('windows nt 5.1',s)>0 then
-              iTopOffset := FNotEditableOffsets.IE_XP
-            else
-              if Pos('windows',s)>0 then
-                iTopOffset := FNotEditableOffsets.IE_Win
-              else
-                iTopOffset := FNotEditableOffsets.IE_Mac;
-          end;
-        brNetscape6:  iTopOffset := FNotEditableOffsets.NS6;
-        brOpera:      iTopOffset := FNotEditableOffsets.Opera;
-        else          iTopOffset := FNotEditableOffsets.Other;
+      Browser:= {$IFDEF INTRAWEB51}FComp.WebApplication.{$ELSE}AContext.{$ENDIF}Browser;
+      if BrowserIsIE(Browser) then
+      begin
+        s := lowercase({$IFDEF INTRAWEB51}FComp.{$ELSE}AContext.{$ENDIF}WebApplication.Request.UserAgent);
+        if Pos('windows nt 5.1',s)>0 then
+          iTopOffset := FNotEditableOffsets.IE_XP
+        else
+          if Pos('windows',s)>0 then
+            iTopOffset := FNotEditableOffsets.IE_Win
+          else
+            iTopOffset := FNotEditableOffsets.IE_Mac;
+      end
+      else if BrowserIsNetscape6(Browser) then
+      begin
+        iTopOffset := FNotEditableOffsets.NS6;
+      end
+      else if BrowserIsOpera(Browser) then
+      begin
+        iTopOffset := FNotEditableOffsets.Opera;
+      end
+      else
+      begin
+        iTopOffset := FNotEditableOffsets.Other;
       end;
     end;
 

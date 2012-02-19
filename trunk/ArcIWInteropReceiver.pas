@@ -28,11 +28,13 @@ unit ArcIWInteropReceiver;
 
 interface
 
+{$I IntrawebVersion.inc}
+
 uses
   SysUtils, Classes, ActnList, Menus, IWBaseHTMLInterfaces, SyncObjs,
   IWBaseHTMLComponent, IWBaseInterfaces, IWRenderContext, IWHTMLTag,
-  InHTTP, InCookie, InCookieManager, IWBaseForm, IWBaseRenderContext,
-  InURI, IWForm, IWScriptEvents, ArcIWInteropCommon, InSSLOpenSSL;
+  {$IFNDEF INTRAWEB120} InHTTP, InCookieManager, {$ENDIF} InCookie, IWBaseForm, IWBaseRenderContext,
+  InURI, IWForm, IWScriptEvents, ArcIWInteropCommon, InSSLOpenSSL, ArcCommon;
 
 type
   TServerItem = class(TCollectionItem)
@@ -109,7 +111,9 @@ type
     FAppFrameName: string;
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    {$IFNDEF INTRAWEB110}
     function ComponentContextClass: TIWBaseComponentContextClass; override;
+    {$ENDIF}
     procedure Loaded; override;
     function UseServerSideEvents : boolean; virtual; abstract;
     procedure ConfigureClientSideEvent(AppName, ActionName, MenuItemName : string); virtual; abstract;
@@ -152,7 +156,7 @@ type
 
 implementation
 
-uses ArcD5Fix, ArcFastStrings, IWMarkupLanguageTag;
+uses ArcD5Fix, IWMarkupLanguageTag, StrUtils;
 
 {$IFDEF VER130}
 function StrToBool(s : string) : Boolean;
@@ -221,8 +225,9 @@ procedure TServerItem.Register;
   function DecodeIt(str : string) : string;
   begin
     Result := TInURI.URLDecode(str);
-    Result := FastReplace(Result,'+',' ',False);
+    Result := ReplaceStr(Result,'+',' ');
   end;
+  (*
   function FindInteropCookie(cookies : TInCookies) : TInCookieRFC2109;
   var
     i : integer;
@@ -237,8 +242,9 @@ procedure TServerItem.Register;
     if not Assigned(Result) then
       raise Exception.Create('Error Registering Interop');
   end;
+ *)
 var
-  http : TInHTTP;
+//  http : TInHTTP;
   sl, slActions, slQuery : TD7StringList;
   s, sQuery : string;
   i : integer;
@@ -259,11 +265,12 @@ begin
       if Assigned(TServerCollection(Collection).Receiver) and Assigned(TServerCollection(Collection).Receiver.FOnBeforeRegisterServer) then
         TServerCollection(Collection).Receiver.OnBeforeRegisterServer(TServerCollection(Collection).Receiver, Self, slQuery);
 
-      sQuery := FastReplace(slQuery.DelimitedText,#0,'',False);
+      sQuery := ReplaceStr(slQuery.DelimitedText,#0,'');
       try
         while FActions.ActionCount >0 do
           FActions[0].Free;
 
+        (*
         http := TInHTTP.Create(nil);
         try
           http.CookieManager := TInCookieManager.Create(http);
@@ -332,6 +339,7 @@ begin
         finally
           http.Free;
         end;
+        *)
       except
         on e: exception do
           if Assigned(TServerCollection(Collection).Receiver) then
@@ -436,10 +444,12 @@ begin
     raise Exception.Create('TArcIWCustomInteropReceiver.AppFrameName property not set');
 end;
 
+{$IFNDEF INTRAWEB110}
 function TArcIWCustomInteropReceiver.ComponentContextClass: TIWBaseComponentContextClass;
 begin
   Result := TIWComponent40Context;
 end;
+{$ENDIF}
 
 constructor TArcIWCustomInteropReceiver.Create(AOwner: TComponent);
 begin
@@ -508,7 +518,7 @@ procedure TArcIWCustomInteropReceiver.RebuildMenu(ClearMenu : boolean = True);
       begin
         mi := TMenuItem.Create(Menu);
         mi.Caption := act.Category;
-        mi.Name := FastReplace(act.Category,' ','',False);
+        mi.Name := ReplaceStr(act.Category,' ','');
         mi.Tag := Order;
         Result := mi;
         Menu.Items.Add(mi);

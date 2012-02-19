@@ -30,7 +30,7 @@ interface
 
 uses
   SysUtils, Classes, IWAppForm, IWCompButton, IWFont, IWTypes, Controls,
-  Graphics, IWForm, ArcIWDlgBase, ArcIWDlgMessageBox;
+  Graphics, IWForm, ArcIWDlgBase, ArcIWDlgMessageBox, ArcCommon;
 
 {$I IntraWebVersion.inc}
 
@@ -281,7 +281,7 @@ begin
       end;
       inc(iBtn);
     end;
-    if (TIWAppForm(Self.Owner).WebApplication.Browser = brOpera) then
+    if BrowserIsOpera(TIWAppForm(Self.Owner).WebApplication.Browser) then
     begin
       btn1.Top := btn1.Top+rgnParent.Top+rgnText.Top+rgnButtons.Top;
       btn2.Top := btn2.Top+rgnParent.Top+rgnText.Top+rgnButtons.Top;

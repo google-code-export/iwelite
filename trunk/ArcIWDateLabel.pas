@@ -2,9 +2,11 @@ unit ArcIWDateLabel;
 
 interface
 
+{$I IntrawebVersion.inc}
+
 uses SysUtils, Classes, IWTypes, IWHTMLTag, IWControl, IWScriptEvents,
   IWRenderContext, IWBaseInterfaces, IWColor, IWFileReference, IWGLobal,
-  IWFont, IWForm, ArcIWGridCommon;
+  IWFont, IWForm, ArcIWGridCommon, ArcCommon;
 
 type
   TArcDateNotifyEvent = procedure(Sender : TObject; NewDate : TDateTime) of object;
@@ -73,7 +75,7 @@ type
 
 implementation
 
-uses ArcFastStrings, DateUtils;
+uses StrUtils, DateUtils;
 
 { TArcIWDateLabel }
 
@@ -133,14 +135,14 @@ begin
     '<option value ='''+FDateDisplay.FDecember+'''>'+FDateDisplay.FDecember+'</option>' +
     '</select>';
                                        
-  sMonthHTML := FastReplace(sMonthHTML,' value ='''+FDateDisplay.LookupMonth(MonthOf(FDate))+'''',' selected value ='''+FDateDisplay.LookupMonth(MonthOf(FDate))+'''');
+  sMonthHTML := ReplaceStr(sMonthHTML,' value ='''+FDateDisplay.LookupMonth(MonthOf(FDate))+'''',' selected value ='''+FDateDisplay.LookupMonth(MonthOf(FDate))+'''');
 
   sDayHTML := '<select onchange=''sde_'+HTMLName+'=this.value;dde_'+HTMLName+'(true);''>';
   for i := 1 to DateUtils.DaysInMonth(FDate) do
     sDayHTML := sDayHTML+'<option value ='''+IntToStr(i)+'''>'+IntToStr(i)+'</option>';
   sDayHTML := sDayHTML+'</select>';
 
-  sDayHTML := FastReplace(sDayHTML,' value ='''+IntToStr(DayOf(FDate))+'''',' selected value ='''+IntToStr(DayOf(FDate))+'''');
+  sDayHTML := ReplaceStr(sDayHTML,' value ='''+IntToStr(DayOf(FDate))+'''',' selected value ='''+IntToStr(DayOf(FDate))+'''');
 
   sYearHTML := '<input size=4 type=''text'' id='''+HTMLName+'_y'' style=''width:'+IntToStr(FStyle.Font.Size*4)+'px'' onblur=''sye_'+HTMLName+'=this.value;dye_'+HTMLName+'(true);'' value='''+IntToStr(YearOf(FDate))+'''/>';
 

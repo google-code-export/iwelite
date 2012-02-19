@@ -33,7 +33,7 @@ interface
 uses
   SysUtils, Classes, IWColor, IWFont, ArcIWEnhancedInterface,
   IWHTMLTag, IWBaseControl, IWControl, IWDBStdCtrls, IWDBExtCtrls, IWDBGrids
-  {$IFNDEF INTRAWEB51}, IWRenderContext{$ENDIF};
+  {$IFNDEF INTRAWEB51}, IWRenderContext{$ENDIF}, ArcCommon;
 
 type
   TArcIWEnhDBImage = class(TIWDBImage)

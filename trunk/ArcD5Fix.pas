@@ -28,16 +28,14 @@ unit ArcD5Fix;
 
 interface
 
-uses Windows, Classes, SysUtils, TypInfo;
+uses Windows, Classes, SysUtils;
 
 type
-
-{$I IntrawebVersion.inc}
 
 {$IFDEF CLR}
   TD7StringList = TStringList;
 {$ELSE}
-{$IFDEF D7Plus}
+{$IFDEF VER150}
 
   TD7StringList = TStringList;
 
@@ -62,7 +60,7 @@ type
     property Delimiter: Char read GetDelimiter write SetDelimiter;
     property DelimitedText: string read GetDelimitedText write SetDelimitedText;
     property QuoteChar: Char read GetQuoteChar write SetQuoteChar;
-    property ValueFromIndex[const idx : integer]: string read GetValueByIndex write SetValueByIndex;
+    property ValueByIndex[const idx : integer]: string read GetValueByIndex write SetValueByIndex;
   end;
 
 function TryEncodeDate(Year, Month, Day: Word; out Date: TDateTime): Boolean;
@@ -74,10 +72,6 @@ function EncodeDateTime(const AYear, AMonth, ADay, AHour, AMinute, ASecond,
 function TryStrToDateTime(const S: string; out Value: TDateTime): Boolean;
 function DirectoryExists(const Directory : string) : Boolean;
 function ForceDirectories(Dir: string) : Boolean;
-function ifThen(b : boolean; TrueString : string; FalseString : string = '') : string;
-function MinutesBetween(Date1, Date2 : TDateTime) : integer;
-function GetPropList(obj : TObject; ppl : PPropList) : integer;
-
 var
   TrueBoolStrs: array of String;
   FalseBoolStrs: array of String;
@@ -91,7 +85,6 @@ function StrToBoolDef(const S: string; const Default: Boolean): Boolean;
 function TryStrToBool(const S: string; out Value: Boolean): Boolean;
 
 function BoolToStr(B: Boolean; UseBoolStrs: Boolean = False): string;
-function TryStrToInt(const S: string; out Value: integer) : Boolean;
 {$ENDIF}
 {$ENDIF}
 
@@ -100,32 +93,8 @@ const
 
 implementation
 
-{$IFNDEF D7Plus}
+{$IFNDEF VER150}
 {$IFNDEF CLR}
-
-function MinutesBetween(Date1, Date2 : TDateTime) : integer;
-var
-  e : extended;
-begin
-  e := Date2 - Date1;
-  Result := Trunc(e)*60*24;
-  e := e-Trunc(e);
-  Result := Result + Round(e * 60 * 24);
-end;
-
-function ifThen(b : boolean; TrueString : string; FalseString : string = '') : string;
-begin
-  if b then
-    Result := TrueString
-  else
-    Result := FalseString;
-end;
-
-function GetPropList(obj : TObject; ppl : PPropList) : integer;
-begin
-  Result := TypInfo.GetPropList(obj.ClassInfo,tkAny,ppl);
-end;
-
 function ExcludeTrailingPathDelimiter(const S: string): string;
 begin
   Result := S;
@@ -215,16 +184,6 @@ begin
   end;
 end;
 
-function TryStrToInt(const S: string; out Value: integer) : Boolean;
-begin
-  Result := True;
-  try
-    Value := StrToInt(s);
-  except
-    Result := False;
-  end;
-end;
-
 { TD7StringList }
 
 function TD7StringList.GetDelimiter : Char;
@@ -259,7 +218,7 @@ begin
     begin
       S := Get(I);
       P := PChar(S);
-      while not (P^ in [#0..' ', QuoteChar, Delimiter]) do
+      while not CharInSet(P^,[#0..' ', QuoteChar, Delimiter]) do
         P := CharNext(P);
       if (P^ <> #0) then S := AnsiQuotedStr(S, QuoteChar);
       Result := Result + S + Delimiter;
@@ -277,7 +236,7 @@ begin
   try
     Clear;
     P := PChar(Value);
-    while P^ in [#1..' '] do
+    while CharInSet(P^,[#1..' ']) do
       P := CharNext(P);
     while P^ <> #0 do
     begin
@@ -291,7 +250,7 @@ begin
         SetString(S, P1, P - P1);
       end;
       Add(S);
-      while P^ in [#1..' '] do
+      while CharInSet(P^,[#1..' ']) do
         P := CharNext(P);
       if P^ = Delimiter then
       begin
@@ -300,7 +259,7 @@ begin
           Add('');
         repeat
           P := CharNext(P);
-        until not (P^ in [#1..' ']);
+        until not CharInSet(P^,[#1..' ']);
       end;
     end;
   finally

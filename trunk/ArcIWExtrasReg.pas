@@ -29,7 +29,7 @@ unit ArcIWExtrasReg;
 interface
 
 uses SysUtils, Classes, IWBaseControl, IWControl, IWDsnPaintHandlers,
-  ArcIWCheckListBox, ArcIWPageFileUpload, ArcIWTabRegion, ArcIWDateLabel;
+  ArcIWCheckListBox, ArcIWPageFileUpload;
 
 procedure Register;
 
@@ -37,8 +37,7 @@ implementation
 
 procedure Register;
 begin
-  RegisterComponents('IWES Visual',[TArcIWCheckListBox {$IFDEF D7Plus}, TArcIWPageFileUpload, TArcIWPageFileUploadButton, TArcIWTabRegion, TArcIWDateLabel{$ENDIF}]);
-
+  RegisterComponents('IWES Visual',[TArcIWCheckListBox, TArcIWPageFileUpload, TArcIWPageFileUploadButton]);
   IWRegisterPaintHandler('TArcIWCheckListBox', TIWPaintHandlerListBox);
   IWRegisterPaintHandler('TArcIWPageFileUploadButton', TIWPaintHandlerButton);
   //IWRegisterPaintHandler('TArcIWPageFileUpload', TIWPaintHandlerEdit);
