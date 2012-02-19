@@ -98,10 +98,11 @@ interface
 
 uses
   Windows, Messages, Graphics, SysUtils, Classes, {$IFNDEF CLR}JPeg, {$ENDIF}IWControl, IWTypes,
-  {$IFDEF VER130} FileCtrl, {$ENDIF} ArcIWOperaFix, SWSystem,
+  {$IFDEF VER130} FileCtrl, {$ENDIF} ArcIWOperaFix, {$IFDEF INTRAWEB110} IWSystem, {$ELSE} SWSystem, {$ENDIF}
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, IWScriptEvents, {$ENDIF}
-  {$IFDEF INTRAWEB70} IWRenderContext, {$ENDIF} {$IFDEF INTRAWEB72} IWStreams, {$ENDIF}
-  IWHTMLTag;
+  {$IFDEF INTRAWEB70} IWRenderContext, {$ENDIF}
+  {$IFDEF INTRAWEB72} {$IFDEF INTRAWEB120} IWRenderStream {$ELSE} IWStreams {$ENDIF}, {$ENDIF}
+  IWHTMLTag, ArcCommon;
 
 type
   TArcIWFilledBoxOnMouseDown = procedure(ASender: TObject; const AX: Integer; const AY: Integer) of object;
@@ -165,7 +166,8 @@ type
 
 implementation
 
-uses SWStrings, IWAppForm;
+uses
+  {$IFDEF INTRAWEB110} IWStrings, {$ELSE} SWStrings, {$ENDIF} IWAppForm;
 
 var
   FilePath : string;
@@ -473,49 +475,47 @@ begin
     Result.AddStringParam('src',AContext.WebApplication.AppURLBase+'/files/~~~'+TComponent(FFriend.Parent).Name+'_'+FFriend.Name+'.jpg');
 
   if Assigned(FOnMouseDown) then begin
-    case AContext.Browser of
-      brIE:
-        begin
-          Result.AddStringParam( 'onClick', 'return SubmitClickConfirm('''+HTMLName+''','+
-                                 'event.offsetX + '','' + event.offsetY, '+
-                                 iif(DoSubmitValidation, 'true', 'false')+','''+
-                                 Confirmation+''');');
-        end;
-      brNetscape6:
-        begin
-          LTag := TIWHTMLTag.CreateTag('A');
+    if BrowserIsIE(AContext.Browser) then
+    begin
+      Result.AddStringParam( 'onClick', 'return SubmitClickConfirm('''+HTMLName+''','+
+                             'event.offsetX + '','' + event.offsetY, '+
+                             iif(DoSubmitValidation, 'true', 'false')+','''+
+                             Confirmation+''');');
+    end
+    else if BrowserIsNetscape6(AContext.Browser) then
+    begin
+      LTag := TIWHTMLTag.CreateTag('A');
+      try
+        LTag.AddStringParam('HREF', '#');
+        LTag.AddStringParam('OnMouseOver', 'return ImageSetEvent(this,''' + HTMLName + ''''
+          + ',' + iif(DoSubmitValidation, 'true', 'false')
+          + ',' + '''' + Confirmation + ''''
+          + ');"');
+        {$IFDEF INTRAWEB72}
+          LStream := TIWRenderStream.Create;
           try
-            LTag.AddStringParam('HREF', '#');
-            LTag.AddStringParam('OnMouseOver', 'return ImageSetEvent(this,''' + HTMLName + ''''
-              + ',' + iif(DoSubmitValidation, 'true', 'false')
-              + ',' + '''' + Confirmation + ''''
-              + ');"');
-            {$IFDEF INTRAWEB72}
-              LStream := TIWRenderStream.Create;
-              try
-                Result.Render(LStream);
-                LTag.Contents.AddText(LStream.Extract);
-              finally
-                LSTream.Free;
-              end;
-            {$ELSE}
-              LTag.Contents.AddText(Result.Render);
-            {$ENDIF}
-          except
-            FreeAndNil(LTag);
-            raise;
+            Result.Render(LStream);
+            LTag.Contents.AddText(LStream.Extract);
+          finally
+            LSTream.Free;
           end;
-          FreeAndNil(Result);
-          Result := LTag;
-        end;
-      brOpera:
-        begin
-          Result.AddStringParam( 'onClick', 'return SubmitClickConfirm('''+HTMLName+''','+
-                                 '(event.clientX-SubmitForm.'+HTMLName+'.style.pixelLeft)+ '','' + '+
-                                 '(event.clientY-SubmitForm.'+HTMLName+'.style.pixelTop), '+
-                                 iif(DoSubmitValidation, 'true', 'false')+','''+
-                                 Confirmation+''');');
-        end;
+        {$ELSE}
+          LTag.Contents.AddText(Result.Render);
+        {$ENDIF}
+      except
+        FreeAndNil(LTag);
+        raise;
+      end;
+      FreeAndNil(Result);
+      Result := LTag;
+    end
+    else if BrowserIsOpera(AContext.Browser) then
+    begin
+      Result.AddStringParam( 'onClick', 'return SubmitClickConfirm('''+HTMLName+''','+
+                             '(event.clientX-SubmitForm.'+HTMLName+'.style.pixelLeft)+ '','' + '+
+                             '(event.clientY-SubmitForm.'+HTMLName+'.style.pixelTop), '+
+                             iif(DoSubmitValidation, 'true', 'false')+','''+
+                             Confirmation+''');');
     end;
   end;
 

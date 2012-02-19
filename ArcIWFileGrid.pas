@@ -40,8 +40,7 @@ uses
 {$ELSE}
   System.Text, IWNETJpeg,
 {$ENDIF}
-  ArcIWGridCommon, IWColor, Graphics, ArcIWCustomGrid, IWForm, IWApplication,
-  ArcFastStrings;
+  ArcIWGridCommon, IWColor, Graphics, ArcIWCustomGrid, IWForm, IWApplication, ArcCommon;
 
 type
 {$IFDEF INTRAWEB51}
@@ -473,7 +472,7 @@ end;
 
 {$IFNDEF CLR}
 
-procedure StrResetLength(var S: AnsiString);
+procedure StrResetLength(var S: string);
 begin
   SetLength(S, StrLen(PChar(S)));
 end;
@@ -492,7 +491,7 @@ end;
 function ExpandEnvironmentVar(var Value: string): Boolean;
 var
   R: Integer;
-  Expanded: AnsiString;
+  Expanded: string;
 {$IFDEF CLR}
   SB: StringBuilder;
 {$ENDIF}
@@ -517,7 +516,7 @@ end;
 
 // Gets the icons of a given file
 
-function GetWindowsSystemFolder: AnsiString;
+function GetWindowsSystemFolder: string;
 var
   Required: Cardinal;
 {$IFDEF CLR}
@@ -1722,8 +1721,8 @@ function TArcIWFileGrid.RenderHTML(
 {$ELSE}
     case FScrollbars of
       scrNone: result := 'overflow:hidden;';
-      scrHorizontal: result := IfThen(AContext.Browser in [brIE], 'overflow-y:hidden;overflow-x: auto;', 'overflow:auto;');
-      scrVertical: result := IfThen(AContext.Browser in [brIE], 'overflow-x:hidden;overflow-y: auto;', 'overflow:auto;');
+      scrHorizontal: result := IfThen(BrowserIsIE(AContext.Browser), 'overflow-y:hidden;overflow-x: auto;', 'overflow:auto;');
+      scrVertical: result := IfThen(BrowserIsIE(AContext.Browser), 'overflow-x:hidden;overflow-y: auto;', 'overflow:auto;');
       scrBoth: result := 'overflow:auto;';
     end;
 {$ENDIF}
@@ -1765,7 +1764,7 @@ function TArcIWFileGrid.RenderHTML(
 
     sURL := TInURI.PathEncode(sURL);
 
-    sURL := FastReplace(sURL, '''', '%27', true);
+    sURL := ReplaceText(sURL, '''', '%27');
 
     sOptions := '';
     if woButtons in wo then
@@ -1838,10 +1837,6 @@ begin
   end;
 
   FWebApplication := {$IFDEF INTRAWEB72}AContext.WebApplication{$ELSE}WebApplication{$ENDIF};
-  GIWServer.AddInternalFile('IW_GFX_ARCFILEUPLOAD', '/gfx/ArcFileUpload.png');
-  GIWServer.AddInternalFile('IW_GFX_ARCCREATEDIR', '/gfx/ArcCreateDir.png');
-  GIWServer.AddInternalFile('IW_GFX_ARCRENAME', '/gfx/ArcRename.png');
-  GIWServer.AddInternalFile('IW_GFX_ARCDELETE', '/gfx/ArcDelete.png');
 
   Result := TIWHTMLTag.CreateTag('span');
   Result.AddStringParam('style', 'width:' + IntToStr(Width) + 'px;Height:' + IntToStr(Height) + 'px;');
@@ -1901,7 +1896,7 @@ begin
 
   iTableWidth := width;
 
-  if ({$IFDEF INTRAWEB72}AContext.Browser{$ELSE}WebApplication.Browser{$ENDIF} = brIE) and (not (FStyleTable.BorderStyle.Style in [brdNone, brdHidden])) then
+  if BrowserIsIE({$IFDEF INTRAWEB72}AContext.Browser{$ELSE}WebApplication.Browser{$ENDIF}) and (not (FStyleTable.BorderStyle.Style in [brdNone, brdHidden])) then
     iTableWidth := width - (FStyleTable.BorderStyle.Width * 2);
 
   if not FAutoColumnWidth then
@@ -2127,10 +2122,14 @@ begin
         //comment by peter 2005/05/19
         if fi.Filename = FSelectedRowValue then
         begin
-          if FScrollToSelectedRow and (AContext.Browser in [brIE, brNetscape7]) then
+          if FScrollToSelectedRow and (BrowserIsIE(AContext.Browser) or BrowserIsNetscape7(AContext.Browser)) then
           begin
             tagRow.AddStringParam('id', HTMLName + _SelectedRow + '_' + IntToStr(y));
+            {$IFDEF INTRAWEB110}
+            if False then
+            {$ELSE}
             if AContext.PageContext.WebApplication.IsPartialUpdate then
+            {$ENDIF}
               TIWPageContext40(AContext.PageContext).AddToUpdateInitProc('IWTop().document.getElementById("' + HTMLName + _SelectedRow + '_' + IntToStr(y) + '").scrollIntoView(false)')
             else
               TIWPageContext40(AContext.PageContext).AddToInitProc('IWTop().document.getElementById("' + HTMLName + _SelectedRow + '_' + IntToStr(y) + '").scrollIntoView(false)');
@@ -2799,5 +2798,11 @@ begin
     result := DefaultURL;
 end;
 
+initialization // Plp: TIWServer.AddInternalFile isnt thread-saft so it must me right here
+  TIWServer.AddInternalFile('IW_GFX_ARCFILEUPLOAD', '/gfx/ArcFileUpload.png');
+  TIWServer.AddInternalFile('IW_GFX_ARCCREATEDIR', '/gfx/ArcCreateDir.png');
+  TIWServer.AddInternalFile('IW_GFX_ARCRENAME', '/gfx/ArcRename.png');
+  TIWServer.AddInternalFile('IW_GFX_ARCDELETE', '/gfx/ArcDelete.png');
+finalization
 end.
 

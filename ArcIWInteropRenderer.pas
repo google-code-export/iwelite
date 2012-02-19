@@ -28,10 +28,12 @@ unit ArcIWInteropRenderer;
 
 interface
 
+{$I IntrawebVersion.inc}
+
 uses
   SysUtils, Classes, ArcIWInteropController, IWBaseHTMLInterfaces, IWBaseForm,
   IWBaseHTMLComponent, IWBaseInterfaces, IWRenderContext, IWHTMLTag, IWHTML40Interfaces,
-  IWBaseRenderContext, ArcIWInteropCommon, ArcFastStrings;
+  IWBaseRenderContext, ArcIWInteropCommon, ArcCommon;
 
 type
   TArcIWInteropRenderer = class(TIWBaseHTMLComponent, IIWSubmitControl)
@@ -42,7 +44,9 @@ type
   protected
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure Loaded; override;
+    {$IFNDEF INTRAWEB110}
     function ComponentContextClass: TIWBaseComponentContextClass; override;
+    {$ENDIF}
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -59,10 +63,12 @@ implementation
 
 { TArcIWInteropRenderer }
 
+{$IFNDEF INTRAWEB110}
 function TArcIWInteropRenderer.ComponentContextClass: TIWBaseComponentContextClass;
 begin
   Result := TIWComponent40Context;
 end;
+{$ENDIF}
 
 constructor TArcIWInteropRenderer.Create(AOwner: TComponent);
 begin
@@ -132,7 +138,7 @@ var
   iPos : integer;
 begin
   FSubmitParam := AValue;
-  iPos := FastCharPos(AValue,'~',1);
+  iPos := Pos('~',AValue);
   sAction := Copy(AValue,1,iPos-1);
   sValue := Copy(AValue,iPos+1,High(Integer));
   

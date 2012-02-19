@@ -40,10 +40,16 @@ type
 procedure BreakupFileVersion(FileName: string; var Major, Minor, Release, Build : Cardinal);
 procedure ExecuteAndWait(const Filename, Params : string);
 function FindOpenPort : integer;
+function FastPosNoCase(const aSourceString, aFindString : string; const StartPos : Integer) : Integer;
 
 implementation
 
-uses InTCPServer;
+uses InTCPServer, StrUtils;
+
+function FastPosNoCase(const aSourceString, aFindString : string; const StartPos : Integer) : Integer;
+begin
+  Result:= PosEx(UpperCase(aFindString),UpperCase(aSourceString),StartPos);
+end;
 
 function FindOpenPort : integer;
 var

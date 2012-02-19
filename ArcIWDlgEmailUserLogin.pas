@@ -1,19 +1,19 @@
 ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 // The MIT License
-// 
+//
 // Copyright (c) 2008 by Arcana Technologies Incorporated
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,7 +21,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 unit ArcIWDlgEmailUserLogin;
@@ -30,7 +30,7 @@ interface
 
 uses
   SysUtils, Classes, IWAppForm, IWCompButton, IWFont, IWTypes, Controls,
-  Graphics, IWForm, ArcIWDlgBase;
+  Graphics, IWForm, ArcIWDlgBase, ArcCommon;
 
 type
   TArcEmailUserLoginNotifyEvent = procedure(Sender : TObject; Username, EmailAddress, Password : string) of object;
@@ -100,7 +100,8 @@ type
 
 implementation
 
-uses uAppDlgEmailUserLoginForm;
+uses
+  uAppDlgEmailUserLoginForm;
 
 { TArcIWDlgEmailUserLogin }
 
@@ -201,7 +202,7 @@ begin
       btn1.Caption := FElementText.FBtnTxtCancel;
       btn2.Caption := FElementText.FBtnTxtLogin;
     end;
-    if (TIWAppForm(Self.Owner).WebApplication.Browser = brOpera) then
+    if BrowserIsOpera(TIWAppForm(Self.Owner).WebApplication.Browser) then
     begin
       btn1.Top := btn1.Top+rgnParent.Top+rgnText.Top+rgnButtons.Top;
       btn2.Top := btn2.Top+rgnParent.Top+rgnText.Top+rgnButtons.Top;

@@ -80,12 +80,12 @@ begin
   RegisterComponentEditor(TArcIWStringGridTreeContent, TTreeContentComponentEditor);
 end;
 
-procedure StrResetLength(var S: AnsiString);
+procedure StrResetLength(var S: string);
 begin
   SetLength(S, StrLen(PChar(S)));
 end;
 
-function PidlToPath(IdList: PItemIdList): Ansistring;
+function PidlToPath(IdList: PItemIdList): string;
 begin
   SetLength(Result, MAX_PATH);
   if SHGetPathFromIdList(IdList, PChar(Result)) then

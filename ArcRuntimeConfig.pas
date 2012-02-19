@@ -31,8 +31,8 @@ interface
 {$I IntraWebVersion.inc}
 
 uses
-  SysUtils, Classes, IniFiles, IWForm, ArcIWControlCommon, ArcIWControlBase,
-  ArcFastStrings {$IFNDEF INTRAWEB5}, IWColor{$ENDIF};
+  SysUtils, Classes, IniFiles, IWForm, ArcIWControlCommon, ArcIWControlBase
+ {$IFNDEF INTRAWEB5}, IWColor{$ENDIF};
 
 type
   TArcRuntimeConfig = class(TComponent)
@@ -55,7 +55,7 @@ type
 
 implementation
 
-uses {$IFNDEF VER130}Variants,{$ENDIF} Graphics, TypInfo;
+uses {$IFNDEF VER130}Variants,{$ENDIF} Graphics, TypInfo, uSMCommon;
 
 { TArcRuntimeConfig }
 
@@ -152,7 +152,7 @@ begin
                 {$ENDIF}
                 tkFloat:
                   SetFloatProp(obj,pi,val);
-                tkLString, tkString:
+                tkLString, tkString, tkUString:
                   {$IFDEF VER130}ArcIWControlCommon.{$ENDIF}SetStrProp(obj,pi,val);
                 tkWChar, tkWString:
                   SetWideStrProp(obj,pi,val);
@@ -179,7 +179,7 @@ begin
                 // matter in an intraweb application because technically no window has
                 // a parent window.  This is a byproduct of having wincontrols in a non
                 // windowed application.
-                if FastPosNoCase(e.Message,'parent window',length(e.Message),13,1)=0 then
+                if FastPosNoCase(e.Message,'parent window',1)=0 then
                 begin
                   try
                     TIWForm(Owner).AddToInitProc('alert("Error Setting Property: '+e.message+'. '+obj.Name+':'+obj.ClassName+' to value '+val+'");'#13);

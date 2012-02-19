@@ -32,7 +32,7 @@ interface
 
 uses
   SysUtils, Classes, Controls, IWForm, IWControl, IWHTMLTag, ArcIWDlgBase
-  {$IFDEF INTRAWEB70}, IWRenderContext {$ENDIF};
+  {$IFDEF INTRAWEB70}, IWRenderContext {$ENDIF}, ArcCommon;
 
 type
   TConfirmationResult = (crOK, crCancel);

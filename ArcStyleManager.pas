@@ -31,7 +31,7 @@ interface
 {$I IntrawebVersion.inc}
 
 uses
-  SysUtils, Classes, Controls, iniFiles, TypInfo, ArcD5Fix, Graphics, IWColor
+  SysUtils, Classes, Controls, iniFiles, TypInfo, Graphics, IWColor
   {$ifdef DELPHIBDS},Contnrs{$ENDIF};
 
 type
@@ -214,8 +214,8 @@ procedure TArcControlCollection.WriteCommonProperties(ini: TIniFile; Section: st
           tkFloat:
             ini.WriteFloat(Section,Path+sName,GetFloatProp(obj,ppl[iProp]));
           tkWChar, tkWString,
-          tkLString, tkString:
-            ini.WriteString(Section,Path+sName,GetStrProp(obj,ppl[iProp]));
+          tkLString, tkString, tkUString:
+            ini.WriteString(Section,Path+sName,{$IFDEF VER130}ArcIWControlCommon.{$ENDIF}GetStrProp(obj,ppl[iProp]));
           {$IFNDEF VER130}
           tkInt64:
             begin
@@ -225,7 +225,7 @@ procedure TArcControlCollection.WriteCommonProperties(ini: TIniFile; Section: st
           {$ENDIF}
           tkVariant:
             begin
-              s := GetVariantProp(obj,ppl[iProp]);
+              s := {$IFDEF VER130}ArcIWControlCommon.{$ENDIF}GetVariantProp(obj,ppl[iProp]);
               ini.WriteString(Section,Path+sName,s);
             end;
           tkClass:
@@ -317,8 +317,8 @@ var
             tkFloat:
               SetFloatProp(obj,ppl[iProp],ini.ReadFloat(Section,Path+sName,GetFloatProp(obj,ppl[iProp])));
             tkWChar, tkWString,
-            tkLString, tkString:
-              SetStrProp(obj,ppl[iProp],ini.ReadString(Section,Path+sName,GetStrProp(obj,ppl[iProp])));
+            tkLString, tkString, tkUString:
+              SetStrProp(obj,ppl[iProp],ini.ReadString(Section,Path+sName,{$IFDEF VER130}ArcIWControlCommon.{$ENDIF}GetStrProp(obj,ppl[iProp])));
             {$IFNDEF VER130}
             tkInt64:
               begin
@@ -328,7 +328,7 @@ var
             {$ENDIF}
             tkVariant:
               begin
-                s := GetVariantProp(obj,ppl[iProp]);
+                s := {$IFDEF VER130}ArcIWControlCommon.{$ENDIF}GetVariantProp(obj,ppl[iProp]);
                 SetStrProp(obj,ppl[iProp],ini.ReadString(Section,Path+sName,s));
               end;
             tkClass:

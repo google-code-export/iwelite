@@ -34,8 +34,9 @@ interface
 uses
   IWAppForm, IWApplication, IWTypes, IWCompButton, IWControl, IWCompRectangle, IWColor,
   Classes, Controls, Forms, IWContainer, IWRegion, IWCompEdit, IWCompLabel,
-  ArcIWDlgLogin, SysUtils, IWExtCtrls, IWHTMLTag{$IFDEF INTRAWEB51}, IWBaseControl,
-  IWVCLBaseControl, IWVCLBaseContainer, IWBaseHTMLControl, IWHTMLContainer{$ENDIF};
+  ArcIWDlgLogin, SysUtils
+  {$IFDEF INTRAWEB120}, IWCompExtCtrls {$ELSE}, IWExtCtrls {$ENDIF}, IWHTMLTag
+  {$IFDEF INTRAWEB51}, IWBaseControl, IWVCLBaseControl, IWVCLBaseContainer, IWBaseHTMLControl, IWHTMLContainer {$ENDIF};
 
 type
   TCompHelper = class(TArcIWDlgLogin)
@@ -72,7 +73,9 @@ type
 
 implementation
 
-uses IWContainerBorderOptions, Graphics, IWGridCommon;
+uses
+  IWContainerBorderOptions, Graphics
+  {$IFDEF INTRAWEB120}, IWCompGridCommon {$ELSE}, IWGridCommon {$ENDIF};
 
 procedure TfrmDlgLogin.Click(Sender: TObject);
 begin

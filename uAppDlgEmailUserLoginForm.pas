@@ -77,7 +77,9 @@ type
 
 implementation
 
-uses IWContainerBorderOptions, Graphics, IWGridCommon;
+uses
+  IWContainerBorderOptions, Graphics
+  {$IFDEF INTRAWEB120}, IWCompGridCommon {$ELSE}, IWGridCommon {$ENDIF};
 
 procedure TfrmDlgEmailUserLogin.Click(Sender: TObject);
 begin

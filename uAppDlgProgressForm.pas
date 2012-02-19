@@ -34,9 +34,10 @@ interface
 uses
   IWAppForm, IWApplication, IWTypes, IWCompButton, IWControl, IWCompRectangle, IWColor,
   Classes, Controls, Forms, IWContainer, IWRegion, IWCompEdit, IWCompLabel,
-  ArcIWDlgProgress, SysUtils, IWExtCtrls, IWHTMLTag, ArcIWDlgBase
+  ArcIWDlgProgress, SysUtils, IWHTMLTag, ArcIWDlgBase
   {$IFDEF INTRAWEB51}, IWBaseControl, IWVCLBaseControl, IWVCLBaseContainer,
-  IWBaseComponent, IWBaseHTMLComponent, IWBaseHTMLControl, IWHTMLContainer{$ENDIF};
+  IWBaseComponent, IWBaseHTMLComponent, IWBaseHTMLControl, IWHTMLContainer{$ENDIF}
+  {$IFDEF INTRAWEB120}, IWCompExtCtrls {$ELSE}, IWExtCtrls {$ENDIF};
 
 type
   TCompHelper = class(TArcIWDlgProgress)
@@ -64,7 +65,9 @@ type
 
 implementation
 
-uses IWContainerBorderOptions, Graphics, IWGridCommon;
+uses
+  IWContainerBorderOptions, Graphics
+  {$IFDEF INTRAWEB120}, IWCompGridCommon {$ELSE}, IWGridCommon {$ENDIF};
 
 constructor TfrmDlgProgress.Create(AOwner: TComponent);
 begin

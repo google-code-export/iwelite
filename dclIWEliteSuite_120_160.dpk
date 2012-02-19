@@ -1,0 +1,82 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// The MIT License
+//
+// Copyright (c) 2008 by Arcana Technologies Incorporated
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+package dclIWEliteSuite_120_160;
+
+{$R *.res}
+{$R 'EliteSuiteDsn.dcr'}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST ON}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'Arcana IntraWeb Elite Suite'}
+{$DESIGNONLY}
+{$IMPLICITBUILD OFF}
+{$DEFINE DEBUG}
+
+requires
+  rtl,
+  designide,
+  Intraweb_120_160,
+  dclIntraweb_120_160,
+  IWEliteSuite_120_160;
+
+contains
+  ArcIWDlgReg in 'ArcIWDlgReg.pas',
+  ArcIWEnhancedReg in 'ArcIWEnhancedReg.pas',
+  ArcIWExtrasReg in 'ArcIWExtrasReg.pas',
+  ArcIWGraphsReg in 'ArcIWGraphsReg.pas',
+  ArcIWGridsReg in 'ArcIWGridsReg.pas',
+  ArcIWLanguageReg in 'ArcIWLanguageReg.pas',
+//  ArcIWInteropReg in 'ArcIWInteropReg.pas',
+//  ArcIWServerManagerReg in 'ArcIWServerManagerReg.pas',
+  ArcIWTemplatesReg in 'ArcIWTemplatesReg.pas',
+  ArcIWRegister in 'ArcIWRegister.pas',
+  ArcIWGridsReg72 in 'ArcIWGridsReg72.pas',
+  ArcIWLanguageEditors in 'ArcIWLanguageEditors.pas',
+  ArcIWStringGridDesigners in 'ArcIWStringGridDesigners.pas',
+  ArcIWTranslationEditor in 'ArcIWTranslationEditor.pas',
+  ArcRuntimeConfigEditor in 'ArcRuntimeConfigEditor.pas';
+
+end.
+

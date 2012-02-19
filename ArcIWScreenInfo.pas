@@ -70,7 +70,7 @@ uses
   Windows, Messages, SysUtils, Classes, Controls, IWControl, IWTypes,
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, IWScriptEvents, {$ENDIF}
   {$IFDEF INTRAWEB70} IWRenderContext, {$ENDIF}
-  IWHTMLTag;
+  IWHTMLTag, ArcCommon;
 
 type
   TArcIWClientScreen = record
@@ -167,10 +167,14 @@ begin
 
 //  sScript := sScript+#13+'alert("set value to: "+document.SubmitForm.'+Uppercase(Name)+'.value);';
 
-  case TIWPageContext40(AContext.PageCOntext).UpdateMode of
+  {$IFDEF INTRAWEB110}
+  TIWComponent40Context(Acontext).AddToInitProc(sScript)
+  {$ELSE}
+  case TIWPageContext40(AContext.PageContext).UpdateMode of
     umPartial: TIWComponent40Context(Acontext).AddToUpdateInitProc(sScript);
     umAll:     TIWComponent40Context(Acontext).AddToInitProc(sScript);
   end;
+  {$ENDIF}
 end;
 {$ENDIF}
 

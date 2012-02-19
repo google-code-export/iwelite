@@ -1,0 +1,153 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// The MIT License
+//
+// Copyright (c) 2008 by Arcana Technologies Incorporated
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+package IWEliteSuite_120_160;
+
+{$R *.res}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'Arcana IntraWeb Elite Suite'}
+{$RUNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  rtl,
+  vclx,
+  vclimg,
+  inet,
+  dbrtl,
+  websnap,
+  webdsnap,
+  Intraweb_120_160;
+
+contains
+  ArcD5Fix in 'ArcD5Fix.pas',
+  ArcIWAutoTranslate in 'ArcIWAutoTranslate.pas',
+  ArcIWCheckListBox in 'ArcIWCheckListBox.pas',
+  ArcIWComponentSelectorForm in 'ArcIWComponentSelectorForm.pas',
+  ArcIWControlBase in 'ArcIWControlBase.pas',
+  ArcIWControlCommon in 'ArcIWControlCommon.pas',
+  ArcIWCustomGrid in 'ArcIWCustomGrid.pas',
+  ArcIWDlgBase in 'ArcIWDlgBase.pas',
+  ArcIWDlgConfirmPopup in 'ArcIWDlgConfirmPopup.pas',
+  ArcIWDlgEmailUserLogin in 'ArcIWDlgEmailUserLogin.pas',
+  ArcIWDlgLogin in 'ArcIWDlgLogin.pas',
+  ArcIWDlgMessageBox in 'ArcIWDlgMessageBox.pas',
+  ArcIWDlgPopupRegion in 'ArcIWDlgPopupRegion.pas',
+  ArcIWDlgPrint in 'ArcIWDlgPrint.pas',
+  ArcIWDlgProgress in 'ArcIWDlgProgress.pas',
+  ArcIWDlgScrollableMessageBox in 'ArcIWDlgScrollableMessageBox.pas',
+  ArcIWDlgSearchReplace in 'ArcIWDlgSearchReplace.pas',
+  ArcIWDlgTimeout in 'ArcIWDlgTimeout.pas',
+  ArcIWEliteResources in 'ArcIWEliteResources.pas',
+  ArcIWEmbeddedHTML in 'ArcIWEmbeddedHTML.pas',
+  ArcIWEnhancedComps in 'ArcIWEnhancedComps.pas',
+  ArcIWEnhancedDBComps in 'ArcIWEnhancedDBComps.pas',
+  ArcIWEnhancedInterface in 'ArcIWEnhancedInterface.pas',
+  ArcIWFileGrid in 'ArcIWFileGrid.pas',
+  ArcIWFilledBox in 'ArcIWFilledBox.pas',
+  ArcIWFontManager in 'ArcIWFontManager.pas',
+  ArcIWFusionChart in 'ArcIWFusionChart.pas',
+  ArcIWGraphsBar in 'ArcIWGraphsBar.pas',
+  ArcIWGridCommon in 'ArcIWGridCommon.pas',
+  ArcIWImageURL in 'ArcIWImageURL.pas',
+//  ArcIWInteropCommon in 'ArcIWInteropCommon.pas',
+//  ArcIWInteropController in 'ArcIWInteropController.pas',
+//  ArcIWInteropReceiver in 'ArcIWInteropReceiver.pas',
+//  ArcIWInteropRenderer in 'ArcIWInteropRenderer.pas',
+  ArcIWIOPPooling in 'ArcIWIOPPooling.pas',
+  ArcIWLanguages in 'ArcIWLanguages.pas',
+  ArcIWLanguageTypes in 'ArcIWLanguageTypes.pas',
+  ArcIWOperaButton in 'ArcIWOperaButton.pas',
+  ArcIWOperaComboBox in 'ArcIWOperaComboBox.pas',
+  ArcIWOperaEdit in 'ArcIWOperaEdit.pas',
+  ArcIWOperaFix in 'ArcIWOperaFix.pas',
+  ArcIWOperaGrid in 'ArcIWOperaGrid.pas',
+  ArcIWOperaListbox in 'ArcIWOperaListbox.pas',
+  ArcIWOperaMemo in 'ArcIWOperaMemo.pas',
+  ArcIWPageController in 'ArcIWPageController.pas',
+  ArcIWPageFileUpload in 'ArcIWPageFileUpload.pas',
+  ArcIWPageIcon in 'ArcIWPageIcon.pas',
+  ArcIWPaypalLink in 'ArcIWPaypalLink.pas',
+  ArcIWRegionGrid in 'ArcIWRegionGrid.pas',
+  ArcIWRegionGridComponents in 'ArcIWRegionGridComponents.pas',
+  ArcIWScreenInfo in 'ArcIWScreenInfo.pas',
+  ArcIWSelectLanguage in 'ArcIWSelectLanguage.pas',
+  ArcIWServerManager in 'ArcIWServerManager.pas',
+  ArcIWServerTimer in 'ArcIWServerTimer.pas',
+  ArcIWStringContainer in 'ArcIWStringContainer.pas',
+  ArcIWStringGrid in 'ArcIWStringGrid.pas',
+  ArcIWStringGridContent in 'ArcIWStringGridContent.pas',
+  ArcIWStringGridDatasetContent in 'ArcIWStringGridDatasetContent.pas',
+  ArcIWStringGridINIContent in 'ArcIWStringGridINIContent.pas',
+  ArcIWStringGridTreeContent in 'ArcIWStringGridTreeContent.pas',
+  ArcIWTemplateProcessor7 in 'ArcIWTemplateProcessor7.pas',
+  ArcIWToolWindow in 'ArcIWToolWindow.pas',
+  ArcIWTranslationEditorInputForm in 'ArcIWTranslationEditorInputForm.pas',
+  ArcIWTranslationProgress in 'ArcIWTranslationProgress.pas',
+  ArcIWTranslationTableEditor in 'ArcIWTranslationTableEditor.pas',
+  ArcIWTranslatorBase in 'ArcIWTranslatorBase.pas',
+  ArcPersistentStream in 'ArcPersistentStream.pas',
+  ArcRuntimeConfig in 'ArcRuntimeConfig.pas',
+  ArcRuntimeConfigEditorForm in 'ArcRuntimeConfigEditorForm.pas',
+  ArcServerConfig in 'ArcServerConfig.pas',
+  ArcStyleManager in 'ArcStyleManager.pas',
+  ArcWebCommon in 'ArcWebCommon.pas',
+  uAppDialogForm in 'uAppDialogForm.pas',
+  uAppDlgEmailUserLoginForm in 'uAppDlgEmailUserLoginForm.pas',
+  uAppDlgLoginForm in 'uAppDlgLoginForm.pas',
+  uAppDlgProgressForm in 'uAppDlgProgressForm.pas',
+  uAppDlgScrollableForm in 'uAppDlgScrollableForm.pas',
+  uAppDlgSearchReplaceForm in 'uAppDlgSearchReplaceForm.pas',
+  uLoginManager in 'uLoginManager.pas',
+  uSMCommon in 'uSMCommon.pas',
+  uStatisticFile in 'uStatisticFile.pas',
+  ArcIWDateLabel in 'ArcIWDateLabel.pas',
+  ArcIWTabRegion in 'ArcIWTabRegion.pas',
+  ArcCommon in 'ArcCommon.pas'{,
+  ArcIWWebModuleBridge in 'ArcIWWebModuleBridge.pas' ,
+  ArcIWLoginManager in 'ArcIWLoginManager.pas'};
+
+end.

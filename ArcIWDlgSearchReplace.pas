@@ -30,7 +30,7 @@ interface
 
 uses
   SysUtils, Classes, IWAppForm, IWCompButton, IWFont, IWTypes, Controls,
-  Graphics, IWForm, ArcIWDlgBase;
+  Graphics, IWForm, ArcIWDlgBase, ArcCommon;
 
 type
   TArcTextNotifyEvent = procedure(Sender : TObject; Text : string) of object;
@@ -175,7 +175,7 @@ begin
     btnCancel.Caption := FElementText.FBtnTxtCancel;
     btnReplaceAll.Caption := FElementText.FBtnTxtReplace;
 
-    if (TIWAppForm(Self.Owner).WebApplication.Browser = brOpera) then
+    if BrowserIsOpera(TIWAppForm(Self.Owner).WebApplication.Browser) then
     begin
       btnReplaceAll.Top := btnReplaceAll.Top+rgnParent.Top+rgnText.Top+rgnButtons.Top;
       btnCancel.Top := btnCancel.Top+rgnParent.Top+rgnText.Top+rgnButtons.Top;

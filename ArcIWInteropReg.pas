@@ -36,9 +36,7 @@ uses
   {$IFDEF Linux}QControls,{$ELSE}Controls,{$ENDIF}
   InGlobal, IWDsnWizard, ToolsApi;
 
-
-
-{$I IWCompilerDefines.inc}
+{$I IntraWebVersion.inc}
 
 type
   TArcIWNotifierObject = class(TIWNotifierObject)
@@ -102,7 +100,7 @@ type
     function GetAuthor: string;
     function GetComment: string;
     function GetPage: string;
-    function GetGlyph: {$IFDEF VCL6ORABOVE}Cardinal{$ELSE}HICON{$ENDIF};
+    function GetGlyph: Cardinal;
     procedure Execute;
   end;
 
@@ -178,7 +176,7 @@ begin
   Result := [wsEnabled];
 end;
 
-function TArcWebModuleWizard.GetGlyph: {$IFDEF VCL6ORABOVE}Cardinal{$ELSE}HICON{$ENDIF};
+function TArcWebModuleWizard.GetGlyph: Cardinal;
 {$IFDEF Linux}
 {Var
   ResInfo: Cardinal;}

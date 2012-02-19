@@ -523,15 +523,24 @@ begin
     slOut.Values['BoundIP'] := TIWServerControllerBase(Component.Owner).BoundIP;
     slOut.Values['Description'] := TIWServerControllerBase(Component.Owner).AppName;
     slOut.Values['ExceptionDisplayMode'] := GetEnumProp(Component.Owner,'ExceptionDisplayMode');
+    {$IFNDEF INTRAWEB110}
     slOut.Values['ExecCmd'] := TIWServerControllerBase(Component.Owner).ExecCmd;
+    {$ENDIF}
     slOut.Values['HistoryEnabled'] := BoolToStr(TIWServerControllerBase(Component.Owner).HistoryEnabled, True);
     slOut.Values['HTMLHeaders'] := TIWServerControllerBase(Component.Owner).HTMLHeaders.CommaText;
+    {$IFNDEF INTRAWEB110}
     slOut.Values['InvalidCommandURL'] := TIWServerControllerBase(Component.Owner).InvalidCommandURL;
+    {$ENDIF}
     slOut.Values['Port'] := IntToStr(TIWServerControllerBase(Component.Owner).Port);
+    {$IFNDEF INTRAWEB110}
     slOut.Values['RestrictIPs'] := BoolToStr(TIWServerControllerBase(Component.Owner).RestrictIPs,True);
+    {$ENDIF}
+
     slOut.Values['SessionTimeout'] := IntToStr(TIWServerControllerBase(Component.Owner).SessionTimeout);
     slOut.Values['SessionTrackingMethod'] := GetEnumProp(Component.Owner,'SessionTrackingMethod');
+    {$IFNDEF INTRAWEB110}
     slOut.Values['ShowResyncWarning'] := BoolToStr(TIWServerControllerBase(Component.Owner).ShowResyncWarning,True);
+    {$ENDIF}
     {$IFDEF INTRAWEB50}
     slOut.Values['SSLCertificatePassword'] := TIWServerControllerBase(Component.Owner).SSLCertificatePassword;
     slOut.Values['SSLPort'] := IntToStr(TIWServerControllerBase(Component.Owner).SSLPort);
@@ -539,13 +548,17 @@ begin
     slOut.Values['SSLCertificatePassword'] := TIWServerControllerBase(Component.Owner).SSLOptions.CertificatePassword;
     slOut.Values['SSLPort'] := IntToStr(TIWServerControllerBase(Component.Owner).SSLOptions.Port);
     {$ENDIF}
+    {$IFNDEF INTRAWEB110}
     slOut.Values['StartCmd'] := TIWServerControllerBase(Component.Owner).StartCmd;
+    {$ENDIF}
     slOut.Values['SupportedBrowsers'] := GetSetProp(Component.Owner,'SupportedBrowsers');
     slOut.Values['TemplateDir'] := TIWServerControllerBase(Component.Owner).TemplateDir;
     {$IFNDEF INTRAWEB70}
     slOut.Values['TimeoutURL'] := TIWServerControllerBase(Component.Owner).TimeoutURL;
     {$ELSE}
+    {$IFNDEF INTRAWEB110}
     slOut.Values['TimeoutURL'] := TIWServerControllerBase(Component.Owner).SessionTimeoutURL.URL;
+    {$ENDIF}
     {$ENDIF}
     slOut.SaveToFile(sFile);
   finally

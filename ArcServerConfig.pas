@@ -93,24 +93,32 @@ begin
         TIWServerControllerBase(Owner).AppName := Values['Description'];
       if Values['ExceptionDisplayMode']<>'' then
         SetEnumProp(Owner,'ExceptionDisplayMode',Values['AppName']);
+      {$IFNDEF INTRAWEB110}
       if Values['ExecCmd']<>'' then
         TIWServerControllerBase(Owner).ExecCmd := Values['ExecCmd'];
+      {$ENDIF}
       if Values['HistoryEnabled']<>'' then
         TIWServerControllerBase(Owner).HistoryEnabled := CompareText(Values['HistoryEnabled'],'TRUE')=0;
       if Values['HTMLHeaders']<>'' then
         TIWServerControllerBase(Owner).HTMLHeaders.CommaText := Values['HTMLHeaders'];
+      {$IFNDEF INTRAWEB110}
       if Values['InvalidCommandURL']<>'' then
         TIWServerControllerBase(Owner).InvalidCommandURL := Values['InvalidCommandURL'];
+      {$ENDIF}
       if Values['Port']<>'' then
         TIWServerControllerBase(Owner).Port := StrToIntDef(Values['Port'],80);
+      {$IFNDEF INTRAWEB110}
       if Values['RestrictIPs']<>'' then
         TIWServerControllerBase(Owner).RestrictIPs := CompareText(Values['RestrictIPs'],'TRUE')=0;
+      {$ENDIF}
       if Values['SessionTimeout']<>'' then
         TIWServerControllerBase(Owner).SessionTimeout := StrToIntDef(Values['SessionTimeout'],10);
       if Values['SessionTrackingMethod']<>'' then
         SetEnumProp(Owner,'SessionTrackingMethod',Values['HTMLHeaders']);
+      {$IFNDEF INTRAWEB110}
       if Values['ShowResyncWarning']<>'' then
         TIWServerControllerBase(Owner).ShowResyncWarning := CompareText(Values['ShowResyncWarning'],'TRUE')=0;
+      {$ENDIF}
       {$IFNDEF INTRAWEB50}
       if Values['SSLCertificatePassword']<>'' then
         TIWServerControllerBase(Owner).SSLOptions.CertificatePassword := Values['SSLCertificatePassword'];
@@ -124,8 +132,10 @@ begin
       if Values['SSLPort']<>'' then
         TIWServerControllerBase(Owner).SSLPort := StrToIntDef(Values['SSLPort'],0);
       {$ENDIF}
+      {$IFNDEF INTRAWEB110}
       if Values['StartCmd']<>'' then
         TIWServerControllerBase(Owner).StartCmd := Values['StartCmd'];
+      {$ENDIF}
       if Values['SupportedBrowsers']<>'' then
         SetSetProp(Owner,'SupportedBrowsers',Values['SupportedBrowsers']);
       if Values['TemplateDir']<>'' then
@@ -134,8 +144,10 @@ begin
       if Values['TimeoutURL']<>'' then
         TIWServerControllerBase(Owner).TimeoutURL := Values['TimeoutURL'];
       {$ELSE}
-      if Values['TimeoutURL']<>'' then
-        TIWServerControllerBase(Owner).SessionTimeoutURL.URL := Values['TimeoutURL'];
+        {$IFNDEF INTRAWEB110}
+        if Values['TimeoutURL']<>'' then
+          TIWServerControllerBase(Owner).SessionTimeoutURL.URL := Values['TimeoutURL'];
+        {$ENDIF}
       {$ENDIF}
       if Assigned(FOnAfterProcess) then
         FOnAfterProcess(Self, sl);

@@ -82,7 +82,7 @@ uses
   ArcIWOperaFix,
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, IWScriptEvents, {$ENDIF}
   {$IFDEF INTRAWEB70} IWRenderContext, {$ENDIF}
-  IWHTMLTag;
+  IWHTMLTag, ArcCommon;
 
 type
   TArcIWDefImageDonation = (dfdRounded, dfdCCDButton, dfdPaypal, dfdStandard);
@@ -424,7 +424,7 @@ const
 begin
   for i := 1 to length(txt) do
   begin
-    if txt[i] in InvalidChars then
+    if CharInSet(txt[i],InvalidChars) then
       Result := Result+'%'+IntTohex(Ord(txt[i]),2)
     else
       Result := Result+txt[i];

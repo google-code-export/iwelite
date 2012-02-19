@@ -28,6 +28,8 @@ unit ArcIWLanguages;
 
 interface
 
+{$I IntrawebVersion.inc}
+
 uses
   SysUtils, Classes, IWAppForm, ArcIWLanguageTypes, ArcIWTranslatorBase, IWForm;
 
@@ -168,7 +170,11 @@ begin
       sLang := '';
       sl := TStringList.Create;
       try
+        {$IFDEF INTRAWEB120}
+        sl.CommaText := TIWAppForm(Owner).WebApplication.Request.AcceptLanguage;
+        {$ELSE}
         sl.CommaText := TIWAppForm(Owner).WebApplication.Request.GetFieldByName('Accept-Language');
+        {$ENDIF}
         for i := 0 to sl.Count-1 do
         begin
           sLang := Languages.LanguageLookup(Copy(sl[i],1,2));

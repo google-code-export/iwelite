@@ -60,11 +60,12 @@ interface
 {$I IntrawebVersion.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, IWControl, IWGrids, IWTypes,
+  Windows, Messages, SysUtils, Classes, Controls, IWControl, IWTypes,
   ArcIWOperaFix,
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, IWScriptEvents, {$ENDIF}
   {$IFDEF INTRAWEB70} IWRenderContext, {$ENDIF}
-  IWHTMLTag;
+  IWHTMLTag
+  {$IFDEF INTRAWEB120}, IWCompGrids {$ELSE}, IWGrids {$ENDIF}, ArcCommon;
 
 type
   TArcIWOperaGrid = class(TIWGrid)
@@ -91,10 +92,13 @@ uses IWAppForm;
 { TArcIWOperaGrid }
 
 constructor TArcIWOperaGrid.Create(AOwner: TComponent);
+{$IFNDEF INTRAWEB120}
 var
   browsers : TIWBrowsers;
+{$ENDIF}
 begin
   inherited;
+  {$IFNDEF INTRAWEB120}
   if (csDesigning in ComponentState) then
   begin
     if not (brOpera in  TIWAppForm(Owner).SupportedBrowsers) then
@@ -104,6 +108,7 @@ begin
       TIWAppForm(Owner).SupportedBrowsers := browsers;
     end;
   end;
+  {$ENDIF}
 end;
 
 {$IFDEF IWVERCLASS5}

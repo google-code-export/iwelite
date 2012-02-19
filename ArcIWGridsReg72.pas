@@ -32,7 +32,7 @@ uses {$IFNDEF VER130}DesignIntf, {$ENDIF}
   IWColor, IWDsnColor, ArcIWGridCommon, SysUtils, Classes,
   ArcIWRegionGrid, ArcIWRegionGridComponents, ArcIWStringGridDatasetContent,
   ArcIWStringGridINIContent, ArcIWStringGridDesigners, ArcIWStringGridTreeContent,
-  ArcIWStringGridCalendarContent, ColnEdit;
+  {ArcIWStringGridCalendarContent,} ColnEdit;
 
 procedure Register;
 
@@ -44,7 +44,7 @@ procedure Register;
 begin
   RegisterComponents('IWES Grids', [TArcIWRegionGrid, TArcIWRGButton,
     TArcIWRGImageFile, TArcIWRGImage, TArcIWRGLink, TArcIWStringGridDatasetContent,
-    TArcIWStringGridINIContent, TArcIWStringGridTreeContent , TArcIWStringGridCalendarContent]);
+    TArcIWStringGridINIContent, TArcIWStringGridTreeContent {, TArcIWStringGridCalendarContent}]);
   IWRegisterPaintHandler('TArcIWRGButton', TIWPaintHandlerButton);
   IWRegisterPaintHandler('TArcIWRGImage', TIWPaintHandlerImage);
   IWRegisterPaintHandler('TArcIWRGImageFile', TIWPaintHandlerImage);

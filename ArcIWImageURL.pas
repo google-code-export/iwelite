@@ -69,11 +69,12 @@ interface
 {$I IntrawebVersion.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, IWControl, IWExtCtrls,
+  Windows, Messages, SysUtils, Classes, Controls, IWControl,
   IWScriptEvents, IWHTMLTag, IWHTMLControls,
   {$IFDEF IWVERCLASS6} IWRenderContext, IWBaseControlInterface, {$ENDIF}
   {$IFDEF INTRAWEB70} IWRenderContext, {$ENDIF}
-  ArcIWOperaFix, IWTypes;
+  ArcIWOperaFix, IWTypes
+  {$IFDEF INTRAWEB120}, IWCompExtCtrls {$ELSE}, IWExtCtrls {$ENDIF}, ArcCommon;
 
 type
   TArcIWImageURL = class(TIWImage)
@@ -150,7 +151,8 @@ type
 
 implementation
 
-uses SWSystem;
+uses
+  {$IFDEF INTRAWEB110} IWSystem {$ELSE} SWSystem {$ENDIF};
 
 { TArcIWImageURL }
 

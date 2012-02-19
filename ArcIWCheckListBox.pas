@@ -28,6 +28,8 @@ unit ArcIWCheckListBox;
 
 interface
 
+{$I IntrawebVersion.inc}
+
 uses
   {$IFDEF VSNET}System.ComponentModel, System.Drawing, {$ENDIF}
   {$IFDEF VSNET}
@@ -37,13 +39,13 @@ uses
   {$IFDEF Linux}
   QTypes, IWCLXComponent, IWCLXClasses,
   {$ELSE}
-  IWVCLComponent, IWVCLClasses,
+  IWVCLComponent, {$IFNDEF INTRAWEB120} IWVCLClasses, {$ENDIF}
   {$ENDIF}
   {$IFDEF Linux}QControls, {$ELSE}Controls, {$ENDIF}
   {$ENDIF}
   {$IFDEF Linux}QGraphics, {$ELSE}Graphics, {$ENDIF}
   IWTypes, IWHTMLTag, IWControl, IWScriptEvents, IWRenderContext, IWBaseInterfaces,
-  IWColor, IWFileReference, IWGLobal, IWCompListbox, IWFont, IWForm, ArcD5Fix;
+  IWColor, IWFileReference, IWGLobal, IWCompListbox, IWFont, IWForm, ArcCommon;
 
 type
   TInvalidSelectionBehavior = (isSelectNone, isSelectAll);
@@ -173,7 +175,7 @@ var
   sBoolNeg1, sBoolItem : string;
 begin
   Result := TIWHTMLTag.CreateTag('div');
-  if AContext.Browser = brIE then
+  if BrowserIsIE(AContext.Browser) then
     iWidth := 2
   else
     iWidth := 1;
