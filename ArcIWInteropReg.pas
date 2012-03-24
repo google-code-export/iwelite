@@ -113,14 +113,14 @@ var
 
 implementation
 
-uses ArcIWInteropController, ArcIWInteropRenderer, ArcIWInteropReceiver,
-  ArcIWWebModuleBridge;
+uses ArcIWInteropController, ArcIWInteropRenderer, ArcIWInteropReceiver
+  {$IFNDEF INTRAWEB120}, ArcIWWebModuleBridge {$ENDIF};
 
 procedure Register;
 begin
   RegisterComponents( 'IWES NonVisual',
                       [TArcIWInteropController, TArcIWInteropRenderer,
-                      TArcIWInteropReceiver, TArcIWWebModuleBridge]);
+                      TArcIWInteropReceiver {$IFNDEF INTRAWEB120}, TArcIWWebModuleBridge {$ENDIF}]);
 end;
 
 { TArcWebModuleWizard }
