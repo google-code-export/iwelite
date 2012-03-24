@@ -124,6 +124,7 @@ type
     FModalColor : TIWColor;
     FModalColorVisible : boolean;
     FModalColorAlpha : integer;
+    FModalPictureURL: string;
     procedure SetBorderOptions(const Value: TIWContainerBorderOptions);
     procedure OnBorderChange(ASender: TObject);
     {$IFDEF VSNET}
@@ -310,6 +311,7 @@ type
     property ModalColor : TIWColor read FModalColor write FModalColor;
     property ModalColorVisible : boolean read FModalColorVisible write FModalColorVisible;
     property ModalColorAlpha : integer read FModalColorAlpha write FModalColorAlpha;
+    property ModalPictureURL: string read FModalPictureURL write FModalPictureURL;
     property ClipRegion: Boolean read get_Clip write set_Clip default true;
     property LayoutMgr: TIWContainerLayout read get_LayoutMgr write set_LayoutMgr;
     property BorderOptions: TIWContainerBorderOptions read FBorderOptions write SetBorderOptions;
@@ -500,6 +502,7 @@ begin
   FModalColor := clNone;
   FModalColorVisible := True;
   FModalColorAlpha := 35;
+  FModalPictureURL := '';
 
   FBorderOptions := TIWContainerBorderOptions.Create;
   FBorderOptions.Control := Self;
@@ -768,6 +771,10 @@ begin
     if FModalColor <> clNone then begin
       s := s + ' background-image:url('''+AContext.WebApplication.InternalURLBase+'/gfx/AlphaImage.png'');';
     end;
+    if (FModalColor = clNone) and (FModalPictureURL <>'') then begin
+      s := s + ' background-image:url('''+AContext.WebApplication.InternalURLBase+FModalPictureURL+''');';
+    end;
+
   end;
   tagLocker.AddStringParam('Style',s);
 
