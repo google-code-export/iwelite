@@ -2280,7 +2280,7 @@ end;
 function TArcIWStringGrid.RenderAsyncComponent(
   AContext: TIWBaseComponentContext): TIWXMLTag;
 begin
-  // Todo?
+  Result:= inherited RenderAsyncComponent(AContext); // Todo?
 end;
 
 procedure TArcIWStringGrid.RenderAsyncComponents(AContext: TIWContainerContext;

@@ -1671,6 +1671,7 @@ begin
     FindClose(SR);
   end;
 
+  sc:= nil;
   case FColumnSort of
     soFilename: sc := SortByFilename;
     soFilenameDesc: sc := SortByFilenameDesc;
@@ -1681,7 +1682,8 @@ begin
     soModified: sc := SortByModified;
     soModifiedDesc: sc := SortByModifiedDesc;
   end;
-  FFileList.Sort(sc);
+  if Assigned(sc) then
+    FFileList.Sort(sc);
   FNeedsRefresh := False;
 end;
 

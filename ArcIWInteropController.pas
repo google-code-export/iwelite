@@ -33,7 +33,7 @@ interface
 uses
   SysUtils, Classes, SyncObjs, ActnList, IWForm, IWApplication, InURI,
   IWServerControllerBase, IWBaseForm, HTTPApp, ArcIWInteropCommon {$IFDEF INTRAWEB110} ,IWURLResponder {$ENDIF}
-  {$IFDEF INTRAWEB120}, IW.HttpRequest, IW.HttpReply {$ENDIF};
+  {$IFDEF INTRAWEB120}, IW.Http.Request, IW.Http.Reply {$ENDIF};
 
 type
   {$IFDEF INTRAWEB120}
@@ -175,7 +175,7 @@ begin
     {$IFDEF INTRAWEB120}
     AResponse.WriteString('Interop Registration Set');
     s := ListActionNames(ARequest);
-    AResponse.AddGlobalCookie('InteropReg',Ifthen(s='','""',s),'',0 {?});
+    AResponse.AddCookie('InteropReg',Ifthen(s='','""',s),'',0 {?});
     {$ELSE}
     AResponse.Content := 'Interop Registration Set';
     with AResponse.Cookies.Add do

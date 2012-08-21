@@ -348,6 +348,7 @@ procedure TArcIWDlgMessageBox.SetDlgType(const Value: TArcMsgDlgType);
 var
   bSetCaption : boolean;
 begin
+  bSetCaption:= False;
   if FCaption = '' then
     bSetCaption := True
   else
