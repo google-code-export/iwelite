@@ -388,6 +388,7 @@ procedure TArcIWCustomInteropReceiver.AssignScriptEvent(
 var
   idx : integer;
 begin
+  idx:= -1;
   {$IFDEF VER150}
   idx := ScriptEvents.IndexOf(EventName);
   if idx >= 0 then

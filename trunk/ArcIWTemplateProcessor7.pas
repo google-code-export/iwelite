@@ -56,7 +56,7 @@ uses
   IWContainer, IWHTMLControls, IWAppForm, IWFileReference,
   IWForm, IWCompMenu, IWStandAloneServer, IWLayoutMgrHTML, ArcPersistentStream
   {$IFDEF INTRAWEB120}
-  , IWRenderStream, IWCompExtCtrls, IWCompGrids, IWCompTreeview, IWCompFile, IW.HttpRequest
+  , IWRenderStream, IWCompExtCtrls, IWCompGrids, IWCompTreeview, IWCompFile, IW.Http.Request
   {$ELSE}
   , IWStreams, IWExtCtrls, IWGrids, IWTreeview {$ENDIF}
   , ArcCommon;
@@ -154,7 +154,7 @@ type
     destructor Destroy; override;
     procedure ProcessControl(AContainerContext: TIWContainerContext;
       APageContext: TIWBaseHTMLPageContext; AControl: IIWBaseHTMLComponent); override;
-    procedure Process( AStream : TIWRenderStream;
+    procedure Process(AStream : TIWRenderStream;
       AContainerContext: TIWContainerContext; APageContext: TIWBasePageContext); override;
   published
     property SSIOptions : TSSIOptions read FSSIOptions write SetSSIOptions;
@@ -442,14 +442,14 @@ var
       if Contains(ACode,'{/STYLE\}') then begin
         if TIWPageContext40(APageContext).StyleTag.Contents.Count > 0 then
           TIWPageContext40(APageContext).StyleTag.Render(rs);
-        ACode := StringReplace(ACode,'{/STYLE\}',rs.Extract,[rfReplaceAll]);
+        ACode := StringReplace(ACode,'{/STYLE\}',{$IFDEF INTRAWEB122} rs.AsString {$ELSE} rs.Extract {$ENDIF},[rfReplaceAll]);
       end;
       if Contains(ACode,'{/SCRIPT\}') then begin
         ACode := StringReplace(ACode,'{/SCRIPT\}',ScriptSection(TIWPageContext40(APageContext)),[rfReplaceAll]);
       end;
       if Contains(ACode,'{/FORM\}') then begin
         APageContext.FormTag.Render(rs);
-        ACode := StringReplace(ACode,'{/FORM\}',rs.Extract,[rfReplaceAll]);
+        ACode := StringReplace(ACode,'{/FORM\}',{$IFDEF INTRAWEB122} rs.AsString {$ELSE} rs.Extract {$ENDIF},[rfReplaceAll]);
       end;
       ALen := Length(ACode);
     finally
@@ -518,7 +518,11 @@ var
       try
         APageContext.BodyTag.Render(rs);
         APageContext.FormTag.ClosingTag := cbTrue;
+        {$IFDEF INTRAWEB122}
+        rs.WriteText('{/FORM\}');
+        {$ELSE}
         rs.WriteString('{/FORM\}');
+        {$ENDIF}
         if MasterFormTag then
         begin
           tagTmp := TIWHTMLTag.CreateHTMLTag('form',cbFalse);
@@ -534,9 +538,9 @@ var
         begin
           Tag := '<HEAD></HEAD>';
           HandleHead(Tag, 13);
-          Tag := Tag+rs.Extract;
+          Tag := Tag+{$IFDEF INTRAWEB122} rs.AsString {$ELSE} rs.Extract {$ENDIF};
         end else
-          Tag := rs.Extract;
+          Tag := {$IFDEF INTRAWEB122} rs.AsString {$ELSE} rs.Extract {$ENDIF};
       finally
         rs.Free;
       end;
@@ -711,8 +715,8 @@ begin
     if Assigned(FOnBeforeProcess) then
       OnBeforeProcess(fsTemplate);
 
-    _Process(AStream, fsTemplate, AContainerContext, TIWBaseHTMLPageContext(APageContext),1);
-    _Process(AStream, fsTemplate, AContainerContext, TIWBaseHTMLPageContext(APageContext),2);
+    _Process(AStream{$IFDEF INTRAWEB122}.Stream{$ENDIF}, fsTemplate, AContainerContext, TIWBaseHTMLPageContext(APageContext),1);
+    _Process(AStream{$IFDEF INTRAWEB122}.Stream{$ENDIF}, fsTemplate, AContainerContext, TIWBaseHTMLPageContext(APageContext),2);
 
   end else
   begin
@@ -740,8 +744,8 @@ begin
           end;
         end;
 
-        _Process(AStream, fsTemplate, AContainerContext, TIWBaseHTMLPageContext(APageContext),1);
-        _Process(AStream, fsTemplate, AContainerContext, TIWBaseHTMLPageContext(APageContext),2);
+        _Process(AStream{$IFDEF INTRAWEB122}.Stream{$ENDIF}, fsTemplate, AContainerContext, TIWBaseHTMLPageContext(APageContext),1);
+        _Process(AStream{$IFDEF INTRAWEB122}.Stream{$ENDIF}, fsTemplate, AContainerContext, TIWBaseHTMLPageContext(APageContext),2);
       finally
         FCachedTemplate.Clear;
         if FCacheTemplate then
@@ -761,8 +765,8 @@ begin
       if Assigned(fsTemplate) then
       begin
         try
-          _Process(AStream, fsTemplate, AContainerContext, TIWBaseHTMLPageContext(APageCOntext),1);
-          _Process(AStream, fsTemplate, AContainerContext, TIWBaseHTMLPageContext(APageCOntext),2);
+          _Process(AStream{$IFDEF INTRAWEB122}.Stream{$ENDIF}, fsTemplate, AContainerContext, TIWBaseHTMLPageContext(APageCOntext),1);
+          _Process(AStream{$IFDEF INTRAWEB122}.Stream{$ENDIF}, fsTemplate, AContainerContext, TIWBaseHTMLPageContext(APageCOntext),2);
         finally
         	FCachedTemplate.Clear;
         	if FCacheTemplate then begin
@@ -1120,7 +1124,7 @@ begin
           rs := TIWRenderStream.Create;
           try
             IWCtrl.MakeHTMLTag(TIWHTMLTag(myTag),rs);
-            Result := sScripts+rs.Extract;
+            Result := sScripts+{$IFDEF INTRAWEB122}rs.AsString{$ELSE}rs.Extract{$ENDIF};
           finally
             rs.Free;
           end;

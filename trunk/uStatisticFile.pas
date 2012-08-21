@@ -32,7 +32,7 @@ interface
 
 uses
   SysUtils, Classes, HTTPApp, IWTypes, Windows
-  {$IFDEF INTRAWEB120}, IW.HttpRequest {$ENDIF};
+  {$IFDEF INTRAWEB120}, IW.Http.Request {$ENDIF};
 
 const
   ProLogFileCode = 'PROL';

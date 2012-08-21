@@ -57,7 +57,7 @@ type
   protected
     FSubmitParam : string;
     function GetSubmitParam: string;
-    procedure Submit(const AValue: string);
+    procedure Submit(const AValue: string); reintroduce;
     function getSubmitProc: TSubmitProc;
   public
     constructor Create(AOwner: TComponent); override;

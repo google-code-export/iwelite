@@ -46,7 +46,7 @@ uses
   {$IFDEF Linux}QGraphics, {$ELSE}Graphics, {$ENDIF} ArcIWEliteResources,
   IWTypes, IWHTMLTag, IWControl, IWScriptEvents, IWRenderContext, IWBaseInterfaces, SyncObjs, IWServer,
   IWColor, IWCompButton, IWFileReference, IWGLobal, IWFont, IWForm, IWServerControllerBase, HTTPApp
-  {$IFDEF INTRAWEB120}, IW.HttpRequest, IW.HttpReply {$ENDIF}, ArcCommon;
+  {$IFDEF INTRAWEB120}, IW.Http.Request, IW.Http.Reply {$ENDIF}, ArcCommon;
 
 type
   TValidRID = class(TObject)

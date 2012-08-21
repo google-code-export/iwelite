@@ -284,6 +284,8 @@ procedure TArcIWBarGraph.IWPaint;
     i, iPerc, iW, iX, iH  : integer;
     f, fPerc : real;
   begin
+    iW:= 0;
+    iPerc:= 0;
     case FOrientation of
       goVertical:   iPerc := Height div FAxis.LineCount;
       goHorizontal: iPerc := Width div FAxis.LineCount;
@@ -385,6 +387,7 @@ begin
 
   iW := Canvas.TextWidth(FAxis.Caption);
 
+  iX:= 0; iY:= 0;
   case FOrientation of
     goVertical:
       begin
@@ -538,6 +541,8 @@ function TArcIWBarGraph.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHT
       f, fPerc : real;
       t : TIWHTMLTag;
     begin
+      iW:= 0;
+      iPerc:= 0;
       case FOrientation of
         goVertical:   iPerc := Height div FAxis.LineCount;
         goHorizontal: iPerc := Width div FAxis.LineCount;
@@ -742,6 +747,8 @@ function TArcIWBarGraph.RenderHTML(AContext: TIWBaseHTMLComponentContext): TIWHT
       i, iPerc, iW, iX, iH  : integer;
       f, fPerc : real;
     begin
+      iW:= 0;
+      iPerc:= 0;
       case FOrientation of
         goVertical:   iPerc := Height div FAxis.LineCount;
         goHorizontal: iPerc := Width div FAxis.LineCount;
@@ -1169,6 +1176,7 @@ begin
   case graph.Orientation of
     goVertical:   result := round(graph.Height - (graph.Height * perc));
     goHorizontal: result := round(graph.Width - (graph.Width * perc));
+    else result:= 0;
   end;
 end;
 

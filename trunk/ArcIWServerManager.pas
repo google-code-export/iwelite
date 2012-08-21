@@ -36,7 +36,7 @@ uses
   HTTPApp, IWApplication, IWServer, ActiveX, {$IFDEF INTRAWEB70}IWColor, IWFont, Graphics,{$ENDIF}
   IWBaseForm, SyncObjs, {$IFNDEF VER130} DateUtils, Variants,{$ENDIF} ArcD5Fix,
   uLoginManager, uSMCommon, ArcIWEliteResources
-  {$IFDEF INTRAWEB120}, IW.HttpRequest, IW.HttpReply {$ENDIF}, ArcCommon;
+  {$IFDEF INTRAWEB120}, IW.Http.Request, IW.Http.Reply {$ENDIF}, ArcCommon;
 
 type
   TArcIWServerManager = class;
@@ -852,6 +852,7 @@ procedure TAdminAppEventCheckThread.Execute;
     vValue : Variant;
     b : boolean;
   begin
+    b:= False;
     repeat
       try
         b := FAdminApp.GetCommand(vCommand, vValue);
@@ -1275,7 +1276,7 @@ begin
   end;
 
   {$IFDEF INTRAWEB120}
-  Response.AddGlobalCookie(CookieName,DateTimeToStr(Now),'',EncodeDate(2999,12,31));
+  Response.AddCookie(CookieName,DateTimeToStr(Now),'',EncodeDate(2999,12,31));
   {$ELSE}
   with Response.Cookies.Add do
   begin
@@ -1452,13 +1453,21 @@ begin
 
       case GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} LicenseType {$ELSE}  LicenseVal {$ENDIF}{$ELSE}License{$ENDIF} of
         {$IFDEF INTRAWEB110}
-        ltUltimate: LogMessage('Ultimate Edition');
-        ltStandard: LogMessage('Standard Edition');
+          {$IFDEF INTRAWEB120}
+          ltRegisted: LogMessage('Registered License');
+          ltEval: LogMessage('Evaluation License');
+          ltInvalid: LogMessage('Invalid License');
+          {$ELSE}
+          ltUltimate: LogMessage('Ultimate Edition');
+          ltStandard: LogMessage('Standard Edition');
+          {$ENDIF}
         {$ELSE}
         ltEnterprise: LogMessage('Enterprise Edition');
         ltDeveloper: LogMessage('Developer Edition');
         {$ENDIF}
+        {$IFNDEF INTRAWEB120}
         ltPersonal: LogMessage('Personal Edition');
+        {$ENDIF}
         {$IFNDEF INTRAWEB90}
         ltPackagedPage: LogMessage('Packaged Page');
         ltPackagedEnterprise: LogMessage('Packaged Enterprise');
@@ -1771,6 +1780,7 @@ var
   hr : THitLogRecord;
   Session : TIWApplication;
 begin
+  hr:= nil;
   {$IFNDEF INTRAWEB120}
   inc(_ContentBytes,Response.ContentLength);
   {$ENDIF}
@@ -1905,7 +1915,9 @@ function TArcIWServerManager.RestartIW : boolean;
     end;
   begin
     ExtractResourceFile('RestartEXE',DLLFilePath+DefaultRestartEXE);
+    {$WARNINGS OFF}
     WinExec(PAnsiChar('"'+DLLFilePath+DefaultRestartEXE+'" "'+DLLFileName+'" "'+ServerController.AppName+'" "'+IsService+'"'), SW_HIDE);
+    {$WARNINGS ON}
   end;
   procedure RestartDSO;
   begin
@@ -2810,6 +2822,7 @@ end;
 
 function TAdminAppDLL.GetCommand(var Command, Value: Variant): Boolean;
 begin
+  Result:= False;
   try
     if @FGetCommand <> nil then
       result := FGetCommand(Command, Value);
@@ -2848,7 +2861,9 @@ end;
 
 procedure TAdminAppDLL.LoadEXE;
 begin
+  {$WARNINGS OFF}
   WinExec(PAnsiChar(FAdminLoc),SW_NORMAL);
+  {$WARNINGS ON}
   Initialize(FIP,FPort);
   FServerMan.UpdateSettingsVars;
   FServerMan.UpdateLayoutVars;

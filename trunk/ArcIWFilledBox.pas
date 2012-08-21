@@ -495,7 +495,7 @@ begin
           LStream := TIWRenderStream.Create;
           try
             Result.Render(LStream);
-            LTag.Contents.AddText(LStream.Extract);
+            LTag.Contents.AddText({$IFDEF INTRAWEB122} LStream.AsString {$ELSE} LStream.Extract {$ENDIF});
           finally
             LSTream.Free;
           end;

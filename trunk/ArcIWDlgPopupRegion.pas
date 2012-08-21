@@ -253,9 +253,9 @@ type
     {$ENDIF}
     function get_Css: string;
     function get_SkinId: string;
-    procedure set_SkinId(AValue: string);
+    procedure set_SkinId({$IFDEF INTRAWEB122} const {$ENDIF}AValue: string);
     function RequiresRefresh: Boolean;
-    procedure set_Css(AValue: string);
+    procedure set_Css({$IFDEF INTRAWEB122} const {$ENDIF}AValue: string);
     {$IFDEF INTRAWEB90}
     procedure RenderAsyncComponents(AContext: TIWContainerContext;
       APageContext: TIWBasePageContext);
@@ -906,7 +906,7 @@ begin
   FIWControlImplementation.SetClip(AValue);
 end;
 
-procedure TArcIWDlgPopupRegion.set_Css(AValue: string);
+procedure TArcIWDlgPopupRegion.set_Css({$IFDEF INTRAWEB122} const {$ENDIF}AValue: string);
 begin
 
 end;
@@ -921,7 +921,7 @@ begin
   FIWControlImplementation.SetScriptEvents(Value);
 end;
 
-procedure TArcIWDlgPopupRegion.set_SkinId(AValue: string);
+procedure TArcIWDlgPopupRegion.set_SkinId({$IFDEF INTRAWEB122} const {$ENDIF}AValue: string);
 begin
 
 end;
@@ -1342,7 +1342,11 @@ end;
 procedure TArcIWDlgPopupRegion.MakeHTMLTag(ATag: TIWHTMLTag; ABuffer: TIWRenderStream);
 begin
   FIWControlImplementation.MakeHTMLTag(ATag,ABuffer);
+  {$IFDEF INTRAWEB122}
+  ABuffer.WriteText(ParentContainer.ContainerContext.ComponentContext[Name].PostRender);
+  {$ELSE}
   ABuffer.WriteString(ParentContainer.ContainerContext.ComponentContext[Name].PostRender);
+  {$ENDIF}
 end;
 {$ENDIF}
 
@@ -1353,7 +1357,11 @@ begin
   LBuffer := TIWRenderStream.Create;
   try
     MakeHTMLTag(ATag,LBuffer);
+    {$IFDEF INTRAWEB122}
+    Result := LBuffer.AsString;
+    {$ELSE}
     Result := LBuffer.Extract;
+    {$ENDIF}
   finally
     LBuffer.Free;
   end;
@@ -1431,7 +1439,7 @@ end;
 
 function TArcIWDlgPopupRegion.RequiresRefresh: Boolean;
 begin
-
+  Result:= False;
 end;
 
 procedure TArcIWDlgPopupRegion.set_WebCursor(AValue: TIWCursor);
