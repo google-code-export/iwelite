@@ -1454,7 +1454,7 @@ begin
       case GLicense.{$IFDEF INTRAWEB70}{$IFDEF INTRAWEB120} LicenseType {$ELSE}  LicenseVal {$ENDIF}{$ELSE}License{$ENDIF} of
         {$IFDEF INTRAWEB110}
           {$IFDEF INTRAWEB120}
-          ltRegisted: LogMessage('Registered License');
+//          ltRegisted: LogMessage('Registered License');
           ltEval: LogMessage('Evaluation License');
           ltInvalid: LogMessage('Invalid License');
           {$ELSE}

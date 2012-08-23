@@ -506,7 +506,7 @@ begin
                       'name="'+FSeriesData[0].FData[i].Caption+'" '+
                       'value="'+FloatToStr(FSeriesData[0].FData[i].Value)+'" '+
                       ifThen(FSeriesData[0].FData[i].Color <> clNone,'color="'+ColorToRGBString(FSeriesData[0].FData[i].Color)+'" ')+
-                      ifThen(Assigned(FSeriesData[0].FData[j].OnClick),'link="'+FSeriesData[0].FData[i].GetLink+'" ')+
+                      ifThen(Assigned(FSeriesData[0].FData[i].OnClick),'link="'+FSeriesData[0].FData[i].GetLink+'" ')+
                       'alpha="'+IntToStr(100-FSeriesData[0].FData[i].Transparency)+'" '+
                       'isSliced="'+IfThen(FSeriesData[0].FData[i].Sliced,'1','0')+'" '+
                       'showName="'+IfThen(FSeriesData[0].FData[i].ShowCaption,'1','0')+'" '+
