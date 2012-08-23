@@ -68,7 +68,7 @@ type
     lblEmail: TIWLabel;
     IWRegion12: TIWRegion;
     lblPassword: TIWLabel;
-    procedure Click(Sender: TObject);
+    procedure Click(Sender: TObject); reintroduce;
     procedure edtUsernameHTMLTag(ASender: TObject; ATag: TIWHTMLTag);
   public
     DlgComponent : TArcIWDlgEmailUserLogin;
